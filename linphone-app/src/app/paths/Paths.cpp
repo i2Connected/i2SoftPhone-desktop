@@ -47,6 +47,8 @@ static inline bool filePathExists (const QString &path, const bool& isWritable) 
   if( isWritable && !info.isWritable())
 	return false;
   QFile file(path);
+  if( isWritable && !file.isWritable())
+	return false;
   return file.exists();
 }
 
