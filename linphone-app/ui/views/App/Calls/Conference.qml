@@ -6,6 +6,8 @@ import Common.Styles 1.0
 import Linphone 1.0
 import LinphoneUtils 1.0
 
+import UtilsCpp 1.0
+
 import App.Styles 1.0
 
 // =============================================================================
@@ -76,12 +78,13 @@ Rectangle {
         id: rightActions
 
         anchors.right: parent.right
-        iconSize: CallStyle.header.iconSize
+        iconSize: CallStyle.header.buttonIconSize
 
         ActionSwitch {
           enabled: conference.conferenceModel.recording
           icon: 'record'
           useStates: false
+          visible: SettingsModel.callRecorderEnabled
 
           onClicked: !enabled
             ? conference.conferenceModel.startRecording()
@@ -134,7 +137,7 @@ Rectangle {
 
               horizontalTextAlignment: Text.AlignHCenter
               sipAddress: parent.sipAddress
-              username: LinphoneUtils.getContactUsername(parent._sipAddressObserver)
+              username: UtilsCpp.getDisplayName(parent._sipAddressObserver.peerAddress)
             }
             IncallAvatar {
             

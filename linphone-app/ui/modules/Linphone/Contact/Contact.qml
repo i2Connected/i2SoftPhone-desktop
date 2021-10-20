@@ -22,6 +22,7 @@ Rectangle {
 	
 	property bool displayUnreadMessageCount: false
 	property bool showContactAddress : true
+	property bool showAuxData : false
 	
 	// A entry from `SipAddressesModel` or an `SipAddressObserver`.
 	property var entry
@@ -30,7 +31,7 @@ Rectangle {
 	
 	property string username: (entry != undefined ?(entry.contactModel != undefined ? entry.contactModel.vcard.username
 																			:entry.username != undefined ?entry.username:
-																										   LinphoneUtils.getContactUsername(entry.sipAddress || entry.fullPeerAddress  || entry.peerAddress || '')
+																										   UtilsCpp.getDisplayName(entry.sipAddress || entry.fullPeerAddress  || entry.peerAddress || '')
 											):'')
 	
 	// ---------------------------------------------------------------------------
@@ -53,14 +54,14 @@ Rectangle {
 			Layout.preferredWidth: ContactStyle.contentHeight
 			
 			//image: _contact && _contact.vcard.avatar
-			image: entry?(entry.contactModel?entry.contactModel.vcard.avatar:entry.avatar?entry.avatar: ''):''
-			
+			image: entry?(entry.contactModel	? entry.contactModel.vcard.avatar
+												: entry.avatar ? entry.avatar : '')
+						:''
 			presenceLevel: entry?(entry.contactModel ? (entry.contactModel.presenceStatus >= 0 ? Presence.getPresenceLevel(entry.contactModel.presenceStatus) : -1)
 													 : (entry.presenceStatus >= 0 ? Presence.getPresenceLevel(entry.presenceStatus) : -1)
 								  )
 								:-1
 			
-			//username: LinphoneUtils.getContactUsername(_contact || entry.sipAddress || entry.fullPeerAddress  || entry.peerAddress || '')
 			//username: UtilsCpp.getDisplayName(entry.sipAddress || entry.peerAddress )
 			
 			username : entry!=undefined && entry.isOneToOne!=undefined && !entry.isOneToOne ? '' : item.username
@@ -113,9 +114,12 @@ Rectangle {
 			Layout.leftMargin: ContactStyle.spacing
 			
 			sipAddress: (entry && item.showContactAddress
-						 && (entry.isOneToOne == undefined || entry.isOneToOne) && (entry.haveEncryption == undefined || !entry.haveEncryption)
-						 ? entry.sipAddress || entry.fullPeerAddress || entry.peerAddress || ''
-						 : '')
+						&& (item.showAuxData
+							? entry.auxDataToShow || ''
+							: (entry.isOneToOne == undefined || entry.isOneToOne) && (entry.haveEncryption == undefined || !entry.haveEncryption)
+								? entry.sipAddress || entry.fullPeerAddress || entry.peerAddress || ''
+								: '')
+						) || ''
 			participants: entry && item.showContactAddress && sipAddress == '' && entry.isOneToOne && entry.participants ? entry.participants.addressesToString : ''
 			username: item.username
 		}

@@ -50,7 +50,7 @@ SearchSipAddressesModel::SearchSipAddressesModel (QObject *parent) : QAbstractLi
 	
 	mMagicSearch = CoreManager::getInstance()->getCore()->createMagicSearch();
 	mSearch = std::make_shared<SearchHandler>(this);
-	QObject::connect(mSearch.get(), SIGNAL(searchReceived(std::list<std::shared_ptr<linphone::SearchResult>> )), this, SLOT(searchReceived(std::list<std::shared_ptr<linphone::SearchResult>>)));
+	QObject::connect(mSearch.get(), &SearchHandler::searchReceived, this, &SearchSipAddressesModel::searchReceived, Qt::QueuedConnection);
 	mMagicSearch->addListener(mSearch);
 	
 }
@@ -111,9 +111,19 @@ void SearchSipAddressesModel::setFilter(const QString& filter){
 }
 
 void SearchSipAddressesModel::searchReceived(std::list<std::shared_ptr<linphone::SearchResult>> results){
-	beginResetModel();
-	mAddresses.clear();
+	QList<std::shared_ptr<SearchResultModel> > addresses;
 	for(auto it = results.begin() ; it != results.end() ; ++it)
-		mAddresses << std::make_shared<SearchResultModel>((*it)->getFriend(), (*it)->getAddress());
-	endResetModel();
+		addresses << std::make_shared<SearchResultModel>((*it)->getFriend(), (*it)->getAddress());
+// Fix crash on Qt 5.15.2 with endResetModel (index out of range).
+	if(mAddresses.size() > 0){// Workaround : remove all
+		beginRemoveRows(QModelIndex(), 0, mAddresses.size()-1);
+		mAddresses.clear();
+		endRemoveRows();
+	}
+	if( addresses.size() > 0){// Workaround : add new on cleanned base
+		beginInsertRows(QModelIndex(),0, addresses.size()-1);
+		mAddresses = addresses;
+		endInsertRows(); 
+	}
+//--------------------------------------------------------------
 }

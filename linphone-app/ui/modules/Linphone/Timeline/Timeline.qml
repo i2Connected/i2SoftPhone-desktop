@@ -7,6 +7,8 @@ import Linphone 1.0
 import Linphone.Styles 1.0
 import ColorsList 1.0
 
+import UtilsCpp 1.0
+
 import 'Timeline.js' as Logic
 
 // =============================================================================
@@ -54,7 +56,7 @@ Rectangle {
 			Layout.preferredHeight: TimelineStyle.legend.height
 			Layout.alignment: Qt.AlignTop
 			color: showHistory.containsMouse?TimelineStyle.legend.backgroundColor.hovered:TimelineStyle.legend.backgroundColor.normal
-			visible:view.count > 0 || searchView.visible
+			visible:view.count > 0 || searchView.visible || filterView.visible
 			
 			MouseArea{// no more showing history
 				id:showHistory
@@ -94,18 +96,21 @@ Rectangle {
 						}
 					}
 				}
-				
-				Icon {
-					id:searchButton
+				MouseArea{
 					Layout.alignment: Qt.AlignRight
 					Layout.rightMargin: TimelineStyle.legend.rightMargin
-					icon: (searchView.visible? 'timeline_close': 'timeline_search')
-					iconSize: TimelineStyle.legend.iconSize
-					MouseArea{
-						anchors.fill:parent
-						onClicked:{
-							searchView.visible = !searchView.visible
-						}
+					Layout.fillHeight: true
+					Layout.preferredWidth: TimelineStyle.legend.iconSize
+					onClicked:{
+						searchView.visible = !searchView.visible
+					}
+				
+					Icon {
+						id:searchButton
+						anchors.verticalCenter: parent.verticalCenter
+						anchors.horizontalCenter: parent.horizontalCenter						
+						icon: (searchView.visible? 'timeline_close': 'timeline_search')
+						iconSize: TimelineStyle.legend.iconSize
 					}
 				}
 			}
@@ -136,40 +141,45 @@ Rectangle {
 					//: 'Simple rooms' : Filter item
 					//~ Mode Selecting it will show all simple rooms
 					text:qsTr('timelineFilterSimpleRooms')
-					property var value : (checked?TimelineProxyModel.SimpleChatRoom:0)
+					property var value : (checkState==Qt.Checked?TimelineProxyModel.SimpleChatRoom: (checkState == Qt.PartiallyChecked ?TimelineProxyModel.NoSimpleChatRoom:0))
 					onValueChanged: timeline.model.filterFlags = filterChoices.getFilterFlags()
+					tristate: true
 				}
 				CheckBoxText {
 					id:secureFilter
 					//: 'Secure rooms' : Filter item
 					//~ Mode Selecting it will show all secure rooms
 					text:qsTr('timelineFilterSecureRooms')
-					property var value : (checked?TimelineProxyModel.SecureChatRoom:0)
+					property var value : (checkState==Qt.Checked?TimelineProxyModel.SecureChatRoom: (checkState == Qt.PartiallyChecked ?TimelineProxyModel.NoSecureChatRoom:0))
 					onValueChanged: timeline.model.filterFlags = filterChoices.getFilterFlags()
+					tristate: true
 				}
 				CheckBoxText {
 					id:groupFilter
 					//: 'Chat groups' : Filter item
 					//~ Mode Selecting it will show all chat groups (with more than one participant)
 					text:qsTr('timelineFilterChatGroups')
-					property var value : (checked?TimelineProxyModel.GroupChatRoom:0)
+					property var value : (checkState==Qt.Checked?TimelineProxyModel.GroupChatRoom: (checkState == Qt.PartiallyChecked ?TimelineProxyModel.NoGroupChatRoom:0))
 					onValueChanged: timeline.model.filterFlags = filterChoices.getFilterFlags()
+					tristate: true
 				}
 				CheckBoxText {
 					id:secureGroupFilter
 					//: 'Secure Chat Groups' : Filter item
 					//~ Mode Selecting it will show all secure chat groups (with more than one participant)
 					text:qsTr('timelineFilterSecureChatGroups')
-					property var value : (checked?TimelineProxyModel.SecureGroupChatRoom:0)
+					property var value : (checkState==Qt.Checked?TimelineProxyModel.SecureGroupChatRoom: (checkState == Qt.PartiallyChecked ?TimelineProxyModel.NoSecureGroupChatRoom:0))
 					onValueChanged: timeline.model.filterFlags = filterChoices.getFilterFlags()
+					tristate: true
 				}
 				CheckBoxText {
 					id:ephemeralsFilter
 					//: 'Ephemerals' : Filter item
 					//~ Mode Selecting it will show all chat rooms where the ephemeral mode has been enabled.
 					text:qsTr('timelineFilterEphemerals')
-					property var value : (checked?TimelineProxyModel.EphemeralChatRoom:0)
+					property var value : (checkState==Qt.Checked?TimelineProxyModel.EphemeralChatRoom: (checkState == Qt.PartiallyChecked ?TimelineProxyModel.NoEphemeralChatRoom:0))
 					onValueChanged: timeline.model.filterFlags = filterChoices.getFilterFlags()
+					tristate: true
 				}
 				
 			}
@@ -222,6 +232,7 @@ Rectangle {
 				width: parent ? parent.width : 0
 				
 				Contact {
+					id: contactView
 					property bool isSelected: modelData != undefined && modelData.selected	//view.currentIndex === index
 					
 					anchors.fill: parent
@@ -240,19 +251,13 @@ Rectangle {
 					usernameColor: isSelected
 								   ? TimelineStyle.contact.username.color.selected
 								   : TimelineStyle.contact.username.color.normal
-					
-					Loader {
-						anchors.fill: parent
-						sourceComponent: TooltipArea {
-							
-							//text: $timelineEntry.timestamp.toLocaleString(
-							//Qt.locale(App.locale),
-							//Locale.ShortFormat
-							//)
-						}
+					TooltipArea {	
+						id: contactTooltip						
+						text: UtilsCpp.toDateTimeString(modelData.chatRoomModel.lastUpdateTime)
+						isClickable: true
 					}
 					Icon{
-						icon: modelData.selected ? 'timer_light' : 'timer'
+						icon: modelData && modelData.selected ? 'timer_light' : 'timer'
 						iconSize: 15
 						anchors.right:parent.right
 						anchors.bottom:parent.bottom
@@ -264,12 +269,19 @@ Rectangle {
 				
 				MouseArea {
 					anchors.fill: parent
+					acceptedButtons: Qt.LeftButton | Qt.RightButton
+					propagateComposedEvents: true
+					preventStealing: false
 					onClicked: {
 						//timeline.model.unselectAll()
-						if(modelData.selected)// Update selection
-							timeline.entrySelected(modelData)
-						modelData.selected = true
-						view.currentIndex = index;
+						if(mouse.button == Qt.LeftButton){
+							if(modelData.selected)// Update selection
+								timeline.entrySelected(modelData)
+							modelData.selected = true
+							view.currentIndex = index;
+						}else{
+							contactTooltip.show()
+						}
 					}
 				}
 				

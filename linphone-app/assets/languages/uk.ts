@@ -971,8 +971,7 @@
     </message>
     <message>
         <source>ephemeralNotInConference!</source>
-        <extracomment>&apos;
-Ephemeral message is only supported in conference based chat room!&apos;</extracomment>
+        <extracomment>&apos;Ephemeral message is only supported in conference based chat room!&apos;</extracomment>
         <translation type="unfinished"></translation>
         <extra-Context>Warning about not being in conference based chat room.</extra-Context>
     </message>
@@ -1001,9 +1000,7 @@ Ephemeral message is only supported in conference based chat room!&apos;</extrac
     </message>
     <message numerus="yes">
         <source>nDay</source>
-        <extracomment>&apos;%1 day&apos;
-----------
-&apos;%1 days&apos;</extracomment>
+        <extracomment>&apos;%1 day&apos;</extracomment>
         <translation type="unfinished">
             <numerusform></numerusform>
             <numerusform></numerusform>

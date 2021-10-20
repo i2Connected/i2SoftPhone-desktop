@@ -473,13 +473,13 @@ A kiszolgáló URL-je nincs konfigurálva.</translation>
     <message>
         <source>deliveryDelivered</source>
         <extracomment>&apos;Send to %1 - %2&apos; Little message to indicate the state of a message</extracomment>
-        <translation>Küldés: %1 - %2</translation>
+        <translation>Küldött: %1 - %2</translation>
         <extra-Context>%1 is someone, %2 is a date/time. The state is that the message has been sent but not received.</extra-Context>
     </message>
     <message>
         <source>deliveryDeliveredToUser</source>
         <extracomment>&apos;Retrieved by %1 - %2&apos; Little message to indicate the state of a message</extracomment>
-        <translation>Kézbesítve: %1 - %2</translation>
+        <translation>Lekért: %1 - %2</translation>
         <extra-Context>%1 is someone, %2 is a date/time. The state is that the message has been retrieved</extra-Context>
     </message>
     <message>
@@ -491,7 +491,7 @@ A kiszolgáló URL-je nincs konfigurálva.</translation>
     <message>
         <source>deliveryNotDelivered</source>
         <extracomment>&quot;%1 have nothing received&quot; Little message to indicate the state of a message</extracomment>
-        <translation>%1 semmit sem kapott</translation>
+        <translation>%1 nem kapta meg az üzenetet</translation>
         <extra-Context>%1 is someone. The state is that the message hasn&apos;t been delivered.</extra-Context>
     </message>
 </context>
@@ -533,28 +533,24 @@ A kiszolgáló URL-je nincs konfigurálva.</translation>
         <source>nMinute</source>
         <translation>
             <numerusform>%1 perc</numerusform>
-            <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>nHour</source>
         <translation>
             <numerusform>%1 óra</numerusform>
-            <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>nDay</source>
         <translation>
             <numerusform>%1 nap</numerusform>
-            <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>nWeek</source>
         <translation>
             <numerusform>%1 hét</numerusform>
-            <numerusform></numerusform>
         </translation>
     </message>
 </context>
@@ -965,8 +961,7 @@ A kiszolgáló URL-je nincs konfigurálva.</translation>
     </message>
     <message>
         <source>ephemeralNotInConference!</source>
-        <extracomment>&apos;
-Ephemeral message is only supported in conference based chat room!&apos;</extracomment>
+        <extracomment>&apos;Ephemeral message is only supported in conference based chat room!&apos;</extracomment>
         <translation>Az elmúló üzenetet csak a konferencia alapú csevegőszoba támogatja!</translation>
         <extra-Context>Warning about not being in conference based chat room.</extra-Context>
     </message>
@@ -991,9 +986,7 @@ Ephemeral message is only supported in conference based chat room!&apos;</extrac
     </message>
     <message numerus="yes">
         <source>nDay</source>
-        <extracomment>&apos;%1 day&apos;
-----------
-&apos;%1 days&apos;</extracomment>
+        <extracomment>&apos;%1 day&apos;</extracomment>
         <translation>
             <numerusform>%1 nap</numerusform>
         </translation>
@@ -2359,17 +2352,17 @@ Kattintson ide: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>fontsTitle</source>
         <extracomment>&apos;Fonts&apos; : title of fonts section in settings</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Betűkészletek</translation>
     </message>
     <message>
         <source>fontsTextChange</source>
         <extracomment>&apos;Text Messages&apos; : Label for changing text message fonts</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Szöveges üzenetek</translation>
     </message>
     <message>
         <source>fontsPopupTitle</source>
         <extracomment>&apos;Select a new font&apos; : Popup title for choosing new fonts</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Új betűkészlet kijelölése</translation>
     </message>
 </context>
 <context>

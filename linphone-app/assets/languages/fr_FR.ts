@@ -16,7 +16,7 @@
     </message>
     <message>
         <source>confirmAction</source>
-        <translation>ACTIVER</translation>
+        <translation>UTILISER LE COMPTE</translation>
     </message>
     <message>
         <source>activationSteps</source>
@@ -31,7 +31,7 @@
     </message>
     <message>
         <source>confirmAction</source>
-        <translation>ACTIVER</translation>
+        <translation>UTILISER LE COMPTE</translation>
     </message>
     <message>
         <source>activationSteps</source>
@@ -159,7 +159,7 @@
     </message>
     <message>
         <source>usernameStatusInvalidCharacters</source>
-        <translation>Caractères invalides détectés (regex : `%1`).</translation>
+        <translation>Caractères invalides détectés (regex&#x202f;: `%1`).</translation>
     </message>
     <message>
         <source>usernameStatusInvalid</source>
@@ -175,7 +175,7 @@
     </message>
     <message>
         <source>passwordStatusInvalidCharacters</source>
-        <translation>Caractères invalides détectés (regex : `%1`).</translation>
+        <translation>Caractères invalides détectés (regex&#x202f;: `%1`).</translation>
     </message>
     <message>
         <source>passwordStatusMissingCharacters</source>
@@ -426,7 +426,7 @@
     <message>
         <source>attendedTransferComplete</source>
         <extracomment>&apos;COMPLETE ATTENDED TRANSFER&apos; : Title button, design is in uppercase.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Valider le transfert</translation>
     </message>
     <message>
         <source>attendedTransferCall</source>
@@ -474,7 +474,7 @@ URL du serveur non configurée.</translation>
     <message>
         <source>deliveryDelivered</source>
         <extracomment>&apos;Send to %1 - %2&apos; Little message to indicate the state of a message</extracomment>
-        <translation>Envoi à %1 - %2</translation>
+        <translation>Envoyé à %1 - %2</translation>
         <extra-Context>%1 is someone, %2 is a date/time. The state is that the message has been sent but not received.</extra-Context>
     </message>
     <message>
@@ -532,28 +532,28 @@ URL du serveur non configurée.</translation>
     <name>ChatNoticeModel</name>
     <message numerus="yes">
         <source>nMinute</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>%1 minute</numerusform>
             <numerusform>%1 minutes</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>nHour</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>%1 heure</numerusform>
             <numerusform>%1 heures</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>nDay</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>%1 jour</numerusform>
             <numerusform>%1 jours</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>nWeek</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>%1 semaine</numerusform>
             <numerusform>%1 semaines</numerusform>
         </translation>
@@ -966,9 +966,8 @@ URL du serveur non configurée.</translation>
     </message>
     <message>
         <source>ephemeralNotInConference!</source>
-        <extracomment>&apos;
-Ephemeral message is only supported in conference based chat room!&apos;</extracomment>
-        <translation>Les messages éphémères ne sont disponibles que pour une conversation définie en mode conférence !</translation>
+        <extracomment>&apos;Ephemeral message is only supported in conference based chat room!&apos;</extracomment>
+        <translation>Les messages éphémères ne sont disponibles que pour une conversation définie en mode conférence&#x202f;!</translation>
         <extra-Context>Warning about not being in conference based chat room.</extra-Context>
     </message>
     <message>
@@ -994,9 +993,7 @@ Ephemeral message is only supported in conference based chat room!&apos;</extrac
     </message>
     <message numerus="yes">
         <source>nDay</source>
-        <extracomment>&apos;%1 day&apos;
-----------
-&apos;%1 days&apos;</extracomment>
+        <extracomment>&apos;%1 day&apos;</extracomment>
         <translation>
             <numerusform>%1 jour</numerusform>
             <numerusform>%1 jours</numerusform>
@@ -1522,7 +1519,7 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>conferenceEphemeralMessageLifetimeChangedEvent</source>
         <extracomment>&apos;Ephemeral messages have been updated: %1&apos; : Little message to show on the event when ephemeral has been updated. %1 is a date time</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Délai d’expiration des messages : %1</translation>
     </message>
 </context>
 <context>
@@ -1886,7 +1883,7 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     </message>
     <message>
         <source>serverTooltip</source>
-        <translation>Serveur LDAP. ie : ldap:// pour un serveur local ou ldap://ldap.example.org/</translation>
+        <translation>Serveur LDAP. ie&#x202f;: ldap:// pour un serveur local ou ldap://ldap.example.org/</translation>
     </message>
     <message>
         <source>bindDNLabel</source>
@@ -1906,7 +1903,7 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     </message>
     <message>
         <source>useTLSTooltip</source>
-        <translation type="unfinished"></translation>
+        <translation>Encode les transactions en utilisant LDAP sur TLS (StartTLS). Vous devez utiliser le protocole \&apos;ldap\&apos;. Utiliser \&apos;ldaps\&apos; pour LDAP sur SSL n&apos;est pas standard et déprécié.&lt;br&gt;StartTLS est une extension du protocole LDAP qui utilise le protocole TLS pour encoder la communication. &lt;br&gt;Elle fonctionne en effectuant une connexion normale (ie. non-sécurisée) avec un serveur LDAP avant d&apos;entamer un protocole d&apos;établissement de liaison entre le serveur et les services web. Ici, le serveur envoie son certificat pour prouver son identité avant d&apos;établir une connexion sécurisée.</translation>
     </message>
     <message>
         <source>useSalLabel</source>
@@ -1914,7 +1911,7 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     </message>
     <message>
         <source>useSalTooltip</source>
-        <translation type="unfinished"></translation>
+        <translation>La résolution DNS est effectuée par Linphone en utilisant SAL. Il fournira une IP à LDAP. Ce faisant, la négociation TLS ne pourra pas vérifier le nom d&apos;hôte. Vous devrez donc désactiver les vérifications si vous voulez forcer la connexion.</translation>
     </message>
     <message>
         <source>verifyTLSLabel</source>
@@ -1950,7 +1947,7 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     </message>
     <message>
         <source>baseObjectTooltip</source>
-        <translation type="unfinished"></translation>
+        <translation>Base Object/Search Base est une spécification pour les recherches LDAP. Elle indique que la recherche ne doit être effectuée qu&apos;en se basant sur cette entrée.&lt;br&gt;Aucune entrée au-dessus ne sera prise en compte.</translation>
     </message>
     <message>
         <source>filterLabel</source>
@@ -2365,17 +2362,17 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>fontsTitle</source>
         <extracomment>&apos;Fonts&apos; : title of fonts section in settings</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Polices</translation>
     </message>
     <message>
         <source>fontsTextChange</source>
         <extracomment>&apos;Text Messages&apos; : Label for changing text message fonts</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Messages textes</translation>
     </message>
     <message>
         <source>fontsPopupTitle</source>
         <extracomment>&apos;Select a new font&apos; : Popup title for choosing new fonts</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Sélectionnez une nouvelle police</translation>
     </message>
 </context>
 <context>
@@ -2502,25 +2499,25 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>timelineFilterSimpleRooms</source>
         <extracomment>&apos;Simple rooms&apos; : Filter item</extracomment>
-        <translation>Conversations 1-1</translation>
+        <translation>Standards</translation>
         <extra-Mode>Selecting it will show all simple rooms</extra-Mode>
     </message>
     <message>
         <source>timelineFilterSecureRooms</source>
         <extracomment>&apos;Secure rooms&apos; : Filter item</extracomment>
-        <translation>Conversations sécurisées</translation>
+        <translation>Sécurisées</translation>
         <extra-Mode>Selecting it will show all secure rooms</extra-Mode>
     </message>
     <message>
         <source>timelineFilterChatGroups</source>
         <extracomment>&apos;Chat groups&apos; : Filter item</extracomment>
-        <translation>Conversations de groupe</translation>
+        <translation>Groupes standards</translation>
         <extra-Mode>Selecting it will show all chat groups (with more than one participant)</extra-Mode>
     </message>
     <message>
         <source>timelineFilterSecureChatGroups</source>
         <extracomment>&apos;Secure Chat Groups&apos; : Filter item</extracomment>
-        <translation>Conversations de groupe sécurisées</translation>
+        <translation>Groupes sécurisés</translation>
         <extra-Mode>Selecting it will show all secure chat groups (with more than one participant)</extra-Mode>
     </message>
     <message>

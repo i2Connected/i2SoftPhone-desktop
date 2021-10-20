@@ -12,11 +12,21 @@ MouseArea {
 	property int delay: TooltipStyle.delay
 	property bool force: false
 	property var tooltipParent: parent
-	property int maxWidth : tooltipParent.width
+	property int maxWidth : window? window.width : tooltipParent.width
 	
 	property bool _visible: false
 	property int hoveringCursor : Qt.PointingHandCursor
 	property bool isClickable : false
+	
+	function show(){
+		if(isClickable){
+			if(tooltip.delay>0) {
+				tooltip.oldDelay = tooltip.delay
+				tooltip.delay = 0
+			}
+			tooltip.show(text, -1);
+		}
+	}
 	
 	anchors.fill:parent
 	
@@ -34,13 +44,7 @@ MouseArea {
 		wheel.accepted = false
 	}
 	onClicked:{
-		if(isClickable){
-			if(tooltip.delay>0) {
-				tooltip.oldDelay = tooltip.delay
-				tooltip.delay = 0
-			}
-			tooltip.show(text, -1);
-		}
+		show()
 		mouse.accepted = false
 	}
 	

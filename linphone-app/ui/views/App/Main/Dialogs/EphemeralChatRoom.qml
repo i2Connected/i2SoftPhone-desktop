@@ -78,7 +78,7 @@ DialogPlus {
 			wrapMode: Text.Wrap
 			//: 'New messages will be deleted on both ends once it has been read by your contact. Select a timeout.' : Context Explanation for ephemerals
 			text: qsTr('ephemeralText')
-			//: '\nEphemeral message is only supported in conference based chat room!'
+			//: 'Ephemeral message is only supported in conference based chat room!'
 			//~ Context Warning about not being in conference based chat room.
 				+(!chatRoomModel.canBeEphemeral?'\n'+qsTr('ephemeralNotInConference!'):'')
 			verticalAlignment: Text.AlignVCenter
@@ -116,7 +116,6 @@ DialogPlus {
 				{ text:qsTr('nHour', '', 1).arg(1), value:3600},
 				//: '%1 day'
 				{ text:qsTr('nDay', '', 1).arg(1), value:86400},
-				//: '%1 days'
 				{ text:qsTr('nDay', '', 3).arg(3), value:259200},
 				//: '%1 week'
 				{ text:qsTr('nWeek', '', 1).arg(1), value:604800}

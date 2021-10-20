@@ -107,18 +107,20 @@ QVariant SipAddressesModel::data (const QModelIndex &index, int role) const {
 // -----------------------------------------------------------------------------
 
 QVariantMap SipAddressesModel::find (const QString &sipAddress) const {
-  auto it = mPeerAddressToSipAddressEntry.find(sipAddress);
-  if (it == mPeerAddressToSipAddressEntry.end())
-    return QVariantMap();
+	QString cleanedAddress = Utils::cleanSipAddress(sipAddress);
+	auto it = mPeerAddressToSipAddressEntry.find(cleanedAddress);
+	if (it == mPeerAddressToSipAddressEntry.end())
+		return QVariantMap();
 
-  return buildVariantMap(*it);
+	return buildVariantMap(*it);
 }
 
 // -----------------------------------------------------------------------------
 
 ContactModel *SipAddressesModel::mapSipAddressToContact (const QString &sipAddress) const {
-  auto it = mPeerAddressToSipAddressEntry.find(sipAddress);
-  return it == mPeerAddressToSipAddressEntry.end() ? nullptr : it->contact;
+	QString cleanedAddress = Utils::cleanSipAddress(sipAddress);
+	auto it = mPeerAddressToSipAddressEntry.find(cleanedAddress);
+	return it == mPeerAddressToSipAddressEntry.end() ? nullptr : it->contact;
 }
 
 // -----------------------------------------------------------------------------
@@ -576,12 +578,10 @@ void SipAddressesModel::initSipAddresses () {
 }
 
 void SipAddressesModel::initSipAddressesFromChat () {
-  
   for (const auto &chatRoom : CoreManager::getInstance()->getCore()->getChatRooms()) {
-    list<shared_ptr<linphone::ChatMessage>> history(chatRoom->getHistory(1));
-    if (history.empty())
-      continue;
-
+		auto lastMessage = chatRoom->getLastMessageInHistory();
+		if( !lastMessage)
+			continue;
     QString peerAddress(Utils::cleanSipAddress(Utils::coreStringToAppString(chatRoom->getPeerAddress()->asStringUriOnly())));
     QString localAddress(Utils::cleanSipAddress(Utils::coreStringToAppString(chatRoom->getLocalAddress()->asStringUriOnly())));
 
@@ -589,7 +589,7 @@ void SipAddressesModel::initSipAddressesFromChat () {
       chatRoom->getUnreadMessagesCount(),
       CoreManager::getInstance()->getMissedCallCount(peerAddress, localAddress),
       false,
-      QDateTime::fromMSecsSinceEpoch(history.back()->getTime() * 1000)
+      QDateTime::fromMSecsSinceEpoch(lastMessage->getTime() * 1000)
     };
   }
 }

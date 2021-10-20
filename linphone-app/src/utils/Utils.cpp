@@ -93,6 +93,10 @@ QString Utils::toDateString(QDateTime date){
 	return date.toString("yyyy/MM/dd");
 }
 
+QString Utils::getDisplayName(const QString& address){
+	return getDisplayName(interpretUrl(address));
+}
+
 QImage Utils::getImage(const QString &pUri) {
 	QImage image(pUri);
 	if(image.isNull()){// Try to determine format from headers instead of using suffix
@@ -477,9 +481,9 @@ QString Utils::getDisplayName(const std::shared_ptr<const linphone::Address>& ad
 					return cl->getRemoteAddress()->weakEqual(address);
 		});
 			if(callLog != callHistory.end())
-				displayName = Utils::coreStringToAppString((*callLog)->getRemoteAddress()->getDisplayName());
+				displayName = QString::fromStdString((*callLog)->getRemoteAddress()->getDisplayName());
 			if(displayName == "")
-				displayName = Utils::coreStringToAppString(address->getDisplayName());
+				displayName = QString::fromStdString(address->getDisplayName());
 			if(displayName == "")
 				displayName = Utils::coreStringToAppString(address->getUsername());
 		}

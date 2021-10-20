@@ -242,8 +242,10 @@ App::App (int &argc, char *argv[]) : SingleApplication(argc, argv, true, Mode::U
 
 App::~App () {
 	qInfo() << QStringLiteral("Destroying app...");
-	delete mEngine;
-	delete mParser;
+	if( mEngine )
+		mEngine->deleteLater();// Let to Qt the time to delete its data
+	if( mParser)
+		delete mParser;
 }
 
 // -----------------------------------------------------------------------------
@@ -269,7 +271,8 @@ void App::processArguments(QHash<QString,QString> args){
 	for(auto i = keys.begin() ; i != keys.end() ; ++i){
 		parameters << "--"+(*i)+"="+args.value(*i);
 	}
-	mParser->process(parameters);
+	if(!mParser->parse(parameters))
+		qWarning() << "Parsing error : " << mParser->errorText();
 }
 
 static QQuickWindow *createSubWindow (QQmlApplicationEngine *engine, const char *path) {

@@ -16,7 +16,7 @@
     </message>
     <message>
         <source>confirmAction</source>
-        <translation>ACTIVATE</translation>
+        <translation>USE ACCOUNT</translation>
     </message>
     <message>
         <source>activationSteps</source>
@@ -31,7 +31,7 @@
     </message>
     <message>
         <source>confirmAction</source>
-        <translation>ACTIVATE</translation>
+        <translation>USE ACCOUNT</translation>
     </message>
     <message>
         <source>activationSteps</source>
@@ -474,13 +474,13 @@ Server URL not configured.</translation>
     <message>
         <source>deliveryDelivered</source>
         <extracomment>&apos;Send to %1 - %2&apos; Little message to indicate the state of a message</extracomment>
-        <translation>Send to %1 - %2</translation>
+        <translation>Sent to %1 - %2</translation>
         <extra-Context>%1 is someone, %2 is a date/time. The state is that the message has been sent but not received.</extra-Context>
     </message>
     <message>
         <source>deliveryDeliveredToUser</source>
         <extracomment>&apos;Retrieved by %1 - %2&apos; Little message to indicate the state of a message</extracomment>
-        <translation>Delivered by %1 - %2</translation>
+        <translation>Received by %1 - %2</translation>
         <extra-Context>%1 is someone, %2 is a date/time. The state is that the message has been retrieved</extra-Context>
     </message>
     <message>
@@ -492,7 +492,7 @@ Server URL not configured.</translation>
     <message>
         <source>deliveryNotDelivered</source>
         <extracomment>&quot;%1 have nothing received&quot; Little message to indicate the state of a message</extracomment>
-        <translation>%1 received nothing</translation>
+        <translation>%1 did not receive the message</translation>
         <extra-Context>%1 is someone. The state is that the message hasn&apos;t been delivered.</extra-Context>
     </message>
 </context>
@@ -956,8 +956,7 @@ Server URL not configured.</translation>
     </message>
     <message>
         <source>ephemeralNotInConference!</source>
-        <extracomment>&apos;
-Ephemeral message is only supported in conference based chat room!&apos;</extracomment>
+        <extracomment>&apos;Ephemeral message is only supported in conference based chat room!&apos;</extracomment>
         <translation>Ephemeral message is only supported in conference based chat room!</translation>
         <extra-Context>Warning about not being in conference based chat room.</extra-Context>
     </message>
@@ -984,9 +983,7 @@ Ephemeral message is only supported in conference based chat room!&apos;</extrac
     </message>
     <message numerus="yes">
         <source>nDay</source>
-        <extracomment>&apos;%1 day&apos;
-----------
-&apos;%1 days&apos;</extracomment>
+        <extracomment>&apos;%1 day&apos;</extracomment>
         <translation>
             <numerusform>%1 day</numerusform>
             <numerusform>%1 days</numerusform>
@@ -1921,7 +1918,7 @@ Click here: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     </message>
     <message>
         <source>useTLSTooltip</source>
-        <translation>Encrypt transactions by LDAP over TLS(StartTLS). You must use \&apos;ldap\&apos; scheme. \&apos;ldaps\&apos; for LDAP over SSL is non-standardized and deprecated.&lt;br&gt;StartTLS in an extension to the LDAP protocol which uses the TLS protocol to encrypt communication. &lt;br&gt;It works by establishing a normal - i.e. unsecured - connection with the LDAP server before a handshake negotiation between the server and the web services is carried out. Here, the server sends its certificate to prove its identity before the secure connection is established.</translation>
+        <translation>Encrypt transactions by LDAP over TLS(StartTLS). You must use \&apos;ldap\&apos; scheme. \&apos;ldaps\&apos; for LDAP over SSL is non-standardized and deprecated.&lt;br&gt;StartTLS is an extension to the LDAP protocol which uses the TLS protocol to encrypt communication. &lt;br&gt;It works by establishing a normal - i.e. unsecured - connection with the LDAP server before a handshake negotiation between the server and the web services is carried out. Here, the server sends its certificate to prove its identity before the secure connection is established.</translation>
     </message>
     <message>
         <source>useSalLabel</source>
@@ -2543,7 +2540,7 @@ Click here: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>timelineFilterSecureChatGroups</source>
         <extracomment>&apos;Secure Chat Groups&apos; : Filter item</extracomment>
-        <translation>Secure Chat Groups</translation>
+        <translation>Secure chat groups</translation>
         <extra-Mode>Selecting it will show all secure chat groups (with more than one participant)</extra-Mode>
     </message>
     <message>
