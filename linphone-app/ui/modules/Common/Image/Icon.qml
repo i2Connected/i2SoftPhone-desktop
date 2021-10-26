@@ -1,6 +1,7 @@
 import QtQuick 2.7
 
 import Common 1.0
+import Linphone 1.0
 import Utils 1.0
 
 // =============================================================================
@@ -16,7 +17,7 @@ Item {
 
   Image {
 	id:image
-    mipmap: Qt.platform.os === 'osx'
+    mipmap: SettingsModel.mipmapEnabled
     cache: Images.areReadOnlyImages
     function getIconSize () {
       Utils.assert(
