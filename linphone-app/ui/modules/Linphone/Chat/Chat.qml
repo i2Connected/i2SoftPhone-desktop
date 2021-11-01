@@ -187,6 +187,7 @@ Rectangle {
 				color: ChatStyle.color
 				implicitHeight: layout.height + ChatStyle.entry.bottomMargin
 				
+				
 				// ---------------------------------------------------------------------
 				
 				MouseArea {
@@ -203,7 +204,7 @@ Rectangle {
 						width: entry.width
 						Text{
 							id:authorName
-							Layout.leftMargin: timeDisplay.width + 10
+							Layout.leftMargin: timeDisplay.width + ChatStyle.entry.metaWidth + ChatStyle.entry.message.extraContent.spacing
 							Layout.fillWidth: true
 							text : $chatEntry.fromDisplayName ? $chatEntry.fromDisplayName : ''
 							property var previousItem : {
@@ -226,14 +227,17 @@ Rectangle {
 						}
 						RowLayout {
 							
-							spacing: 0
+							spacing: 5
 							width: entry.width
+							
+							layoutDirection: $chatEntry.isOutgoing ? Qt.RightToLeft : Qt.LeftToRight
+							Layout.alignment: $chatEntry.isOutgoing ? Qt.AlignRight : Qt.AlignLeft
 							
 							// Display time.
 							Text {
 								id:timeDisplay
 								Layout.alignment: Qt.AlignTop
-								Layout.preferredHeight: ChatStyle.entry.lineHeight
+								Layout.preferredHeight: implicitHeight// ChatStyle.entry.lineHeight
 								Layout.preferredWidth: ChatStyle.entry.time.width
 								
 								color: ChatStyle.entry.event.text.color

@@ -45,13 +45,17 @@ Item {
 	Rectangle {
 		id: rectangle
 		
+		anchors.left: !$chatEntry.isOutgoing ? parent.left : undefined
+		anchors.right: $chatEntry.isOutgoing ? parent.right : undefined
+		
 		height: parent.height - (deliveryLayout.visible? deliveryLayout.height : 0)
 		radius: ChatStyle.entry.message.radius
+		//property int messageWidth:  Math.min(message.implicitWidth, parent.width)
 		width: (
-				   ephemeralTimerRow.visible && message.contentWidth < ephemeralTimerRow.width
+				   ephemeralTimerRow.visible && message.implicitWidth < ephemeralTimerRow.width
 				   ? ephemeralTimerRow.width
-				   : message.contentWidth < parent.width
-					 ? message.contentWidth
+				   : message.implicitWidth < parent.width
+					 ? message.implicitWidth
 					 : parent.width
 				   ) + message.padding * 2
 		Row{
@@ -79,7 +83,7 @@ Item {
 				iconSize: ChatStyle.ephemeralTimer.iconSize
 			}
 		}		
-	}
+	//}
 	
 	
 	
@@ -92,9 +96,11 @@ Item {
 		property string lastTextSelected : ''
 		property font customFont : SettingsModel.textMessageFont
 		
+		//anchors.right: $chatEntry.isOutgoing ? parent.right : undefined
+		
 		anchors {
-			left: container.left
-			right: container.right
+			left: rectangle.left
+			right: rectangle.right
 		}
 		
 		clip: true
@@ -138,7 +144,7 @@ Item {
 			onCopySelectionDone: container.copySelectionDone()
 		}
 	}
-	
+	}
 	// ---------------------------------------------------------------------------
 	// Extra content.
 	// ---------------------------------------------------------------------------
@@ -148,8 +154,10 @@ Item {
 		
 		anchors {
 			left: rectangle.right
+			bottom: rectangle.bottom
 			leftMargin: ChatStyle.entry.message.extraContent.leftMargin
 		}
+		
 	}
 	ChatDeliveries{
 		id: deliveryLayout

@@ -12,21 +12,29 @@ import Units 1.0
 import ColorsList 1.0
 
 // =============================================================================
-
-Row {
+Item{
 	id:mainRow
-	// ---------------------------------------------------------------------------
-	// Avatar if it's an incoming message.
-	// ---------------------------------------------------------------------------
-	
+	implicitHeight: rectangle.height
+	width: parent.width
 	property bool isOutgoing : $chatEntry.isOutgoing  || $chatEntry.state == LinphoneEnums.ChatMessageStateIdle;
 	
 	signal copyAllDone()
 	signal copySelectionDone()
+	Row {
+	
+	// ---------------------------------------------------------------------------
+	// Avatar if it's an incoming message.
+	// ---------------------------------------------------------------------------
+	
+	
+	
+	anchors.left: !isOutgoing ? parent.left : undefined
+	anchors.right: isOutgoing ? parent.right : undefined
+	layoutDirection: isOutgoing ? Qt.RightToLeft : Qt.LeftToRight
 	
 	Item {
 		height: ChatStyle.entry.lineHeight
-		width: ChatStyle.entry.metaWidth
+		width: !isOutgoing ? ChatStyle.entry.metaWidth : 0
 		
 		Component {
 			id: avatar
@@ -55,6 +63,7 @@ Row {
 			anchors.centerIn: parent
 			sourceComponent: !isOutgoing? avatar : undefined
 		}
+		
 	}
 	
 	// ---------------------------------------------------------------------------
@@ -62,7 +71,7 @@ Row {
 	// ---------------------------------------------------------------------------
 	
 	Row {
-		spacing: ChatStyle.entry.message.extraContent.leftMargin
+		spacing: 0 //ChatStyle.entry.message.extraContent.leftMargin
 		Item{
 			width: ChatStyle.entry.message.file.width
 			height:rectangle.height + deliveryLayout.height
@@ -378,7 +387,7 @@ Row {
 		// -------------------------------------------------------------------------
 		// Resend/Remove file message.
 		// -------------------------------------------------------------------------
-		
+	}
 		Row {
 			spacing: ChatStyle.entry.message.extraContent.spacing
 			
@@ -386,7 +395,7 @@ Row {
 				id: icon
 				
 				Icon {
-					anchors.centerIn: parent
+					//anchors.centerIn: parent
 					
 					icon: rectangle.isError ? 'chat_error' :
 											  (rectangle.isRead ? 'chat_read' : 
@@ -418,7 +427,8 @@ Row {
 			}
 			
 			Loader {
-				height: ChatStyle.entry.lineHeight
+				anchors.bottom: parent.top
+			//	height: ChatStyle.entry.lineHeight
 				width: ChatStyle.entry.message.outgoing.areaSize
 				
 				sourceComponent: isOutgoing

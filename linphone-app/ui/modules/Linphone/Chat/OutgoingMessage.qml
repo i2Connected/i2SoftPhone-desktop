@@ -34,7 +34,6 @@ Item {
 
     Row {
       spacing: ChatStyle.entry.message.extraContent.spacing
-
       Component {
         id: iconComponent
 
@@ -47,8 +46,8 @@ Item {
           readonly property bool isUploaded: $chatEntry.state == LinphoneEnums.ChatMessageStateDelivered
           readonly property bool isDelivered: $chatEntry.state == LinphoneEnums.ChatMessageStateDeliveredToUser
           readonly property bool isRead: $chatEntry.state == LinphoneEnums.ChatMessageStateDisplayed
-
-          icon: iconId.isError
+          
+		  icon: iconId.isError
             ? 'chat_error'
             : (iconId.isRead ? 'chat_read' : (iconId.isDelivered  ? 'chat_delivered' : '' ) )
           iconSize: ChatStyle.entry.message.outgoing.sendIconSize
@@ -86,7 +85,8 @@ Item {
       }
 
       Loader {
-        height: ChatStyle.entry.lineHeight
+		anchors.bottom: parent.top
+        //height: ChatStyle.entry.lineHeight
         width: ChatStyle.entry.message.outgoing.areaSize
 
         sourceComponent: $chatEntry.state == LinphoneEnums.ChatMessageStateInProgress || $chatEntry.state == LinphoneEnums.ChatMessageStateFileTransferInProgress
@@ -95,4 +95,5 @@ Item {
       }
     }
   }
+  
 }
