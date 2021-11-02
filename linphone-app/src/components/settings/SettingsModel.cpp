@@ -1238,10 +1238,15 @@ QString SettingsModel::getRemoteProvisioning () const {
 }
 
 void SettingsModel::setRemoteProvisioning (const QString &remoteProvisioning) {
-	if (!CoreManager::getInstance()->getCore()->setProvisioningUri(Utils::appStringToCoreString(remoteProvisioning)))
-		emit remoteProvisioningChanged(remoteProvisioning);
+	QString urlRemoteProvisioning = remoteProvisioning;
+	QUrl url(urlRemoteProvisioning);
+	if( !url.isValid()) {
+		urlRemoteProvisioning = QString(Constants::RemoteProvisioningURL) +"/"+ remoteProvisioning;
+	}
+	if (!CoreManager::getInstance()->getCore()->setProvisioningUri(Utils::appStringToCoreString(urlRemoteProvisioning)))
+		emit remoteProvisioningChanged(urlRemoteProvisioning);
 	else
-		emit remoteProvisioningNotChanged(remoteProvisioning);
+		emit remoteProvisioningNotChanged(urlRemoteProvisioning);
 }
 
 // -----------------------------------------------------------------------------
@@ -1278,6 +1283,19 @@ bool SettingsModel::getShowStartVideoCallButton ()const{
 	return !!mConfig->getInt(UiSection, "show_start_video_button", 1);
 }
 
+bool SettingsModel::isMipmapEnabled() const{
+#ifdef __APPLE__
+	return !!mConfig->getInt(UiSection, "mipmap_enabled", 1);
+#else
+	return !!mConfig->getInt(UiSection, "mipmap_enabled", 0);
+#endif
+}
+
+void SettingsModel::setMipmapEnabled(const bool& enabled){
+	mConfig->setInt(UiSection, "mipmap_enabled", enabled);
+	emit mipmapEnabledChanged();
+}
+	
 // =============================================================================
 // Advanced.
 // =============================================================================
