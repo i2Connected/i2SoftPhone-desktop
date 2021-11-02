@@ -301,15 +301,20 @@ ChatMessageModel::ChatMessageModel ( std::shared_ptr<linphone::ChatMessage> chat
 	mChatMessage = chatMessage;
 	mWasDownloaded = false;
 	mChatMessage->addListener(mChatMessageListener);
-	mTimestamp = QDateTime::fromMSecsSinceEpoch(chatMessage->getTime() * 1000);
 	connect(this, &ChatMessageModel::remove, dynamic_cast<ChatRoomModel*>(parent), &ChatRoomModel::removeEntry);
 	
 	std::list<std::shared_ptr<linphone::Content>> contents = chatMessage->getContents();
+	time_t receivedTime = 0;
 	QString txt;
 	for(auto content : contents){
 		if(content->isText())
 			txt += content->getUtf8Text().c_str();
+		receivedTime = std::max(content->getReceivedTime(),receivedTime);
 	}
+	if(receivedTime == 0)
+		mTimestamp = QDateTime::fromMSecsSinceEpoch(chatMessage->getTime() * 1000);
+	else
+		mTimestamp = QDateTime::fromMSecsSinceEpoch(receivedTime* 1000);
 	mContent = txt;
 	//mIsOutgoing = chatMessage->isOutgoing() || chatMessage->getState() == linphone::ChatMessage::State::Idle;
 	
