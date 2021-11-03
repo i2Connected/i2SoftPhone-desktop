@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2010-2020 Belledonne Communications SARL.
  *
  * This file is part of linphone-desktop
@@ -132,6 +132,7 @@ function openMediaParameters (window, incall) {
 
 function showFullscreen (position) {
   if (incall._fullscreen) {
+    incall._fullscreen.raise()
     return
   }
   DesktopTools.DesktopTools.screenSaverStatus = false
@@ -144,13 +145,4 @@ function showFullscreen (position) {
       height:window.height
     }
   }, true)
-}
-
-function updateCallQualityIcon (callQuality,call) {
-  var quality = call.quality
-  callQuality.icon = 'call_quality_' + (
-    // Note: `quality` is in the [0, 5] interval.
-    // It's necessary to map in the `call_quality_` interval. ([0, 3])
-    quality >= 0 ? Math.round(quality / (5 / 3)) : 0
-  )
 }

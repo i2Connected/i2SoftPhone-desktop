@@ -30,11 +30,13 @@
 #include "app/logger/Logger.hpp"
 #include "app/paths/Paths.hpp"
 #include "components/core/CoreManager.hpp"
+#include "components/tunnel/TunnelModel.hpp"
 #include "include/LinphoneApp/PluginNetworkHelper.hpp"
 #include "utils/Utils.hpp"
 #include "utils/Constants.hpp"
 #include "utils/MediastreamerUtils.hpp"
 #include "SettingsModel.hpp"
+
 
 // =============================================================================
 
@@ -600,13 +602,24 @@ void SettingsModel::setMuteMicrophoneEnabled (bool status) {
 
 // -----------------------------------------------------------------------------
 
-bool SettingsModel::getChatEnabled () const {
-	return !!mConfig->getInt(UiSection, "chat_enabled", 1);
+bool SettingsModel::getStandardChatEnabled () const {
+	return !!mConfig->getInt(UiSection, getEntryFullName(UiSection,"standard_chat_enabled"), 1);
 }
 
-void SettingsModel::setChatEnabled (bool status) {
-	mConfig->setInt(UiSection, "chat_enabled", status);
-	emit chatEnabledChanged(status);
+void SettingsModel::setStandardChatEnabled (bool status) {
+	if(!isReadOnly(UiSection, "standard_chat_enabled"))
+		mConfig->setInt(UiSection, "standard_chat_enabled", status);
+	emit standardChatEnabledChanged(getStandardChatEnabled ());
+}
+
+bool SettingsModel::getSecureChatEnabled () const {
+	return !!mConfig->getInt(UiSection, getEntryFullName(UiSection, "secure_chat_enabled"), 1);
+}
+
+void SettingsModel::setSecureChatEnabled (bool status) {
+	if(!isReadOnly(UiSection, "secure_chat_enabled"))
+		mConfig->setInt(UiSection, "secure_chat_enabled", status);
+	emit secureChatEnabledChanged(getSecureChatEnabled () );
 }
 
 // -----------------------------------------------------------------------------
@@ -780,8 +793,9 @@ bool SettingsModel::getContactsEnabled () const {
 }
 
 void SettingsModel::setContactsEnabled (bool status) {
-	mConfig->setInt(UiSection, "contacts_enabled", status);
-	emit contactsEnabledChanged(status);
+	if(!isReadOnly(UiSection, "contacts_enabled"))
+		mConfig->setInt(UiSection, "contacts_enabled", status);
+	emit contactsEnabledChanged(getContactsEnabled ());
 }
 
 // =============================================================================
@@ -1132,6 +1146,16 @@ void SettingsModel::configureRlsUri (const shared_ptr<const linphone::ProxyConfi
 	mConfig->setString("sip", "rls_uri", "");
 }
 
+//------------------------------------------------------------------------------
+
+bool SettingsModel::tunnelAvailable() const{
+	return CoreManager::getInstance()->getCore()->tunnelAvailable();
+}
+
+TunnelModel* SettingsModel::getTunnel() const{
+	return new TunnelModel(CoreManager::getInstance()->getCore()->getTunnel());
+}
+
 // =============================================================================
 // UI.
 // =============================================================================
@@ -1214,10 +1238,14 @@ QString SettingsModel::getRemoteProvisioning () const {
 }
 
 void SettingsModel::setRemoteProvisioning (const QString &remoteProvisioning) {
-	if (!CoreManager::getInstance()->getCore()->setProvisioningUri(Utils::appStringToCoreString(remoteProvisioning)))
-		emit remoteProvisioningChanged(remoteProvisioning);
+	QString urlRemoteProvisioning = remoteProvisioning;
+	if( QUrl(urlRemoteProvisioning).isRelative()) {
+		urlRemoteProvisioning = QString(Constants::RemoteProvisioningURL) +"/"+ remoteProvisioning;
+	}
+	if (!CoreManager::getInstance()->getCore()->setProvisioningUri(Utils::appStringToCoreString(urlRemoteProvisioning)))
+		emit remoteProvisioningChanged(urlRemoteProvisioning);
 	else
-		emit remoteProvisioningNotChanged(remoteProvisioning);
+		emit remoteProvisioningNotChanged(urlRemoteProvisioning);
 }
 
 // -----------------------------------------------------------------------------
@@ -1231,6 +1259,23 @@ void SettingsModel::setExitOnClose (bool value) {
 	emit exitOnCloseChanged(value);
 }
 
+bool SettingsModel::isCheckForUpdateEnabled() const{
+	return !!mConfig->getInt(UiSection, "check_for_update_enabled", 1);
+}
+
+void SettingsModel::setCheckForUpdateEnabled(bool enable){
+	mConfig->setInt(UiSection, "check_for_update_enabled", enable);
+	emit checkForUpdateEnabledChanged();
+}
+
+QString SettingsModel::getVersionCheckUrl() const{
+	return Utils::coreStringToAppString(mConfig->getString("misc", "version_check_url_root", Constants::VersionCheckUrl));
+}
+
+void SettingsModel::setVersionCheckUrl(const QString& url){
+	mConfig->setString("misc", "version_check_url_root", Utils::appStringToCoreString(url));
+	emit versionCheckUrlChanged();
+}
 // -----------------------------------------------------------------------------
 
 bool SettingsModel::getShowLocalSipAccount()const{
@@ -1245,6 +1290,19 @@ bool SettingsModel::getShowStartVideoCallButton ()const{
 	return !!mConfig->getInt(UiSection, "show_start_video_button", 1);
 }
 
+bool SettingsModel::isMipmapEnabled() const{
+#ifdef __APPLE__
+	return !!mConfig->getInt(UiSection, "mipmap_enabled", 1);
+#else
+	return !!mConfig->getInt(UiSection, "mipmap_enabled", 0);
+#endif
+}
+
+void SettingsModel::setMipmapEnabled(const bool& enabled){
+	mConfig->setInt(UiSection, "mipmap_enabled", enabled);
+	emit mipmapEnabledChanged();
+}
+	
 // =============================================================================
 // Advanced.
 // =============================================================================
@@ -1331,6 +1389,13 @@ bool SettingsModel::getLogsEnabled (const shared_ptr<linphone::Config> &config) 
 }
 
 // ---------------------------------------------------------------------------
+bool SettingsModel::isDeveloperSettingsAvailable() const {
+#ifdef DEBUG
+	return true;
+#else
+	return false;
+#endif
+}
 bool SettingsModel::getDeveloperSettingsEnabled () const {
 #ifdef DEBUG
 	return !!mConfig->getInt(UiSection, "developer_settings", 0);
@@ -1361,4 +1426,12 @@ void SettingsModel::handleEcCalibrationResult(linphone::EcCalibratorStatus statu
 }
 bool SettingsModel::getIsInCall() const {
 	return CoreManager::getInstance()->getCore()->getCallsNb() != 0;
+}
+
+bool SettingsModel::isReadOnly(const std::string& section, const std::string& name) const {
+	return mConfig->hasEntry(section, name+"/readonly");
+}
+
+std::string SettingsModel::getEntryFullName(const std::string& section, const std::string& name) const {
+	return isReadOnly(section, name)?name+"/readonly" : name;
 }

@@ -25,6 +25,7 @@ Rectangle {
 	
 	//signal entrySelected (string entry)
 	signal entrySelected (TimelineModel entry)
+	signal showHistoryRequest()
 	
 	// ---------------------------------------------------------------------------
 	
@@ -87,8 +88,9 @@ Rectangle {
 				Icon {
 					id:filterButton
 					Layout.alignment: Qt.AlignRight
-					icon: 'timeline_filter'
+					icon: 'filter_params_custom'
 					iconSize: TimelineStyle.legend.iconSize
+					overwriteColor: TimelineStyle.legend.color
 					MouseArea{
 						anchors.fill:parent
 						onClicked:{
@@ -98,7 +100,6 @@ Rectangle {
 				}
 				MouseArea{
 					Layout.alignment: Qt.AlignRight
-					Layout.rightMargin: TimelineStyle.legend.rightMargin
 					Layout.fillHeight: true
 					Layout.preferredWidth: TimelineStyle.legend.iconSize
 					onClicked:{
@@ -108,9 +109,29 @@ Rectangle {
 					Icon {
 						id:searchButton
 						anchors.verticalCenter: parent.verticalCenter
-						anchors.horizontalCenter: parent.horizontalCenter						
-						icon: (searchView.visible? 'timeline_close': 'timeline_search')
+						anchors.horizontalCenter: parent.horizontalCenter
+						property bool searching: searchView.visible
+						icon: (searchView.visible? 'close_custom': 'search_custom')
 						iconSize: TimelineStyle.legend.iconSize
+						overwriteColor: TimelineStyle.legend.color
+					}
+				}
+				MouseArea{
+					Layout.alignment: Qt.AlignRight
+					Layout.rightMargin: TimelineStyle.legend.lastRightMargin
+					Layout.fillHeight: true
+					Layout.preferredWidth: TimelineStyle.legend.iconSize
+					onClicked:{
+						showHistoryRequest()
+					}
+					Icon {
+						id:callHistoryButton
+						anchors.verticalCenter: parent.verticalCenter
+						anchors.horizontalCenter: parent.horizontalCenter
+						property bool searching: searchView.visible
+						icon: 'call_history_custom'
+						iconSize: TimelineStyle.legend.iconSize
+						overwriteColor: TimelineStyle.legend.color
 					}
 				}
 			}
@@ -123,7 +144,7 @@ Rectangle {
 			Layout.fillWidth: true
 			Layout.preferredHeight: filterChoices.height
 			Layout.alignment: Qt.AlignCenter
-			border.color: ColorsList.add("Timeline_filter_border", "border").color
+			border.color: TimelineStyle.filterField.borderColor
 			border.width: 2
 			visible:false
 			
@@ -192,7 +213,7 @@ Rectangle {
 			Layout.fillWidth: true
 			Layout.preferredHeight: 40
 			Layout.alignment: Qt.AlignCenter
-			border.color: ColorsList.add("Timeline_search_border", "border").color
+			border.color: TimelineStyle.searchField.borderColor
 			border.width: 2
 			visible:false
 			onVisibleChanged: if(visible){
@@ -209,7 +230,9 @@ Rectangle {
 					margins: 7
 				}
 				width: parent.width - 14
-				icon: 'search'
+				icon: 'search_custom'
+				iconSize: 30
+				overwriteColor: TimelineStyle.searchField.color
 				//: 'Search in the list' : ths is a placeholder when searching something in the timeline list
 				placeholderText: qsTr('timelineSearchPlaceholderText')
 				
@@ -243,7 +266,7 @@ Rectangle {
 								 ? TimelineStyle.contact.backgroundColor.a
 								 : TimelineStyle.contact.backgroundColor.b
 								 )
-					displayUnreadMessageCount: SettingsModel.chatEnabled
+					displayUnreadMessageCount: SettingsModel.standardChatEnabled || SettingsModel.secureChatEnabled
 					entry: modelData.chatRoomModel
 					sipAddressColor: isSelected
 									 ? TimelineStyle.contact.sipAddress.color.selected
@@ -257,8 +280,9 @@ Rectangle {
 						isClickable: true
 					}
 					Icon{
-						icon: modelData && modelData.selected ? 'timer_light' : 'timer'
-						iconSize: 15
+						icon: TimelineStyle.ephemeralTimer.icon
+						iconSize: TimelineStyle.ephemeralTimer.iconSize
+						overwriteColor:  modelData && modelData.selected ? TimelineStyle.ephemeralTimer.selectedTimerColor : TimelineStyle.ephemeralTimer.timerColor
 						anchors.right:parent.right
 						anchors.bottom:parent.bottom
 						anchors.bottomMargin: 7

@@ -89,6 +89,7 @@ job-macosx-makefile-package:
   only:
      variables:
        - $NIGHTLY_MASTER
+       - $PACKAGE_MACOSX
        - $DEPLOY_MACOSX
   variables:
     CMAKE_OPTIONS: -DENABLE_APP_PACKAGING=YES
@@ -110,10 +111,11 @@ job-macosx-codesigning:
   only:
      variables:
        - $NIGHTLY_MASTER
+       - $PACKAGE_MACOSX
        - $DEPLOY_MACOSX
   script:
     - cd build
-    - codesign --options runtime,library --verbose -s "$MACOS_SIGNING_IDENTITY" OUTPUT/Packages/Linphone*.dmg
+    - codesign --options runtime,library --verbose -s "$MACOS_SIGNING_IDENTITY" OUTPUT/Packages/*.dmg
     - ./../tools/app_notarization.sh
   artifacts:
     when: always

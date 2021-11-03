@@ -159,7 +159,7 @@
     </message>
     <message>
         <source>usernameStatusInvalidCharacters</source>
-        <translation>Caractères invalides détectés (regex&#x202f;: `%1`).</translation>
+        <translation>Caractères invalides détectés (regex : `%1`).</translation>
     </message>
     <message>
         <source>usernameStatusInvalid</source>
@@ -175,7 +175,7 @@
     </message>
     <message>
         <source>passwordStatusInvalidCharacters</source>
-        <translation>Caractères invalides détectés (regex&#x202f;: `%1`).</translation>
+        <translation>Caractères invalides détectés (regex : `%1`).</translation>
     </message>
     <message>
         <source>passwordStatusMissingCharacters</source>
@@ -456,10 +456,6 @@
         <translation>Impossible d&apos;envoyer un fichier.
 URL du serveur non configurée.</translation>
     </message>
-    <message>
-        <source>isComposing</source>
-        <translation>%1 est en train d&apos;écrire…</translation>
-    </message>
     <message numerus="yes">
         <source>chatTyping</source>
         <extracomment>&apos;%1 is typing...&apos; indicate that someone is composing in chat</extracomment>
@@ -467,6 +463,16 @@ URL du serveur non configurée.</translation>
             <numerusform>%1 est en train d&apos;écrire…</numerusform>
             <numerusform>%1 sont en train d&apos;écrire…</numerusform>
         </translation>
+    </message>
+    <message>
+        <source>allTextCopied</source>
+        <extracomment>&quot;Copied to clipboard&quot; : when a user copy a text from the menu, this message show up.</extracomment>
+        <translation>Copié dans le presse-papier</translation>
+    </message>
+    <message>
+        <source>selectedTextCopied</source>
+        <extracomment>&quot;Selection copied to clipboard&quot; : when a user copy a text from the menu, this message show up.</extracomment>
+        <translation>La sélection a été copiée dans le presse-papier</translation>
     </message>
 </context>
 <context>
@@ -747,6 +753,11 @@ URL du serveur non configurée.</translation>
         <source>tooltipShowConversation</source>
         <translation>Aller à la conversation</translation>
     </message>
+    <message>
+        <source>missingConferenceURI</source>
+        <extracomment>&apos;You need to set the conference URI in your account settings to create a conference based chat room.&apos; : Tooltip to warn the user that a setting is missing in its configuration.</extracomment>
+        <translation>Vous devez définir l&apos;URI de la conférence dans les paramètres de votre compte pour créer une conférence.</translation>
+    </message>
 </context>
 <context>
     <name>Contacts</name>
@@ -967,7 +978,7 @@ URL du serveur non configurée.</translation>
     <message>
         <source>ephemeralNotInConference!</source>
         <extracomment>&apos;Ephemeral message is only supported in conference based chat room!&apos;</extracomment>
-        <translation>Les messages éphémères ne sont disponibles que pour une conversation définie en mode conférence&#x202f;!</translation>
+        <translation>Les messages éphémères ne sont disponibles que pour une conversation définie en mode conférence !</translation>
         <extra-Context>Warning about not being in conference based chat room.</extra-Context>
     </message>
     <message>
@@ -1337,6 +1348,11 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
         <source>quit</source>
         <translation>Quitter</translation>
     </message>
+    <message>
+        <source>checkForUpdates</source>
+        <extracomment>&apos;Check for updates&apos; : Item menu for checking updates</extracomment>
+        <translation>Vérifier les mises à jour</translation>
+    </message>
 </context>
 <context>
     <name>MainWindowTopMenuBar</name>
@@ -1597,6 +1613,24 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>presenceOffline</source>
         <translation>Hors-ligne</translation>
+    </message>
+</context>
+<context>
+    <name>QObject</name>
+    <message>
+        <source>LinphoneEnums_TunnelModeEnable</source>
+        <extracomment>&apos;Enable&apos; : One word for button action to enable tunnel mode.</extracomment>
+        <translation>Activer</translation>
+    </message>
+    <message>
+        <source>LinphoneEnums_TunnelModeDisable</source>
+        <extracomment>&apos;Disable&apos; : One word for button action to disable tunnel mode.</extracomment>
+        <translation>Désactiver</translation>
+    </message>
+    <message>
+        <source>LinphoneEnums_TunnelModeAuto</source>
+        <extracomment>&apos;Auto&apos; : One word for button action to set the auto tunnel mode.</extracomment>
+        <translation>Auto</translation>
     </message>
 </context>
 <context>
@@ -1883,7 +1917,7 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     </message>
     <message>
         <source>serverTooltip</source>
-        <translation>Serveur LDAP. ie&#x202f;: ldap:// pour un serveur local ou ldap://ldap.example.org/</translation>
+        <translation>Serveur LDAP. ie : ldap:// pour un serveur local ou ldap://ldap.example.org/</translation>
     </message>
     <message>
         <source>bindDNLabel</source>
@@ -2302,6 +2336,119 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     </message>
 </context>
 <context>
+    <name>SettingsTunnel</name>
+    <message>
+        <source>tunnelStatus</source>
+        <extracomment>&apos;Tunnel Status&apos; : Field title to introduce the status of the tunnel (activated or not)</extracomment>
+        <translation>État du tunnel</translation>
+    </message>
+    <message>
+        <source>tunnelDomain</source>
+        <extracomment>&apos;Domain&apos; : Field title of a textfield to set domain.</extracomment>
+        <translation>Domaine</translation>
+    </message>
+    <message>
+        <source>tunnelUsername</source>
+        <extracomment>&apos;Username&apos; : Field title of a textfield to set username.</extracomment>
+        <translation>Nom d&apos;utilisateur</translation>
+    </message>
+    <message>
+        <source>tunnelSIP</source>
+        <extracomment>&apos;SIP&apos; : Field title of a switch to set SIP mode.</extracomment>
+        <translation>SIP</translation>
+    </message>
+    <message>
+        <source>cancel</source>
+        <extracomment>&apos;Cancel&apos; : Button to cancel the action.</extracomment>
+        <translation>Annuler</translation>
+    </message>
+    <message>
+        <source>setHTTPProxy</source>
+        <extracomment>&apos;Set HTTP proxy&apos; : Button to set the new proxy.</extracomment>
+        <translation>Définir un proxy HTTP</translation>
+    </message>
+    <message>
+        <source>proxyHttpHost</source>
+        <extracomment>&apos;Host&apos; : Placeholder to set hostname.</extracomment>
+        <translation>Hôte</translation>
+    </message>
+    <message>
+        <source>proxyHttpPort</source>
+        <extracomment>&apos;Port&apos; : Placehoilder to set port.</extracomment>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <source>proxyHttpUsername</source>
+        <extracomment>&apos;Username&apos; : Placeholder to set username.</extracomment>
+        <translation>Nom d&apos;utilisateur</translation>
+    </message>
+    <message>
+        <source>proxyHttpPassword</source>
+        <extracomment>&apos;Password&apos; : Placeholder to set password.</extracomment>
+        <translation>Mot de passe</translation>
+    </message>
+    <message>
+        <source>proxyHttpApply</source>
+        <extracomment>&apos;Apply&apos; : Button to set proxy from changes.</extracomment>
+        <translation>Appliquer</translation>
+    </message>
+    <message>
+        <source>serverMode</source>
+        <extracomment>&apos;Mode&apos; : Field title on form to set tunnel mode.</extracomment>
+        <translation>Mode</translation>
+    </message>
+    <message>
+        <source>serverDualMode</source>
+        <extracomment>&apos;Dual mode&apos; : Field title on form to set dual mode of the tunnel.</extracomment>
+        <translation>Mode double</translation>
+    </message>
+    <message>
+        <source>serverTitle</source>
+        <extracomment>&apos;Server&apos; : Title form to set a server</extracomment>
+        <translation>Serveur</translation>
+    </message>
+    <message>
+        <source>serverHostname</source>
+        <extracomment>&apos;Hostname&apos; : Field title on form to set hostname.</extracomment>
+        <translation>Nom d&apos;Hôte</translation>
+    </message>
+    <message>
+        <source>serverPort</source>
+        <extracomment>&apos;Port&apos; : Field title on form to set port.</extracomment>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <source>serverDualHostname</source>
+        <extracomment>&apos;Dual hostname URL&apos; : Field title on form to set the second hostname for dual configuration.</extracomment>
+        <translation>Nom d&apos;hôte du second server</translation>
+    </message>
+    <message>
+        <source>serverDualPort</source>
+        <extracomment>&apos;Dual port&apos; : Field title on form to set the second port for the dual configuration.</extracomment>
+        <translation>Port du second serveur</translation>
+    </message>
+    <message>
+        <source>serverRemoteUDPMirrorPort</source>
+        <extracomment>&apos;Remote UDP mirror port&apos; : Field title on form to set the remote UDP mirror port.</extracomment>
+        <translation>Port miroir UDP distant</translation>
+    </message>
+    <message>
+        <source>serverDelay</source>
+        <extracomment>&apos;Delay&apos; : Field title on form to set the delay of the tunnel.</extracomment>
+        <translation>Décalage</translation>
+    </message>
+    <message>
+        <source>tunnelAddServer</source>
+        <extracomment>&apos;Add server&apos; : Button for adding a server</extracomment>
+        <translation>Ajouter un serveur</translation>
+    </message>
+    <message>
+        <source>tunnelApply</source>
+        <extracomment>&apos;Apply&apos; : Button to apply changes.</extracomment>
+        <translation>Appliquer</translation>
+    </message>
+</context>
+<context>
     <name>SettingsUi</name>
     <message>
         <source>pathsTitle</source>
@@ -2373,6 +2520,26 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
         <source>fontsPopupTitle</source>
         <extracomment>&apos;Select a new font&apos; : Popup title for choosing new fonts</extracomment>
         <translation>Sélectionnez une nouvelle police</translation>
+    </message>
+    <message>
+        <source>checkForUpdateLabel</source>
+        <extracomment>&apos;Check for updates&apos; : Label switch for enabling check for updates</extracomment>
+        <translation>Vérifier les mises à jour</translation>
+    </message>
+    <message>
+        <source>mipmapLabel</source>
+        <extracomment>&apos;Enable Mipmap&apos;</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>mipmapTooltip1</source>
+        <extracomment>&apos;This property holds whether the image uses mipmap filtering when scaled or transformed.&apos; : first line of a tooltip about Mipmap mode.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>mipmapTooltip2</source>
+        <extracomment>&apos;Mipmap filtering gives better visual quality when scaling down compared to smooth, but it may come at a performance cost (both when initializing the image and during rendering).&apos; : Second line of a tooltip about Mipmap mode.</extracomment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2470,6 +2637,11 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>uiAdvanced</source>
         <translation>Avancés</translation>
+    </message>
+    <message>
+        <source>tunnelTab</source>
+        <extracomment>&apos;Tunnel&apos; : Tab title for tunnel section in settings.</extracomment>
+        <translation>Tunnel</translation>
     </message>
 </context>
 <context>

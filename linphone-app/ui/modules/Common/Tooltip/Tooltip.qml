@@ -1,7 +1,9 @@
 import QtQuick 2.7 as Core
 import QtQuick.Controls 2.2 as Core
+import QtGraphicalEffects 1.12
 
 import Common 1.0
+import Linphone 1.0
 import Common.Styles 1.0
 import Utils 1.0
 
@@ -99,14 +101,20 @@ Core.ToolTip {
     // and `implicitWidth`.
     Core.Image {
       id: icon
-      mipmap: Qt.platform.os === 'osx'
+      mipmap: SettingsModel.mipmapEnabled
       fillMode: Core.Image.PreserveAspectFit
       height: TooltipStyle.arrowSize
       source: _edge
-        ? Utils.resolveImageUri('tooltip_arrow_' + _edge)
+        ? Utils.resolveImageUri('tooltip_arrow_' + _edge+'_custom')
         : ''
       sourceSize.height: height
       sourceSize.width: width
+      layer {
+			enabled: true
+			effect: ColorOverlay {
+				color: TooltipStyle.backgroundColor
+			}
+		}
       visible: tooltip.visible && _edge
       width: TooltipStyle.arrowSize
       z: Constants.zMax

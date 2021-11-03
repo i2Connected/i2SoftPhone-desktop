@@ -31,6 +31,7 @@
 #include "components/contacts/ContactsImporterModel.hpp"
 
 // =============================================================================
+class TunnelModel;
 
 class SettingsModel : public QObject {
 	Q_OBJECT
@@ -103,7 +104,8 @@ class SettingsModel : public QObject {
 	Q_PROPERTY(bool callPauseEnabled READ getCallPauseEnabled WRITE setCallPauseEnabled NOTIFY callPauseEnabledChanged)
 	Q_PROPERTY(bool muteMicrophoneEnabled READ getMuteMicrophoneEnabled WRITE setMuteMicrophoneEnabled NOTIFY muteMicrophoneEnabledChanged)
 	
-	Q_PROPERTY(bool chatEnabled READ getChatEnabled WRITE setChatEnabled NOTIFY chatEnabledChanged)
+	Q_PROPERTY(bool standardChatEnabled READ getStandardChatEnabled WRITE setStandardChatEnabled NOTIFY standardChatEnabledChanged)
+	Q_PROPERTY(bool secureChatEnabled READ getSecureChatEnabled WRITE setSecureChatEnabled NOTIFY secureChatEnabledChanged)
 	Q_PROPERTY(bool hideEmptyChatRooms READ getHideEmptyChatRooms WRITE setHideEmptyChatRooms NOTIFY hideEmptyChatRoomsChanged)
 	
 	Q_PROPERTY(bool waitRegistrationForCall READ getWaitRegistrationForCall WRITE setWaitRegistrationForCall NOTIFY waitRegistrationForCallChanged)// Allow call only if the current proxy has been registered
@@ -176,10 +178,14 @@ class SettingsModel : public QObject {
 	Q_PROPERTY(QString downloadFolder READ getDownloadFolder WRITE setDownloadFolder NOTIFY downloadFolderChanged)
 	
 	Q_PROPERTY(bool exitOnClose READ getExitOnClose WRITE setExitOnClose NOTIFY exitOnCloseChanged)
+	Q_PROPERTY(bool checkForUpdateEnabled READ isCheckForUpdateEnabled WRITE setCheckForUpdateEnabled NOTIFY checkForUpdateEnabledChanged)
+	Q_PROPERTY(QString versionCheckUrl READ getVersionCheckUrl WRITE setVersionCheckUrl NOTIFY versionCheckUrlChanged)
 	
 	Q_PROPERTY(bool showLocalSipAccount READ getShowLocalSipAccount CONSTANT)
 	Q_PROPERTY(bool showStartChatButton READ getShowStartChatButton CONSTANT)
 	Q_PROPERTY(bool showStartVideoCallButton READ getShowStartVideoCallButton CONSTANT)
+	
+	Q_PROPERTY(bool mipmapEnabled READ isMipmapEnabled WRITE setMipmapEnabled NOTIFY mipmapEnabledChanged)
 	
 	// Advanced. -----------------------------------------------------------------
 	
@@ -325,8 +331,11 @@ public:
 	bool getMuteMicrophoneEnabled () const;
 	void setMuteMicrophoneEnabled (bool status);
 	
-	bool getChatEnabled () const;
-	void setChatEnabled (bool status);
+	bool getStandardChatEnabled () const;
+	void setStandardChatEnabled (bool status);
+	
+	bool getSecureChatEnabled () const;
+	void setSecureChatEnabled (bool status);
 	
 	bool getHideEmptyChatRooms() const;
 	void setHideEmptyChatRooms(const bool& data);
@@ -426,6 +435,9 @@ public:
 	void configureRlsUri ();
 	void configureRlsUri (const std::shared_ptr<const linphone::ProxyConfig> &proxyConfig);
 	
+	Q_INVOKABLE bool tunnelAvailable() const;
+	Q_INVOKABLE TunnelModel * getTunnel() const;
+	
 	// UI. -----------------------------------------------------------------------
 	
 	QFont getTextMessageFont() const;
@@ -449,9 +461,19 @@ public:
 	bool getExitOnClose () const;
 	void setExitOnClose (bool value);
 	
+	bool isCheckForUpdateEnabled() const;
+	void setCheckForUpdateEnabled(bool enable);
+	
+	QString getVersionCheckUrl() const;
+	void setVersionCheckUrl(const QString& url);
+	
+	
 	Q_INVOKABLE bool getShowLocalSipAccount () const;
 	Q_INVOKABLE bool getShowStartChatButton () const;
 	Q_INVOKABLE bool getShowStartVideoCallButton () const;
+	
+	bool isMipmapEnabled() const;
+	void setMipmapEnabled(const bool& enabled);
 	
 	// Advanced. ---------------------------------------------------------------------------
 	
@@ -476,7 +498,7 @@ public:
 	static bool getLogsEnabled (const std::shared_ptr<linphone::Config> &config);
 	
 	// ---------------------------------------------------------------------------
-	
+	Q_INVOKABLE bool isDeveloperSettingsAvailable() const;
 	bool getDeveloperSettingsEnabled () const;
 	void setDeveloperSettingsEnabled (bool status);
 	
@@ -485,6 +507,9 @@ public:
 	void handleEcCalibrationResult(linphone::EcCalibratorStatus status, int delayMs);
 	
 	bool getIsInCall() const;
+	
+	bool isReadOnly(const std::string& section, const std::string& name) const;
+	std::string getEntryFullName(const std::string& section, const std::string& name) const;	// Return the full name of the entry : 'name/readonly' or 'name'
 	
 	static const std::string UiSection;
 	static const std::string ContactsSection;
@@ -554,7 +579,8 @@ signals:
 	void callPauseEnabledChanged (bool status);
 	void muteMicrophoneEnabledChanged (bool status);
 	
-	void chatEnabledChanged (bool status);
+	void standardChatEnabledChanged (bool status);
+	void secureChatEnabledChanged (bool status);
 	void hideEmptyChatRoomsChanged (bool status);
 	void waitRegistrationForCallChanged (bool status);
 	
@@ -602,7 +628,7 @@ signals:
 	void dscpVideoChanged (int dscp);
 	
 	void rlsUriEnabledChanged (bool status);
-	
+		
 	// UI. -----------------------------------------------------------------------
 	
 	void textMessageFontChanged(const QFont& font);
@@ -616,6 +642,10 @@ signals:
 	void remoteProvisioningNotChanged (const QString &remoteProvisioning);
 	
 	void exitOnCloseChanged (bool value);
+	void mipmapEnabledChanged();
+	
+	void checkForUpdateEnabledChanged();
+	void versionCheckUrlChanged();
 	
 	// Advanced. -----------------------------------------------------------------
 	

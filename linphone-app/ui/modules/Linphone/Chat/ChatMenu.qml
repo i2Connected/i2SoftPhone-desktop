@@ -16,7 +16,7 @@ import LinphoneEnums 1.0
 import 'Message.js' as Logic
 
 // =============================================================================
-
+// ChatMenu
 Item {
 	id: container
 	property string lastTextSelected
@@ -26,6 +26,8 @@ Item {
 	
 	signal deliveryStatusClicked()
 	signal removeEntryRequested()
+	signal copyAllDone()
+	signal copySelectionDone()
 
 	function open(){
 		messageMenu.popup()
@@ -40,19 +42,27 @@ Item {
 			text: (container.lastTextSelected == '' ? qsTr('menuCopyAll')
 													  //: 'Copy' : Text menu to copy selected text in message into clipboard
 													:  qsTr('menuCopy'))
-			iconMenu: 'menu_copy_text'
-			iconSizeMenu: 17
+			iconMenu: MenuItemStyle.copy.icon
+			iconSizeMenu: MenuItemStyle.copy.iconSize
 			iconLayoutDirection: Qt.RightToLeft
 			menuItemStyle : MenuItemStyle.aux
-			onTriggered: Clipboard.text = (container.lastTextSelected == '' ? container.content : container.lastTextSelected)
+			onTriggered: {
+				if( container.lastTextSelected == ''){
+					Clipboard.text = container.content
+					container.copyAllDone();
+				}else{
+					Clipboard.text = container.lastTextSelected
+					container.copySelectionDone()
+				}
+			}
 			visible: content != ''
 		}
 		
 		MenuItem {
 			enabled: TextToSpeech.available
 			text: qsTr('menuPlayMe')
-			iconMenu: 'speaker'
-			iconSizeMenu: 17
+			iconMenu: MenuItemStyle.speaker.icon
+			iconSizeMenu: MenuItemStyle.speaker.iconSize
 			iconLayoutDirection: Qt.RightToLeft
 			menuItemStyle : MenuItemStyle.aux
 			onTriggered: TextToSpeech.say(container.content)
@@ -64,8 +74,8 @@ Item {
 			//: 'Delivery status' : Item menu that lead to IMDN of a message
 			: qsTr('menuDeliveryStatus')
 			)
-			iconMenu: 'menu_imdn_info'
-			iconSizeMenu: 17
+			iconMenu: MenuItemStyle.imdn.icon
+			iconSizeMenu: MenuItemStyle.imdn.iconSize
 			iconLayoutDirection: Qt.RightToLeft
 			menuItemStyle : MenuItemStyle.aux
 			visible: container.deliveryCount > 0
@@ -74,8 +84,8 @@ Item {
 		MenuItem {
 			//: 'Delete' : Item menu to delete a message
 			text: qsTr('menuDelete')
-			iconMenu: 'menu_delete'
-			iconSizeMenu: 17
+			iconMenu: MenuItemStyle.deleteEntry.icon
+			iconSizeMenu: MenuItemStyle.deleteEntry.iconSize
 			iconLayoutDirection: Qt.RightToLeft
 			menuItemStyle : MenuItemStyle.auxRed
 			onTriggered: container.removeEntryRequested()

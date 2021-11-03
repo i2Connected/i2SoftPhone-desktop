@@ -59,37 +59,40 @@ SearchBox {
 		id: view
 		
 		actions: [{
-				icon: 'video_call',
-				secure:0,
-				visible:true,
+				colorSet: SipAddressesViewStyle.videoCall,
+				secure: 0,
+				visible: true,
 				handler: function (entry) {
 					searchBox.closeMenu()
 					searchBox.launchVideoCall(entry.sipAddress)
 				},
 				visible: SettingsModel.videoSupported && SettingsModel.outgoingCallsEnabled && SettingsModel.showStartVideoCallButton
 			}, {
-				icon: 'call',
-				secure:0,
-				visible:true,
+				colorSet: SipAddressesViewStyle.call,
+				secure: 0,
+				visible: true,
 				handler: function (entry) {
 					searchBox.closeMenu()
 					searchBox.launchCall(entry.sipAddress)
 				},
 				visible: SettingsModel.outgoingCallsEnabled
 			}, {
-				icon: SettingsModel.chatEnabled && SettingsModel.getShowStartChatButton() ? 'chat' : 'history',
-				secure:0,
-				visible:true,
+				colorSet: SettingsModel.getShowStartChatButton() ? SipAddressesViewStyle.chat : SipAddressesViewStyle.history,
+				secure: 0,
+				visible: SettingsModel.standardChatEnabled ,
 				handler: function (entry) {
 					searchBox.closeMenu()
 					searchBox.launchChat(entry.sipAddress)
 				}
 			}, {
-				icon: SettingsModel.chatEnabled && SettingsModel.getShowStartChatButton() ? 'chat' : 'history',
-				secure:1,
-				visible:SettingsModel.chatEnabled && SettingsModel.getShowStartChatButton() && AccountSettingsModel.conferenceURI != '',
+				colorSet: SettingsModel.getShowStartChatButton() ? SipAddressesViewStyle.chat : SipAddressesViewStyle.history,
+				secure: 1,
+				visible: SettingsModel.secureChatEnabled && AccountSettingsModel.conferenceURI != '',
 				visibleHandler : function(entry) {
-									return UtilsCpp.hasCapability(entry.sipAddress,  LinphoneEnums.FriendCapabilityLimeX3Dh);
+									if(entry)
+										return UtilsCpp.hasCapability(entry.sipAddress ? entry.sipAddress : entry,  LinphoneEnums.FriendCapabilityLimeX3Dh);
+									else
+										return false;
 								},
 				handler: function (entry) {
 					searchBox.closeMenu()
@@ -100,7 +103,8 @@ SearchBox {
 		]
 		
 		headerButtonDescription: qsTr('addContact')
-		headerButtonIcon: 'contact_add'
+		headerButtonIcon: 'contact_add_custom'
+		headerButtonOverwriteColor: SipAddressesViewStyle.header.button.color
 		headerButtonAction: SettingsModel.contactsEnabled && (function (sipAddress) {
 			searchBox.closeMenu()
 			searchBox.addContact(sipAddress)

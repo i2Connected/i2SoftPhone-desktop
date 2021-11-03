@@ -8,6 +8,7 @@ import Linphone 1.0
 import Linphone.Styles 1.0
 
 import UtilsCpp 1.0
+import LinphoneEnums 1.0
 
 import App.Styles 1.0
 
@@ -98,9 +99,10 @@ ColumnLayout  {
 			spacing: ContactEditStyle.bar.spacing
 			
 			ActionButton {
+				isCustom: true
+				backgroundRadius: 90
+				colorSet: ContactEditStyle.bar.avatarTakePicture
 				enabled: _edition
-				icon: 'contact_card_photo'
-				iconSize: ContactEditStyle.bar.avatarSize
 				
 				onClicked: avatarChooser.open()
 				
@@ -147,18 +149,39 @@ ColumnLayout  {
 				visible: _contact != null
 				
 				ActionBar {
+					id: actionBar
 					anchors.verticalCenter: parent.verticalCenter
 					iconSize: ContactEditStyle.bar.actions.history.iconSize
 					
 					ActionButton {
-						icon: 'history'
-						
-						onClicked: sipAddressesMenu.open()
-						
-						TooltipArea {
-							isClickable: false
-							text: qsTr('tooltipShowConversation')
+						isCustom: true
+						backgroundRadius: 90
+						colorSet: SettingsModel.getShowStartChatButton() ? ContactEditStyle.chat : ContactEditStyle.history
+						visible: SettingsModel.standardChatEnabled
+						onClicked: sipAddressesMenu.open(false)
+						tooltipText: qsTr('tooltipShowConversation')
+						tooltipIsClickable: false
+					}
+								
+					ActionButton {
+						isCustom: true
+						backgroundRadius: 90
+						colorSet: SettingsModel.getShowStartChatButton() ? ContactEditStyle.chat : ContactEditStyle.history
+						visible: SettingsModel.secureChatEnabled && _contact && _contact.hasCapability(LinphoneEnums.FriendCapabilityLimeX3Dh)
+						enabled: AccountSettingsModel.conferenceURI != ''
+						Icon{
+							icon:'secure_level_1'
+							iconSize:15
+							anchors.right:parent.right
+							anchors.top:parent.top
+							anchors.topMargin: -3
 						}
+						onClicked: {sipAddressesMenu.open(true)}
+						
+						tooltipMaxWidth: actionBar.width
+						tooltipVisible: AccountSettingsModel.conferenceURI == ''
+							//: 'You need to set the conference URI in your account settings to create a conference based chat room.' : Tooltip to warn the user that a setting is missing in its configuration.
+						tooltipText: '- ' + qsTr('missingConferenceURI') + '\n'
 					}
 				}
 				
@@ -166,16 +189,18 @@ ColumnLayout  {
 					anchors.verticalCenter: parent.verticalCenter
 					
 					ActionButton {
-						icon: 'edit'
-						iconSize: ContactEditStyle.bar.actions.edit.iconSize
+						isCustom: true
+						backgroundRadius: 4
+						colorSet: ContactEditStyle.bar.actions.edit.colorSet
 						
 						visible: !_edition
 						onClicked: Logic.editContact()
 					}
 					
 					ActionButton {
-						icon: 'delete'
-						iconSize: ContactEditStyle.bar.actions.del.iconSize
+						isCustom: true
+						backgroundRadius: 4
+						colorSet: ContactEditStyle.bar.actions.del.colorSet
 						
 						onClicked: Logic.removeContact()
 					}
@@ -196,7 +221,7 @@ ColumnLayout  {
 		sipAddresses: _contact ? _contact.vcard.sipAddresses : [ contactEdit.sipAddress ]
 				
 		onSipAddressClicked: {
-			var entry = CallsListModel.createChatRoom( "", false, [sipAddress], false )
+			var entry = CallsListModel.createChatRoom( "", isSecure, [sipAddress], false )
 			if(entry){
 				window.setView('Conversation', {
 									chatRoomModel:entry.chatRoomModel

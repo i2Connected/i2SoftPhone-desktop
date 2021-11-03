@@ -62,7 +62,7 @@ constexpr qint64 Constants::FileSizeLimit;
 constexpr char Constants::DefaultXmlrpcUri[];
 constexpr char Constants::DefaultConferenceURI[];
 constexpr char Constants::DefaultLimeServerURL[];
-
+constexpr char Constants::RemoteProvisioningURL[];
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_WIN)
 constexpr char Constants::H264Description[];
@@ -98,6 +98,7 @@ constexpr char Constants::DefaultContactParameters[];
 constexpr char Constants::DefaultContactParametersOnRemove[];
 constexpr int Constants::DefaultExpires;
 constexpr char Constants::DownloadUrl[];
+constexpr char Constants::VersionCheckUrl[];
 constexpr char Constants::PasswordRecoveryUrl[];
 
 

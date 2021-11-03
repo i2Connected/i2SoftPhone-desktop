@@ -95,7 +95,7 @@ DialogPlus {
 						Layout.fillWidth: true
 						//: 'Would you like to encrypt your chat?' : Ask about setting the chat room as secured.
 						text:qsTr('askEncryption')
-						color: ColorsList.add("NewChatRoom_ask_encryption", "g").color
+						color: NewChatRoomStyle.askEncryptionColor
 						font.pointSize: Units.dp * 11
 						font.weight: Font.DemiBold
 					}
@@ -119,15 +119,20 @@ DialogPlus {
 							anchors.verticalCenter: parent.verticalCenter
 							width:50
 							enabled:true
+							checked: !SettingsModel.standardChatEnabled && SettingsModel.secureChatEnabled 
+							
 							onClicked: {
-								if(!checked){	// Remove all participants that have not the capabilities
-									var participants = selectedParticipants.getParticipants()
-									for(var index in participants){
-										if(!smartSearchBar.isUsable(participants[index].sipAddress))
-											participantView.removeParticipant(participants[index])
+								var newCheck = checked
+								if(! ( SettingsModel.standardChatEnabled && !checked || SettingsModel.secureChatEnabled && checked))
+										newCheck = !checked;
+									if(newCheck){	// Remove all participants that have not the capabilities
+										var participants = selectedParticipants.getParticipants()
+										for(var index in participants){
+											if(!smartSearchBar.isUsable(participants[index].sipAddress))
+												participantView.removeParticipant(participants[index])
+										}
 									}
-								}
-								checked = !checked
+								checked = newCheck;
 							}
 							indicatorStyle: SwitchStyle.aux
 						}
@@ -154,7 +159,7 @@ DialogPlus {
 						textFormat: Text.RichText
 						//: 'Subject' : Label of a text field about the subject of the chat room
 						text :qsTr('subjectLabel') +'<span style="color:red">*</span>'
-						color: ColorsList.add("NewChatRoom_subject_title", "g").color
+						color: NewChatRoomStyle.subjectTitleColor
 						font.pointSize: Units.dp * 11
 						font.weight: Font.DemiBold
 					}
@@ -184,7 +189,7 @@ DialogPlus {
 					Text{
 						//: 'Last contacts' : Header for showing last contacts
 						text : qsTr('LastContactsTitle')
-						color: ColorsList.add("NewChatRoom_recent_contact_title", "g").color
+						color: NewChatRoomStyle.recentContactTitleColor
 						font.pointSize: Units.dp * 11
 						font.weight: Font.DemiBold
 					}
@@ -232,7 +237,7 @@ DialogPlus {
 										
 										font.weight: Font.DemiBold
 										lineHeight: 0.8
-										color: ColorsList.add("NewChatRoom_recent_contact_username", "g").color
+										color: NewChatRoomStyle.recentContactUsernameColor
 										font.pointSize: Units.dp * 9
 										clip:false
 									}
@@ -283,7 +288,7 @@ DialogPlus {
 				Layout.fillHeight: true
 				Layout.fillWidth: true
 				border.width: 1
-				border.color: ColorsList.add("NewChatRoom_addresses_border", "l").color
+				border.color: NewChatRoomStyle.addressesBorderColor
 				
 				ColumnLayout {
 					anchors.fill: parent
@@ -310,7 +315,7 @@ DialogPlus {
 										(secureSwitch.checked ? UtilsCpp.hasCapability(sipAddress,  LinphoneEnums.FriendCapabilityLimeX3Dh) : true);
 						}
 						actions:[{
-								icon: 'add_participant',
+								colorSet: NewChatRoomStyle.addParticipant,
 								secure: secureSwitch.checked,
 								visible: true,
 								visibleHandler : function(entry) {
@@ -340,7 +345,7 @@ DialogPlus {
 						//~ one word for admin status
 						text : qsTr('adminStatus')
 						
-						color: ColorsList.add("NewChatRoom_addresses_admin", "g").color
+						color: NewChatRoomStyle.addressesAdminColor
 						font.pointSize: Units.dp * 11
 						font.weight: Font.Light
 						visible: participantView.count > 0
@@ -370,7 +375,7 @@ DialogPlus {
 							
 							
 							actions: [{
-									icon: 'remove_participant',
+									colorSet: NewChatRoomStyle.removeParticipant,
 									secure:0,
 									visible:true,
 									//: 'Remove this participant from the selection' : Explanation about removing participant from a selection
@@ -402,7 +407,7 @@ DialogPlus {
 					//: 'Required' : Word relative to a star to explain that it is a requirement (Field form)
 					text : '<span style="color:red">*</span> '+qsTr('requiredField')
 					//font.weight: Font.DemiBold
-					color: ColorsList.add("NewChatRoom_requiered_text", "g").color
+					color: NewChatRoomStyle.requiredColor
 					font.pointSize: Units.dp * 8
 				}
 			}

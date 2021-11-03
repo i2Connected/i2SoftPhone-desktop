@@ -157,13 +157,6 @@ static inline string getConfigPathIfExists (const QCommandLineParser &parser) {
 	return configPath;
 }
 
-static inline shared_ptr<linphone::Config> getConfigIfExists (const string &configPath) {
-	string factoryPath(Paths::getFactoryConfigFilePath());
-	if (!Paths::filePathExists(factoryPath))
-		factoryPath.clear();
-	
-	return linphone::Config::newWithFactory(configPath, factoryPath);
-}
 bool App::setFetchConfig (QCommandLineParser *parser) {
 	bool fetched = false;
 	QString filePath = parser->value("fetch-config");
@@ -208,7 +201,7 @@ App::App (int &argc, char *argv[]) : SingleApplication(argc, argv, true, Mode::U
 	mParser->process(*this);
 	
 	// Initialize logger.
-	shared_ptr<linphone::Config> config = getConfigIfExists(getConfigPathIfExists(*mParser));
+	shared_ptr<linphone::Config> config = Utils::getConfigIfExists (QString::fromStdString(getConfigPathIfExists(*mParser)));
 	Logger::init(config);
 	if (mParser->isSet("verbose"))
 		Logger::getInstance()->setVerbose(true);
@@ -321,11 +314,11 @@ void App::initContentApp () {
 		mTranslator = new DefaultTranslator(this);
 		mDefaultTranslator = new DefaultTranslator(this);
 		configPath = getConfigPathIfExists(*mParser);
-		config = getConfigIfExists(configPath);
+		config = Utils::getConfigIfExists (QString::fromStdString(configPath));
 		initLocale(config);
 	} else {
 		configPath = getConfigPathIfExists(*mParser);
-		config = getConfigIfExists(configPath);
+		config = Utils::getConfigIfExists(QString::fromStdString(configPath));
 		// Update and download codecs.
 		VideoCodecsModel::updateCodecs();
 		VideoCodecsModel::downloadUpdatableCodecs(this);
@@ -380,6 +373,13 @@ void App::initContentApp () {
 	mEngine->addImageProvider(ThumbnailProvider::ProviderId, new ThumbnailProvider());
 	
 	mEngine->rootContext()->setContextProperty("applicationUrl", APPLICATION_URL);
+	mEngine->rootContext()->setContextProperty("applicationVendor", APPLICATION_VENDOR);
+#ifdef APPLICATION_LICENCE
+	mEngine->rootContext()->setContextProperty("applicationLicence", APPLICATION_LICENCE);
+#else
+	mEngine->rootContext()->setContextProperty("applicationLicence", "");
+#endif
+	mEngine->rootContext()->setContextProperty("copyrightRangeDate", COPYRIGHT_RANGE_DATE);
 	mEngine->rootContext()->setContextProperty("Colors", mColorListModel->getQmlData());
 	mEngine->rootContext()->setContextProperty("Images", mImageListModel->getQmlData());
 	
@@ -608,6 +608,7 @@ void App::registerTypes () {
 	
 	
 	registerType<ColorProxyModel>("ColorProxyModel");
+	registerType<ImageColorsProxyModel>("ImageColorsProxyModel");
 	registerType<ImageProxyModel>("ImageProxyModel");
 	registerType<TimelineProxyModel>("TimelineProxyModel");
 	registerType<ParticipantProxyModel>("ParticipantProxyModel");
@@ -636,9 +637,12 @@ void App::registerTypes () {
 	registerUncreatableType<HistoryModel>("HistoryModel");
 	registerUncreatableType<LdapModel>("LdapModel");
 	registerUncreatableType<SearchResultModel>("SearchResultModel");
-	registerUncreatableType<SipAddressObserver>("SipAddressObserver");
+	registerUncreatableType<SipAddressObserver>("SipAddressObserver");	
 	registerUncreatableType<VcardModel>("VcardModel");
 	registerUncreatableType<TimelineModel>("TimelineModel");
+	registerUncreatableType<TunnelModel>("TunnelModel");
+	registerUncreatableType<TunnelConfigModel>("TunnelConfigModel");
+	registerUncreatableType<TunnelConfigProxyModel>("TunnelConfigProxyModel");
 	registerUncreatableType<ParticipantModel>("ParticipantModel");
 	registerUncreatableType<ParticipantListModel>("ParticipantListModel");
 	registerUncreatableType<ParticipantDeviceModel>("ParticipantDeviceModel");
@@ -738,8 +742,6 @@ void App::setTrayIcon () {
 	menu->addAction(restoreAction);
 	menu->addSeparator();
 	menu->addAction(quitAction);
-	
-	
 	
 	systemTrayIcon->setContextMenu(menu);
 	systemTrayIcon->setIcon(QIcon(Constants::WindowIconPath));
@@ -938,7 +940,7 @@ void App::openAppAfterInit (bool mustBeIconified) {
 	
 	// Display Assistant if it does not exist proxy config.
 	if (coreManager->getCore()->getAccountList().empty())
-		QMetaObject::invokeMethod(mainWindow, "setView", Q_ARG(QVariant, Constants::AssistantViewName), Q_ARG(QVariant, QString("")));
+		QMetaObject::invokeMethod(mainWindow, "setView", Q_ARG(QVariant, Constants::AssistantViewName), Q_ARG(QVariant, QString("")), Q_ARG(QVariant, QString("")));
 	
 #ifdef ENABLE_UPDATE_CHECK
 	QTimer *timer = new QTimer(mEngine);
@@ -947,7 +949,7 @@ void App::openAppAfterInit (bool mustBeIconified) {
 	QObject::connect(timer, &QTimer::timeout, this, &App::checkForUpdate);
 	timer->start();
 	
-	checkForUpdate();
+	checkForUpdates();
 #endif // ifdef ENABLE_UPDATE_CHECK
 	
 	if(setFetchConfig(mParser))
@@ -996,8 +998,12 @@ QString App::getStrippedApplicationVersion(){// x.y.z but if 'z-*' then x.y.z-1
 	}
 	return currentVersion;
 }
-void App::checkForUpdate () {
-	CoreManager::getInstance()->getCore()->checkForUpdate(
-				Utils::appStringToCoreString(getStrippedApplicationVersion())
-				);
+void App::checkForUpdate() {
+	checkForUpdates(false);
+}
+void App::checkForUpdates(bool force) {
+	if(force || CoreManager::getInstance()->getSettingsModel()->isCheckForUpdateEnabled())
+		CoreManager::getInstance()->getCore()->checkForUpdate(
+					Utils::appStringToCoreString(getStrippedApplicationVersion())
+					);
 }

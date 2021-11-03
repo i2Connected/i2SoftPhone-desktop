@@ -55,6 +55,12 @@ list(APPEND CMAKE_MODULE_PATH "${LINPHONE_OUTPUT_DIR}/cmake")
 set(APP_LIBRARY app-library)
 set(APP_PLUGIN app-plugin)
 include(application_info.cmake)
+string(TIMESTAMP CURRENT_YEAR "%Y")
+if( "${CURRENT_YEAR}" STREQUAL "${APPLICATION_START_LICENCE}")
+	set(COPYRIGHT_RANGE_DATE "${APPLICATION_START_LICENCE}")
+else()
+	set(COPYRIGHT_RANGE_DATE "${APPLICATION_START_LICENCE}-${CURRENT_YEAR}")
+endif()
 
 if(WIN32)
     set(EXECUTABLE_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}")
@@ -158,6 +164,7 @@ set(SOURCES
     src/components/other/colors/ColorModel.cpp
     src/components/other/colors/ColorListModel.cpp
     src/components/other/colors/ColorProxyModel.cpp
+    src/components/other/colors/ImageColorsProxyModel.cpp
     src/components/other/images/ImageModel.cpp
     src/components/other/images/ImageListModel.cpp
     src/components/other/images/ImageProxyModel.cpp
@@ -189,6 +196,10 @@ set(SOURCES
     src/components/timeline/TimelineModel.cpp
     src/components/timeline/TimelineListModel.cpp
     src/components/timeline/TimelineProxyModel.cpp
+    src/components/tunnel/TunnelModel.cpp
+    src/components/tunnel/TunnelConfigModel.cpp
+    src/components/tunnel/TunnelConfigListModel.cpp    
+    src/components/tunnel/TunnelConfigProxyModel.cpp
     src/components/url-handlers/UrlHandlers.cpp
     src/utils/Constants.cpp
     src/utils/LinphoneEnums.cpp
@@ -259,6 +270,7 @@ set(HEADERS
     src/components/other/colors/ColorModel.hpp
     src/components/other/colors/ColorListModel.hpp
     src/components/other/colors/ColorProxyModel.hpp
+    src/components/other/colors/ImageColorsProxyModel.hpp
     src/components/other/images/ImageModel.hpp
     src/components/other/images/ImageListModel.hpp
     src/components/other/images/ImageProxyModel.hpp
@@ -291,6 +303,10 @@ set(HEADERS
     src/components/timeline/TimelineModel.hpp
     src/components/timeline/TimelineListModel.hpp
     src/components/timeline/TimelineProxyModel.hpp
+    src/components/tunnel/TunnelModel.hpp
+    src/components/tunnel/TunnelConfigModel.hpp
+    src/components/tunnel/TunnelConfigListModel.hpp
+    src/components/tunnel/TunnelConfigProxyModel.hpp
     src/components/url-handlers/UrlHandlers.hpp
     src/utils/Constants.hpp
     src/utils/LinphoneEnums.hpp
@@ -457,8 +473,6 @@ list(APPEND SOURCES ${TS_FILES})
 
 # set application details
 if(WIN32)
-	string(TIMESTAMP CURRENT_YEAR "%Y")
-	set(COPYRIGTH_RANGE_DATE "2010-${CURRENT_YEAR}")
 	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_builder/linphone_package/windows/appDetailsWindows.rc.in" "${CMAKE_CURRENT_BINARY_DIR}/appDetailsWindows.rc")
 	set(RC_FILE ${CMAKE_CURRENT_BINARY_DIR}/appDetailsWindows.rc)
 endif()

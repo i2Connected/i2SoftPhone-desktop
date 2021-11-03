@@ -57,6 +57,7 @@ public:
 	Q_INVOKABLE static QString toTimeString(QDateTime date);
 	Q_INVOKABLE static QString toDateString(QDateTime date);
 	Q_INVOKABLE static QString getDisplayName(const QString& address);
+	Q_INVOKABLE static QString toString(const LinphoneEnums::TunnelMode& mode);
 //----------------------------------------------------------------------------------
 	
 	static inline QString coreStringToAppString (const std::string &str) {
@@ -125,6 +126,7 @@ public:
 	static QString getCountryName(const QLocale::Country& country);
 	static void copyDir(QString from, QString to);// Copy a folder recursively without erasing old file
 	static QString getDisplayName(const std::shared_ptr<const linphone::Address>& address);	// Get the displayname from addres in this order : Friends, Contact, Display address, Username address
+	static std::shared_ptr<linphone::Config> getConfigIfExists (const QString& configPath);
 };
 
 #endif // UTILS_H_

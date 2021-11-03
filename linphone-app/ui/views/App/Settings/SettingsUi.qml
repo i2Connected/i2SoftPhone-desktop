@@ -65,8 +65,9 @@ TabContainer {
 						label: qsTr('fontsTextChange')
 						RowLayout{
 							ActionButton {
-								icon: 'options'
-								iconSize: 25
+								isCustom: true
+								backgroundRadius: 90
+								colorSet: SettingsUiStyle.options
 								onClicked: fontDialog.visible = true
 								Layout.preferredWidth: 25
 								FontDialog {
@@ -106,7 +107,8 @@ TabContainer {
 			title: qsTr('pathsTitle')
 			visible: SettingsModel.videoSupported ||
 					 SettingsModel.callRecorderEnabled ||
-					 SettingsModel.chatEnabled ||
+					 SettingsModel.standardChatEnabled ||
+					 SettingsModel.secureChatEnabled ||
 					 SettingsModel.developerSettingsEnabled
 			width: parent.width
 			
@@ -141,7 +143,7 @@ TabContainer {
 			}
 			
 			FormLine {
-				visible: SettingsModel.chatEnabled || SettingsModel.developerSettingsEnabled
+				visible: SettingsModel.standardChatEnabled || SettingsModel.secureChatEnabled || SettingsModel.developerSettingsEnabled
 				
 				FormGroup {
 					label: qsTr('downloadLabel')
@@ -200,6 +202,46 @@ TabContainer {
 						checked: App.autoStart
 						
 						onClicked: App.autoStart = !checked
+					}
+				}
+			}
+			FormLine {
+				FormGroup {
+					//: 'Enable Mipmap'
+					label: qsTr('mipmapLabel')
+					
+					Switch {
+						checked: SettingsModel.mipmapEnabled
+						
+						onClicked: SettingsModel.mipmapEnabled = !checked
+						TooltipArea{
+						//: 'This property holds whether the image uses mipmap filtering when scaled or transformed.' : first line of a tooltip about Mipmap mode.
+							text: qsTr('mipmapTooltip1')+'\n'
+						//: 'Mipmap filtering gives better visual quality when scaling down compared to smooth, but it may come at a performance cost (both when initializing the image and during rendering).' : Second line of a tooltip about Mipmap mode.
+								+qsTr('mipmapTooltip2')
+						}
+					}
+				}
+			}
+			FormLine {
+				FormGroup {
+					//: 'Check for updates' : Label switch for enabling check for updates
+					label: qsTr('checkForUpdateLabel')
+					maxWidth: 150
+					width: 150
+					Switch {
+						checked: SettingsModel.checkForUpdateEnabled
+						
+						onClicked: SettingsModel.checkForUpdateEnabled = !checked
+					}
+				}
+				FormGroup {
+					maxWidth: parent.width - 200
+					width: parent.width - 200
+					TextField {
+						text: SettingsModel.versionCheckUrl
+						
+						onEditingFinished: SettingsModel.versionCheckUrl = text
 					}
 				}
 			}

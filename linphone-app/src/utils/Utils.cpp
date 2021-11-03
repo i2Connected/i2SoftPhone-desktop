@@ -30,6 +30,7 @@
 #include "components/contacts/ContactsListModel.hpp"
 #include "components/contact/ContactModel.hpp"
 #include "components/contact/VcardModel.hpp"
+#include "app/paths/Paths.hpp"
 
 // =============================================================================
 
@@ -95,6 +96,22 @@ QString Utils::toDateString(QDateTime date){
 
 QString Utils::getDisplayName(const QString& address){
 	return getDisplayName(interpretUrl(address));
+}
+
+QString Utils::toString(const LinphoneEnums::TunnelMode& mode){
+	switch(mode){
+	case LinphoneEnums::TunnelMode::TunnelModeEnable :
+		//: 'Enable' : One word for button action to enable tunnel mode.
+		return QObject::tr("LinphoneEnums_TunnelModeEnable");
+	case LinphoneEnums::TunnelMode::TunnelModeDisable :
+		//: 'Disable' : One word for button action to disable tunnel mode.
+		return QObject::tr("LinphoneEnums_TunnelModeDisable");
+	case LinphoneEnums::TunnelMode::TunnelModeAuto :
+		//: 'Auto' : One word for button action to set the auto tunnel mode.
+		return QObject::tr("LinphoneEnums_TunnelModeAuto");
+	default:
+		return "";
+	}
 }
 
 QImage Utils::getImage(const QString &pUri) {
@@ -489,4 +506,12 @@ QString Utils::getDisplayName(const std::shared_ptr<const linphone::Address>& ad
 		}
 	}
 	return displayName;
+}
+
+std::shared_ptr<linphone::Config> Utils::getConfigIfExists (const QString &configPath) {
+	std::string factoryPath(Paths::getFactoryConfigFilePath());
+	if (!Paths::filePathExists(factoryPath))
+		factoryPath.clear();
+	
+	return linphone::Config::newWithFactory(configPath.toStdString(), factoryPath);
 }
