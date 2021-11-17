@@ -110,7 +110,7 @@
     </message>
     <message>
         <source>checkForUpdates</source>
-        <translation type="unfinished">Frissítések keresése</translation>
+        <translation>Frissítések keresése</translation>
     </message>
 </context>
 <context>
@@ -480,7 +480,7 @@ A kiszolgáló URL-je nincs konfigurálva.</translation>
     <message>
         <source>forwardDialogTitle</source>
         <extracomment>&apos;Choose where to forward the message&apos; : Dialog title for choosing where to forward the current message.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Üzenettovábbítás helye kijelölése</translation>
     </message>
 </context>
 <context>
@@ -544,12 +544,12 @@ A kiszolgáló URL-je nincs konfigurálva.</translation>
     <message>
         <source>menuForward</source>
         <extracomment>&apos;Forward&apos; : Forward a message from menu</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Továbbítás</translation>
     </message>
     <message>
         <source>menuReply</source>
         <extracomment>&apos;Reply&apos; : Reply to a message from menu</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Válasz</translation>
     </message>
 </context>
 <context>
@@ -584,7 +584,7 @@ A kiszolgáló URL-je nincs konfigurálva.</translation>
     <message>
         <source>headerReply</source>
         <extracomment>&apos;Reply&apos; : Header on a message that contains a reply.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Válasz</translation>
     </message>
 </context>
 <context>
@@ -592,7 +592,7 @@ A kiszolgáló URL-je nincs konfigurálva.</translation>
     <message>
         <source>titleReply</source>
         <extracomment>&apos;Reply to %1&apos; : Title for a reply preview to know who said what.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Válaszul erre: %1</translation>
     </message>
 </context>
 <context>
@@ -1397,7 +1397,7 @@ Kattintson ide: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>checkForUpdates</source>
         <extracomment>&apos;Check for updates&apos; : Item menu for checking updates</extracomment>
-        <translation type="unfinished">Frissítések keresése</translation>
+        <translation>Frissítések keresése</translation>
     </message>
 </context>
 <context>
@@ -2559,17 +2559,17 @@ Kattintson ide: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>mipmapLabel</source>
         <extracomment>&apos;Enable Mipmap&apos;</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Mipmap engedélyezése</translation>
     </message>
     <message>
         <source>mipmapTooltip1</source>
         <extracomment>&apos;This property holds whether the image uses mipmap filtering when scaled or transformed.&apos; : first line of a tooltip about Mipmap mode.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Ez a tulajdonság megmarad, függetlenül attól, hogy a kép mipmap-szűrést használ-e méretezéskor vagy átalakításkor.</translation>
     </message>
     <message>
         <source>mipmapTooltip2</source>
         <extracomment>&apos;Mipmap filtering gives better visual quality when scaling down compared to smooth, but it may come at a performance cost (both when initializing the image and during rendering).&apos; : Second line of a tooltip about Mipmap mode.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>A mipmap-szűrés jobb vizuális minőséget biztosít kicsinyítéskor, mint a sima, de teljesítményköltséggel járhat (mind a kép inicializálásakor, mind a renderelés során).</translation>
     </message>
 </context>
 <context>
@@ -2678,22 +2678,22 @@ Kattintson ide: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <name>SipAddressDialog</name>
     <message>
         <source>cancel</source>
-        <translation type="unfinished">Mégse</translation>
+        <translation>Mégse</translation>
     </message>
     <message>
         <source>contactsSearchPlaceholder</source>
         <extracomment>&apos;Search in contacts&apos; : Placeholder for a search a contact</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Keresés a névjegyek között</translation>
     </message>
     <message>
         <source>contactsSearchTooltip</source>
         <extracomment>&apos;Search an address in your contacts or use a custom one.&apos; : tooltip</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Keressen egy címet a névjegyei között, vagy használjon egyéni címet.</translation>
     </message>
     <message>
         <source>timelineSelectionHeader</source>
         <extracomment>&apos;Conversations&apos; : header for a selection in conversation list</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Beszélgetések</translation>
     </message>
 </context>
 <context>

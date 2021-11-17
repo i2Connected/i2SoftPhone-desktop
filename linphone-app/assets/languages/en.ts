@@ -94,7 +94,7 @@
     </message>
     <message>
         <source>commandLineOptionFetchConfig</source>
-        <translation>Specify the %1 configuration file to be fetch. It will be merged with the current configuration.</translation>
+        <translation>Specify the %1 configuration file to be fetched. It will be merged with the current configuration.</translation>
     </message>
     <message>
         <source>commandLineOptionFetchConfigArg</source>
@@ -1406,7 +1406,7 @@ Click here: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>checkForUpdates</source>
         <extracomment>&apos;Check for updates&apos; : Item menu for checking updates</extracomment>
-        <translation type="unfinished">Check for updates</translation>
+        <translation>Check for updates</translation>
     </message>
 </context>
 <context>
@@ -2000,7 +2000,7 @@ Click here: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     </message>
     <message>
         <source>useSalTooltip</source>
-        <translation>The DNS resolution is done by Linphone using SAL. It will pass an IP to LDAP. By doing that, the TLS negociation could not check the hostname. You may deactivate the verifications if wanted to force the connection.</translation>
+        <translation>The DNS resolution is done by Linphone using SAL. It will pass an IP to LDAP. By doing that, the TLS negotiation cannot check the hostname. You may deactivate the verifications if wanted to force the connection.</translation>
     </message>
     <message>
         <source>verifyTLSLabel</source>
