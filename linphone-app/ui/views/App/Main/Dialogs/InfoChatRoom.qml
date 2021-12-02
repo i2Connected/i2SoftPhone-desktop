@@ -90,7 +90,7 @@ DialogPlus {
 					secure: chatRoomModel.haveEncryption,
 					visible: true,
 					secureIconVisibleHandler : function(entry) {
-									return chatRoomModel.haveEncryption && UtilsCpp.hasCapability(entry.sipAddress,  LinphoneEnums.FriendCapabilityLimeX3Dh);
+									return entry.sipAddress && chatRoomModel && chatRoomModel.haveEncryption && UtilsCpp.hasCapability(entry.sipAddress,  LinphoneEnums.FriendCapabilityLimeX3Dh);
  								},
 					handler: function (entry) {
 						selectedParticipants.addAddress(entry.sipAddress)
@@ -98,7 +98,7 @@ DialogPlus {
 				}]
 			
 			onEntryClicked: {
-				selectedParticipants.addAddress(entry)
+				selectedParticipants.addAddress(entry.sipAddress)
 			}
 		}
 		
