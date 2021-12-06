@@ -58,7 +58,7 @@ TabContainer {
         }
       }
     }
-
+	
     // -------------------------------------------------------------------------
     // Proxy accounts.
     // -------------------------------------------------------------------------
@@ -83,8 +83,9 @@ TabContainer {
 
             FormTableEntry {
               ActionButton {
-                icon: 'edit'
-                iconSize: SettingsWindowStyle.sipAccounts.iconSize
+                isCustom: true
+                backgroundRadius: 4
+                colorSet: SettingsWindowStyle.buttons.editProxy
 
                 onClicked: Logic.editAccount(modelData)
               }
@@ -92,8 +93,9 @@ TabContainer {
 
             FormTableEntry {
               ActionButton {
-                icon: 'delete'
-                iconSize: SettingsWindowStyle.sipAccounts.iconSize
+                isCustom: true
+                backgroundRadius: 4
+                colorSet: SettingsWindowStyle.buttons.deleteProxy
 
                 onClicked: Logic.deleteAccount(modelData)
               }
@@ -129,10 +131,35 @@ TabContainer {
 
     Form {
       title: qsTr('assistantTitle')
-      visible: SettingsModel.developerSettingsEnabled
+      
       width: parent.width
+	  
+	  FormLine {
+        FormGroup {
+          label: 'Registration URL'
+
+          TextField {
+            text: SettingsModel.assistantRegistrationUrl
+
+            onEditingFinished: SettingsModel.assistantRegistrationUrl = text
+          }
+        }
+      }
+
+	  FormLine {
+        FormGroup {
+          label: 'Login URL'
+
+          TextField {
+            text: SettingsModel.assistantLoginUrl
+
+            onEditingFinished: SettingsModel.assistantLoginUrl = text
+          }
+        }
+      }
 
       FormLine {
+		  visible: SettingsModel.developerSettingsEnabled
         FormGroup {
           label: qsTr('createAppSipAccountEnabledLabel')
 
@@ -155,6 +182,7 @@ TabContainer {
       }
 
       FormLine {
+		  visible: SettingsModel.developerSettingsEnabled
         FormGroup {
           label: qsTr('useOtherSipAccountEnabledLabel')
 
@@ -177,6 +205,7 @@ TabContainer {
       }
 
       FormLine {
+		  visible: SettingsModel.developerSettingsEnabled
         FormGroup {
           label: qsTr('assistantSupportsPhoneNumbersLabel')
 

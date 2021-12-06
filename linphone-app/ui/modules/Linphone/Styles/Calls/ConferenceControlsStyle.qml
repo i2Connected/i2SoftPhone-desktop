@@ -1,13 +1,14 @@
 pragma Singleton
 import QtQml 2.2
 
-import Colors 1.0
+import ColorsList 1.0
 
 // =============================================================================
 
 QtObject {
-  property color color: Colors.e
-  property int height: 60
-  property int leftMargin: 12
-  property int rightMargin: 12
+	property string sectionName: 'ConferenceControls'
+	property color color: ColorsList.add(sectionName, 'e').color
+	property int height: 60
+	property int leftMargin: 12
+	property int rightMargin: 12
 }

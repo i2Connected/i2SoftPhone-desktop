@@ -26,6 +26,7 @@
 #include <QString>
 #include <QVariantMap>
 #include <QVariantList>
+#include <QVector>
 
 // =============================================================================
 
@@ -37,6 +38,8 @@ class AccountSettingsModel : public QObject {
   Q_PROPERTY(QString sipAddress READ getUsedSipAddressAsStringUriOnly NOTIFY accountSettingsUpdated);
   Q_PROPERTY(QString fullSipAddress READ getUsedSipAddressAsString);
   Q_PROPERTY(RegistrationState registrationState READ getRegistrationState NOTIFY accountSettingsUpdated);
+  
+  Q_PROPERTY(QString conferenceURI READ getConferenceURI NOTIFY accountSettingsUpdated)
 
   // Default info.
   Q_PROPERTY(QString primaryDisplayName READ getPrimaryDisplayName WRITE setPrimaryDisplayName NOTIFY accountSettingsUpdated);
@@ -65,14 +68,16 @@ public:
   bool addOrUpdateProxyConfig (const std::shared_ptr<linphone::ProxyConfig> &proxyConfig);
 
   Q_INVOKABLE QVariantMap getProxyConfigDescription (const std::shared_ptr<linphone::ProxyConfig> &proxyConfig);
+  QString getConferenceURI() const;
 
   Q_INVOKABLE void setDefaultProxyConfig (const std::shared_ptr<linphone::ProxyConfig> &proxyConfig = nullptr);
   Q_INVOKABLE void setDefaultProxyConfigFromSipAddress (const QString &sipAddress);
 
   Q_INVOKABLE bool addOrUpdateProxyConfig (const std::shared_ptr<linphone::ProxyConfig> &proxyConfig, const QVariantMap &data);
+  Q_INVOKABLE bool addOrUpdateProxyConfig (const QVariantMap &data);// Create default proxy config and apply data
   Q_INVOKABLE void removeProxyConfig (const std::shared_ptr<linphone::ProxyConfig> &proxyConfig);
 
-  Q_INVOKABLE std::shared_ptr<linphone::ProxyConfig> createProxyConfig ();
+  Q_INVOKABLE std::shared_ptr<linphone::ProxyConfig> createProxyConfig (const QString& assistantFile);
 
   Q_INVOKABLE void addAuthInfo (
     const std::shared_ptr<linphone::AuthInfo> &authInfo,
@@ -84,7 +89,9 @@ public:
 
 signals:
   void accountSettingsUpdated ();
+  void defaultProxyChanged();
   void publishPresenceChanged();
+  void defaultRegistrationChanged();
 
 private:
   QString getUsername () const;
@@ -112,6 +119,8 @@ private:
     const std::shared_ptr<linphone::ProxyConfig> &proxyConfig,
     linphone::RegistrationState state
   );
+  
+  QVector<std::shared_ptr<linphone::ProxyConfig> > mRemovingProxies;
 };
 
 Q_DECLARE_METATYPE(std::shared_ptr<linphone::ProxyConfig>);

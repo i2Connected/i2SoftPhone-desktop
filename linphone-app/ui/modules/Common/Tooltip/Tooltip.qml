@@ -1,7 +1,9 @@
 import QtQuick 2.7 as Core
 import QtQuick.Controls 2.2 as Core
+import QtGraphicalEffects 1.12
 
 import Common 1.0
+import Linphone 1.0
 import Common.Styles 1.0
 import Utils 1.0
 
@@ -31,16 +33,16 @@ Core.ToolTip {
   }
 
   function _getRelativeXArrowCenter () {
-    return tooltip.parent.width / 2 - icon.width / 2
+    return (tooltip.parent ? tooltip.parent.width / 2 - icon.width / 2 : 0)
   }
 
   function _getRelativeYArrowCenter () {
-    return tooltip.parent.height / 2 - icon.height / 2
+    return (tooltip.parent ? tooltip.parent.height / 2 - icon.height / 2 : 0)
   }
 
   function _setArrowEdge () {
     var a = container.mapToItem(null, 0, 0)
-    var b = tooltip.parent.mapToItem(null, 0, 0)
+    var b = (tooltip.parent ?tooltip.parent.mapToItem(null, 0, 0) : {x:0,y:0})
 
     if (a.x + container.width < b.x) {
       _edge = 'left'
@@ -59,7 +61,7 @@ Core.ToolTip {
   // Called when new image is loaded. (When the is edge is updated.)
   function _setArrowPosition () {
     var a = container.mapToItem(null, 0, 0)
-    var b = tooltip.parent.mapToItem(null, 0, 0)
+    var b = (tooltip.parent ?tooltip.parent.mapToItem(null, 0, 0) : {x:0,y:0})
 
     if (_edge === 'left') {
       icon.x = container.width - TooltipStyle.margins - _getArrowWidthMargin()
@@ -99,14 +101,20 @@ Core.ToolTip {
     // and `implicitWidth`.
     Core.Image {
       id: icon
-      mipmap: Qt.platform.os === 'osx'
+      mipmap: SettingsModel.mipmapEnabled
       fillMode: Core.Image.PreserveAspectFit
       height: TooltipStyle.arrowSize
       source: _edge
-        ? Utils.resolveImageUri('tooltip_arrow_' + _edge)
+        ? Utils.resolveImageUri('tooltip_arrow_' + _edge+'_custom')
         : ''
       sourceSize.height: height
       sourceSize.width: width
+      layer {
+			enabled: true
+			effect: ColorOverlay {
+				color: TooltipStyle.backgroundColor
+			}
+		}
       visible: tooltip.visible && _edge
       width: TooltipStyle.arrowSize
       z: Constants.zMax

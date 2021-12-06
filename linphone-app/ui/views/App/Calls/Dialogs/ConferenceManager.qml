@@ -1,5 +1,6 @@
 import QtQuick 2.7
 import QtQuick.Layouts 1.3
+import QtQml 2.12
 
 import Common 1.0
 import Linphone 1.0
@@ -13,6 +14,9 @@ DialogPlus {
 
   readonly property int maxParticipants: 20
   readonly property int minParticipants: 1
+  
+  property ChatRoomModel chatRoomModel	// Used to initialize participants
+  property bool autoCall : false
 
   buttons: [
     TextButtonA {
@@ -31,12 +35,26 @@ DialogPlus {
     }
   ]
 
-  centeredButtons: true
+  buttonsAlignment: Qt.AlignCenter
   descriptionText: qsTr('conferenceManagerDescription')
 
-  height: ConferenceManagerStyle.height
+  height: ConferenceManagerStyle.height + 30
   width: ConferenceManagerStyle.width
+  
+  Timer{
+	id:delayedExit
+	onTriggered : exit(1)
+	interval:1
+  }
 
+	Component.onCompleted: if(chatRoomModel){
+		conferenceHelperModel.toAdd.addParticipants(chatRoomModel)
+		if(autoCall) {
+			conferenceHelperModel.toAdd.update()
+			visible = false
+			delayedExit.start()
+		}
+	}
   // ---------------------------------------------------------------------------
 
   RowLayout {
@@ -60,7 +78,8 @@ DialogPlus {
 
           Layout.fillWidth: true
 
-          icon: 'search'
+          icon: 'search_custom'
+          overwriteColor: ConferenceManagerStyle.searchField.color
 
           onTextChanged: conferenceHelperModel.setFilter(text)
         }
@@ -74,11 +93,20 @@ DialogPlus {
           SipAddressesView {
             anchors.fill: parent
 
+			function transfer(sipAddress){
+				conferenceHelperModel.toAdd.addToConference(sipAddress)
+			}
             actions: [{
-              icon: 'transfer',
+              colorSet: ConferenceManagerStyle.transfer,
+              secure:0,
+              visible: true,
               handler: function (entry) {
-                conferenceHelperModel.toAdd.addToConference(entry.sipAddress)
+				transfer(entry.sipAddress)  
+              },
+              handerSipAddress: function(sipAddress){
+				transfer(sipAddress)
               }
+              
             }]
 
             genSipAddress: filter.text
@@ -87,7 +115,7 @@ DialogPlus {
               id: conferenceHelperModel
             }
 
-            onEntryClicked: actions[0].handler(entry)
+            onEntryClicked: actions[0].handerSipAddress(entry.sipAddress)
           }
         }
       }
@@ -120,16 +148,24 @@ DialogPlus {
 
         anchors.fill: parent
 
+		function cancel(sipAddress){
+			model.removeFromConference(sipAddress)
+		}
         actions: [{
-          icon: 'cancel',
+          colorSet: ConferenceManagerStyle.cancel,
+          visible:true,
+          secure:0,
           handler: function (entry) {
-            model.removeFromConference(entry.sipAddress)
+			  cancel(entry.sipAddress)
+          },
+          handlerSipAddress: function(sipAddress){
+			cancel(sipAddress)
           }
         }]
 
         model: conferenceHelperModel.toAdd
 
-        onEntryClicked: actions[0].handler(entry)
+        onEntryClicked: actions[0].handlerSipAddress(entry)
       }
     }
   }

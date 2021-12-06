@@ -22,6 +22,7 @@
 // =============================================================================
 
 .import Linphone 1.0 as Linphone
+.import UtilsCpp 1.0 as UtilsCpp
 
 .import 'qrc:/ui/scripts/LinphoneUtils/linphone-utils.js' as LinphoneUtils
 .import 'qrc:/ui/scripts/Utils/utils.js' as Utils
@@ -33,7 +34,7 @@ function removeAllEntries () {
     descriptionText: qsTr('removeAllEntriesDescription'),
   }, function (status) {
     if (status) {
-      chatProxyModel.removeAllEntries()
+      chatRoomProxyModel.removeAllEntries()
     }
   })
 }
@@ -43,25 +44,25 @@ function getAvatar () {
   return contact ? contact.vcard.avatar : ''
 }
 
-function getEditIcon () {
-  return conversation._sipAddressObserver.contact ? 'contact_edit' : 'contact_add'
-}
-
 function getEditTooltipText() {
     return conversation._sipAddressObserver.contact ? qsTr('tooltipContactEdit') : qsTr('tooltipContactAdd')
 }
 
-function getUsername () {
-  return LinphoneUtils.getContactUsername(conversation._sipAddressObserver)
+function updateChatFilter (button) {
+  var ChatRoomModel = Linphone.ChatRoomModel
+  if (button === 0) {
+    chatRoomProxyModel.setEntryTypeFilter(ChatRoomModel.GenericEntry)
+  } else if (button === 1) {
+    chatRoomProxyModel.setEntryTypeFilter(ChatRoomModel.CallEntry)
+  } else {
+    chatRoomProxyModel.setEntryTypeFilter(ChatRoomModel.MessageEntry)
+  }
 }
 
-function updateChatFilter (button) {
-  var ChatModel = Linphone.ChatModel
-  if (button === 0) {
-    chatProxyModel.setEntryTypeFilter(ChatModel.GenericEntry)
-  } else if (button === 1) {
-    chatProxyModel.setEntryTypeFilter(ChatModel.CallEntry)
-  } else {
-    chatProxyModel.setEntryTypeFilter(ChatModel.MessageEntry)
-  }
+function openConferenceManager (params) {
+  var App = Linphone.App
+  var callsWindow = App.getCallsWindow()
+
+  App.smartShowWindow(callsWindow)
+  callsWindow.openConferenceManager(params)
 }

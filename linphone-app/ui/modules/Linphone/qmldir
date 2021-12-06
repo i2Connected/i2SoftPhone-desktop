@@ -15,14 +15,22 @@ Calls               1.0 Calls/Calls.qml
 CallStatistics      1.0 Calls/CallStatistics.qml
 
 Chat                1.0 Chat/Chat.qml
-
-History             1.0 History/History.qml
+ChatAudioMessage    1.0 Chat/ChatAudioMessage.qml
+ChatAudioPreview    1.0 Chat/ChatAudioPreview.qml
+ChatMessagePreview  1.0 Chat/ChatMessagePreview.qml
+ChatForwardMessage  1.0 Chat/ChatForwardMessage.qml
+ChatReplyMessage    1.0 Chat/ChatReplyMessage.qml
+ChatReplyPreview    1.0 Chat/ChatReplyPreview.qml
 
 CodecsViewer        1.0 Codecs/CodecsViewer.qml
 
 Avatar              1.0 Contact/Avatar.qml
 Contact             1.0 Contact/Contact.qml
 ContactDescription  1.0 Contact/ContactDescription.qml
+
+SipAddressDialog    1.0 Dialog/SipAddressDialog.qml
+
+History             1.0 History/History.qml
 
 SipAddressesMenu    1.0 Menus/SipAddressesMenu.qml
 
@@ -37,3 +45,5 @@ TelKeypad           1.0 TelKeypad/TelKeypad.qml
 Timeline            1.0 Timeline/Timeline.qml
 
 SipAddressesView    1.0 View/SipAddressesView.qml
+
+ParticipantsView    1.0 View/ParticipantsView.qml

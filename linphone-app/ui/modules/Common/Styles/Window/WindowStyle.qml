@@ -1,12 +1,13 @@
 pragma Singleton
 import QtQml 2.2
 
-import Colors 1.0
+import ColorsList 1.0
 
 // =============================================================================
 
 QtObject {
-  property QtObject transientWindow: QtObject {
-    property color color: Colors.l80
-  }
+	property string sectionName: 'Window'
+	property QtObject transientWindow: QtObject {
+		property color color: ColorsList.add(sectionName+'_transient', 'l80').color
+	}
 }

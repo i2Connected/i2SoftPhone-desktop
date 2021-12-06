@@ -1,40 +1,41 @@
 pragma Singleton
 import QtQml 2.2
 
-import Colors 1.0
 import Units 1.0
+import ColorsList 1.0
 
 // =============================================================================
 
 QtObject {
-  property int spacing: 1
-  property color backgroundColor: Colors.n
-
-  property QtObject entry: QtObject {
-    property int iconSize: 24
-    property int leftMargin: 20
-    property int rightMargin: 20
-    property int spacing: 18
-
-    property QtObject color: QtObject {
-      property color hovered: Colors.h
-      property color normal: Colors.g
-      property color pressed: Colors.i
-      property color selected: Colors.j
-    }
-
-    property QtObject indicator: QtObject {
-      property color color: Colors.i
-      property int width: 5
-    }
-
-    property QtObject text: QtObject {
-      property int pointSize: Units.dp * 11
-
-      property QtObject color: QtObject {
-        property color normal: Colors.q50
-        property color selected: Colors.q
-      }
-    }
-  }
+	property string sectionName: 'ApplicationMenu'
+	property int spacing: 1
+	property color backgroundColor: ColorsList.add(sectionName+'_bg', 'n').color
+	
+	property QtObject entry: QtObject {
+		property int iconSize: 24
+		property int leftMargin: 20
+		property int rightMargin: 20
+		property int spacing: 18
+		
+		property QtObject color: QtObject {
+			property color hovered: ColorsList.add(sectionName+'_entry_h', 'h').color
+			property color normal: ColorsList.add(sectionName+'_entry_n', 'g').color
+			property color pressed: ColorsList.add(sectionName+'_entry_p', 'i').color
+			property color selected: ColorsList.add(sectionName+'_entry_selected', 'j').color
+		}
+		
+		property QtObject indicator: QtObject {
+			property color color: ColorsList.add(sectionName+'_entry_indicator', 'i').color
+			property int width: 5
+		}
+		
+		property QtObject text: QtObject {
+			property int pointSize: Units.dp * 10
+			
+			property QtObject color: QtObject {
+				property color normal: ColorsList.add(sectionName+'_entry_text_n', 'q').color
+				property color selected: ColorsList.add(sectionName+'_entry_text_c', 'q').color
+			}
+		}
+	}
 }

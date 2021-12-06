@@ -24,6 +24,7 @@
 .import QtQuick 2.7 as QtQuick
 
 .import Linphone 1.0 as Linphone
+.import UtilsCpp 1.0 as UtilsCpp
 
 .import 'qrc:/ui/scripts/LinphoneUtils/linphone-utils.js' as LinphoneUtils
 
@@ -34,36 +35,17 @@ function initView () {
   chat.bindToEnd = true
 }
 
-function loadMoreEntries () {
-  if (chat.atYBeginning && !chat.tryToLoadMoreEntries) {
-    chat.tryToLoadMoreEntries = true
-    chat.positionViewAtBeginning()
-    container.proxyModel.loadMoreEntries()
-  }
-}
-
 function getComponentFromEntry (chatEntry) {
-  if (chatEntry.fileName) {
-    return 'FileMessage.qml'
-  }
 
-  if (chatEntry.type === Linphone.ChatModel.CallEntry) {
+  if (chatEntry.type === Linphone.ChatRoomModel.CallEntry) {
     return 'Event.qml'
+  }
+  
+  if (chatEntry.type === Linphone.ChatRoomModel.NoticeEntry) {
+    return 'Notice.qml'
   }
 
   return chatEntry.isOutgoing ? 'OutgoingMessage.qml' : 'IncomingMessage.qml'
-}
-
-function getIsComposingMessage () {
-  if (!container.proxyModel.isRemoteComposing || !Linphone.SettingsModel.chatEnabled) {
-    return ''
-  }
-
-  var sipAddressObserver = chat.sipAddressObserver
-  return qsTr('isComposing').replace(
-    '%1',
-    LinphoneUtils.getContactUsername(sipAddressObserver)
-  )
 }
 
 function handleFilesDropped (files) {
@@ -73,7 +55,6 @@ function handleFilesDropped (files) {
 
 function handleMoreEntriesLoaded (n) {
   chat.positionViewAtIndex(n - 1, QtQuick.ListView.Beginning)
-  chat.tryToLoadMoreEntries = false
 }
 
 function handleMovementEnded () {
@@ -93,5 +74,10 @@ function handleTextChanged (text) {
 function sendMessage (text) {
   textArea.text = ''
   chat.bindToEnd = true
-  container.proxyModel.sendMessage(text)
+  if(container.proxyModel)
+	container.proxyModel.sendMessage(text)
+  /*
+	else{// Create a chat room
+		CallsListModel.createChat()
+	}*/
 }

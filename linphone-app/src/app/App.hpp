@@ -36,19 +36,21 @@ namespace linphone {
   class Config;
 }
 
-class Colors;
+class ColorListModel;
 class DefaultTranslator;
+class ImageListModel;
 class Notifier;
 
+
 class App : public SingleApplication {
-  Q_OBJECT;
+  Q_OBJECT
 
-  Q_PROPERTY(QString configLocale READ getConfigLocale WRITE setConfigLocale NOTIFY configLocaleChanged);
-  Q_PROPERTY(QString locale READ getLocale CONSTANT);
-  Q_PROPERTY(QVariantList availableLocales READ getAvailableLocales CONSTANT);
-  Q_PROPERTY(QString qtVersion READ getQtVersion CONSTANT);
+  Q_PROPERTY(QString configLocale READ getConfigLocale WRITE setConfigLocale NOTIFY configLocaleChanged)
+  Q_PROPERTY(QString locale READ getLocale CONSTANT)
+  Q_PROPERTY(QVariantList availableLocales READ getAvailableLocales CONSTANT)
+  Q_PROPERTY(QString qtVersion READ getQtVersion CONSTANT)
 
-  Q_PROPERTY(bool autoStart READ getAutoStart WRITE setAutoStart NOTIFY autoStartChanged);
+  Q_PROPERTY(bool autoStart READ getAutoStart WRITE setAutoStart NOTIFY autoStartChanged)  
 
 public:
   App (int &argc, char *argv[]);
@@ -74,9 +76,16 @@ public:
     return mNotifier;
   }
 
-  Colors *getColors () const {
-    return mColors;
-  }
+  ColorListModel *getColorListModel () const {
+	return mColorListModel;
+	}
+	ImageListModel *getImageListModel () const {
+	return mImageListModel;
+	}
+	
+   //static ColorListModel *getColorListModel () const {
+    //return App::getInstance()-getColorListModel();
+  //}
 
   QSystemTrayIcon *getSystemTrayIcon () const {
     return mSystemTrayIcon;
@@ -104,7 +113,8 @@ public:
   Q_INVOKABLE QQuickWindow *getSettingsWindow () const;
 
   Q_INVOKABLE static void smartShowWindow (QQuickWindow *window);
-
+  Q_INVOKABLE static void checkForUpdates(bool force = false);
+  
 public slots:
   void stateChanged(Qt::ApplicationState);
 
@@ -114,7 +124,7 @@ signals:
   void autoStartChanged (bool enabled);
 
   void opened (bool status);
-
+  
 private:
   void createParser ();
 
@@ -174,7 +184,8 @@ private:
   QQuickWindow *mCallsWindow = nullptr;
   QQuickWindow *mSettingsWindow = nullptr;
 
-  Colors *mColors = nullptr;
+  ColorListModel * mColorListModel;
+  ImageListModel * mImageListModel;
 
   QSystemTrayIcon *mSystemTrayIcon = nullptr;
 

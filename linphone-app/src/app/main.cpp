@@ -23,15 +23,22 @@
 #ifdef QT_QML_DEBUG
 #include <QQmlDebuggingEnabler>
 #endif
+#include <QSurfaceFormat>
+
+#include "components/core/CoreManager.hpp"
 // =============================================================================
 
 int main (int argc, char *argv[]) {
+  QSurfaceFormat defaultFormat = QSurfaceFormat::defaultFormat();
+  defaultFormat.setVersion(2,1);	// SDK doesn't support recent version yet. Request 2.1 (it will request compatibility mode if not available)
+  QSurfaceFormat::setDefaultFormat(defaultFormat);
   AppController controller(argc, argv);
 #ifdef QT_QML_DEBUG
   QQmlDebuggingEnabler enabler;
 #endif
   //QLoggingCategory::setFilterRules("*.debug=true;qml=false");
   App *app = controller.getApp();
+  
   if (app->isSecondary())
   {
 	  qInfo() << QStringLiteral("Running secondary app success. Kill it now.");
@@ -45,5 +52,9 @@ int main (int argc, char *argv[]) {
     app->initContentApp();
     ret = app->exec();
   } while (ret == App::RestartCode);
+  auto core = CoreManager::getInstance()->getCore();
+  if(core && core->getGlobalState() == linphone::GlobalState::On)
+	core->stop();
+  
   return ret;
 }

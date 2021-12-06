@@ -20,27 +20,30 @@
 
 #include <QDir>
 #include <QtDebug>
+#include <QPluginLoader>
+#include <QJsonDocument>
 
 #include <cstdlib>
 #include <cmath>
 
+#include "app/App.hpp"
 #include "app/logger/Logger.hpp"
 #include "app/paths/Paths.hpp"
 #include "components/core/CoreManager.hpp"
+#include "components/tunnel/TunnelModel.hpp"
+#include "include/LinphoneApp/PluginNetworkHelper.hpp"
 #include "utils/Utils.hpp"
+#include "utils/Constants.hpp"
 #include "utils/MediastreamerUtils.hpp"
 #include "SettingsModel.hpp"
+
 
 // =============================================================================
 
 using namespace std;
 
-namespace {
-	constexpr char DefaultRlsUri[] = "sips:rls@sip.linphone.org";
-	constexpr char DefaultLogsEmail[] = "linphone-desktop@belledonne-communications.com";
-}
-
 const string SettingsModel::UiSection("ui");
+const string SettingsModel::ContactsSection("contacts_import");
 
 SettingsModel::SettingsModel (QObject *parent) : QObject(parent) {
 	CoreManager *coreManager = CoreManager::getInstance();
@@ -102,6 +105,7 @@ void SettingsModel::onSettingsTabChanged(int idx) {
 	case 4://ui
 		break;
 	case 5://advanced
+		accessAdvancedSettings();
 		break;
 	default:
 		break;
@@ -157,6 +161,33 @@ bool SettingsModel::getAssistantSupportsPhoneNumbers () const {
 void SettingsModel::setAssistantSupportsPhoneNumbers (bool status) {
 	mConfig->setInt(UiSection, "assistant_supports_phone_numbers", status);
 	emit assistantSupportsPhoneNumbersChanged(status);
+}
+
+QString SettingsModel::getAssistantRegistrationUrl () const {
+	return Utils::coreStringToAppString(mConfig->getString(UiSection, "assistant_registration_url", Constants::DefaultAssistantRegistrationUrl));
+}
+
+void SettingsModel::setAssistantRegistrationUrl (QString url) {
+	mConfig->setString(UiSection, "assistant_registration_url", Utils::appStringToCoreString(url));
+	emit assistantRegistrationUrlChanged(url);
+}
+
+QString SettingsModel::getAssistantLoginUrl () const {
+	return Utils::coreStringToAppString(mConfig->getString(UiSection, "assistant_login_url", Constants::DefaultAssistantLoginUrl));
+}
+
+void SettingsModel::setAssistantLoginUrl (QString url) {
+	mConfig->setString(UiSection, "assistant_login_url", Utils::appStringToCoreString(url));
+	emit assistantLoginUrlChanged(url);
+}
+
+QString SettingsModel::getAssistantLogoutUrl () const {
+	return Utils::coreStringToAppString(mConfig->getString(UiSection, "assistant_logout_url", Constants::DefaultAssistantLogoutUrl));
+}
+
+void SettingsModel::setAssistantLogoutUrl (QString url) {
+	mConfig->setString(UiSection, "assistant_logout_url", Utils::appStringToCoreString(url));
+	emit assistantLogoutUrlChanged(url);
 }
 
 // =============================================================================
@@ -220,6 +251,7 @@ float SettingsModel::getPlaybackGain() const {
 }
 
 void SettingsModel::setPlaybackGain(float gain) {
+	CoreManager::getInstance()->getCore()->setPlaybackGainDb(MediastreamerUtils::linearToDb(gain));
 	if (mSimpleCaptureGraph && mSimpleCaptureGraph->isRunning()) {
 		mSimpleCaptureGraph->setPlaybackGain(gain);
 	}
@@ -231,6 +263,7 @@ float SettingsModel::getCaptureGain() const {
 }
 
 void SettingsModel::setCaptureGain(float gain) {
+	CoreManager::getInstance()->getCore()->setMicGainDb(MediastreamerUtils::linearToDb(gain));
 	if (mSimpleCaptureGraph && mSimpleCaptureGraph->isRunning()) {
 		mSimpleCaptureGraph->setCaptureGain(gain);
 	}
@@ -598,15 +631,51 @@ void SettingsModel::setMuteMicrophoneEnabled (bool status) {
 
 // -----------------------------------------------------------------------------
 
-bool SettingsModel::getChatEnabled () const {
-	return !!mConfig->getInt(UiSection, "chat_enabled", 1);
+bool SettingsModel::getStandardChatEnabled () const {
+	return !!mConfig->getInt(UiSection, getEntryFullName(UiSection,"standard_chat_enabled"), 1);
 }
 
-void SettingsModel::setChatEnabled (bool status) {
-	mConfig->setInt(UiSection, "chat_enabled", status);
-	emit chatEnabledChanged(status);
+void SettingsModel::setStandardChatEnabled (bool status) {
+	if(!isReadOnly(UiSection, "standard_chat_enabled"))
+		mConfig->setInt(UiSection, "standard_chat_enabled", status);
+	emit standardChatEnabledChanged(getStandardChatEnabled ());
 }
 
+bool SettingsModel::getSecureChatEnabled () const {
+	return !!mConfig->getInt(UiSection, getEntryFullName(UiSection, "secure_chat_enabled"), 1);
+}
+
+void SettingsModel::setSecureChatEnabled (bool status) {
+	if(!isReadOnly(UiSection, "secure_chat_enabled"))
+		mConfig->setInt(UiSection, "secure_chat_enabled", status);
+	emit secureChatEnabledChanged(getSecureChatEnabled () );
+}
+
+// -----------------------------------------------------------------------------
+
+bool SettingsModel::getHideEmptyChatRooms() const{
+	int defaultValue = 0;
+	if(!mConfig->hasEntry("misc", "hide_empty_chat_rooms"))// This step should be removed when this option comes from API and not directly from config file
+		mConfig->setInt("misc", "hide_empty_chat_rooms", defaultValue);
+	return !!mConfig->getInt("misc", "hide_empty_chat_rooms", defaultValue);
+}
+
+void SettingsModel::setHideEmptyChatRooms(const bool& status){
+	mConfig->setInt("misc", "hide_empty_chat_rooms", status);
+	emit hideEmptyChatRoomsChanged(status);
+}
+
+// -----------------------------------------------------------------------------
+
+bool SettingsModel::getWaitRegistrationForCall() const{
+	return !!mConfig->getInt(UiSection, "call_wait_registration", 0);
+}
+
+void SettingsModel::setWaitRegistrationForCall(const bool& status){
+	mConfig->setInt(UiSection, "call_wait_registration", status);
+	emit waitRegistrationForCallChanged(status);
+}
+	
 // -----------------------------------------------------------------------------
 
 bool SettingsModel::getConferenceEnabled () const {
@@ -753,10 +822,14 @@ bool SettingsModel::getContactsEnabled () const {
 }
 
 void SettingsModel::setContactsEnabled (bool status) {
-	mConfig->setInt(UiSection, "contacts_enabled", status);
-	emit contactsEnabledChanged(status);
+	if(!isReadOnly(UiSection, "contacts_enabled"))
+		mConfig->setInt(UiSection, "contacts_enabled", status);
+	emit contactsEnabledChanged(getContactsEnabled ());
 }
 
+int SettingsModel::getIncomingCallTimeout() const {
+	return CoreManager::getInstance()->getCore()->getIncTimeout();
+}
 // =============================================================================
 // Network.
 // =============================================================================
@@ -1057,7 +1130,7 @@ bool SettingsModel::getRlsUriEnabled () const {
 
 void SettingsModel::setRlsUriEnabled (bool status) {
 	mConfig->setInt(UiSection, "rls_uri_enabled", status);
-	mConfig->setString("sip", "rls_uri", status ? DefaultRlsUri : "");
+	mConfig->setString("sip", "rls_uri", status ? Constants::DefaultRlsUri : "");
 	emit rlsUriEnabledChanged(status);
 }
 
@@ -1066,7 +1139,7 @@ static string getRlsUriDomain () {
 	if (!domain.empty())
 		return domain;
 
-	shared_ptr<linphone::Address> linphoneAddress = CoreManager::getInstance()->getCore()->createAddress(DefaultRlsUri);
+	shared_ptr<linphone::Address> linphoneAddress = CoreManager::getInstance()->getCore()->createAddress(Constants::DefaultRlsUri);
 	Q_CHECK_PTR(linphoneAddress);
 	domain = linphoneAddress->getDomain();
 	return domain;
@@ -1083,7 +1156,7 @@ void SettingsModel::configureRlsUri () {
 	const string domain = getRlsUriDomain();
 	for (const auto &proxyConfig : CoreManager::getInstance()->getCore()->getProxyConfigList())
 		if (proxyConfig->getDomain() == domain) {
-			mConfig->setString("sip", "rls_uri", DefaultRlsUri);
+			mConfig->setString("sip", "rls_uri", Constants::DefaultRlsUri);
 			return;
 		}
 
@@ -1098,17 +1171,48 @@ void SettingsModel::configureRlsUri (const shared_ptr<const linphone::ProxyConfi
 
 	const string domain = getRlsUriDomain();
 	if (proxyConfig->getDomain() == domain) {
-		mConfig->setString("sip", "rls_uri", DefaultRlsUri);
+		mConfig->setString("sip", "rls_uri", Constants::DefaultRlsUri);
 		return;
 	}
 
 	mConfig->setString("sip", "rls_uri", "");
 }
 
+//------------------------------------------------------------------------------
+
+bool SettingsModel::tunnelAvailable() const{
+	return CoreManager::getInstance()->getCore()->tunnelAvailable();
+}
+
+TunnelModel* SettingsModel::getTunnel() const{
+	return new TunnelModel(CoreManager::getInstance()->getCore()->getTunnel());
+}
+
 // =============================================================================
 // UI.
 // =============================================================================
 
+QFont SettingsModel::getTextMessageFont() const{
+	QString family = Utils::coreStringToAppString(mConfig->getString(UiSection, "text_message_font", Utils::appStringToCoreString(App::getInstance()->font().family())));
+	int pointSize = getTextMessageFontSize();
+	return QFont(family,pointSize);
+}
+
+void SettingsModel::setTextMessageFont(const QFont& font){
+	mConfig->setString(UiSection, "text_message_font", Utils::appStringToCoreString(font.family()));
+	setTextMessageFontSize(font.pointSize());
+	emit textMessageFontChanged(font);
+}
+
+int SettingsModel::getTextMessageFontSize() const{
+	return mConfig->getInt(UiSection, "text_message_font_size", 10);
+}
+
+void SettingsModel::setTextMessageFontSize(const int& size){
+	mConfig->setInt(UiSection, "text_message_font_size", size);
+	emit textMessageFontSizeChanged(size);
+}
+	
 QString SettingsModel::getSavedScreenshotsFolder () const {
 	return QDir::cleanPath(
 			       Utils::coreStringToAppString(
@@ -1166,10 +1270,14 @@ QString SettingsModel::getRemoteProvisioning () const {
 }
 
 void SettingsModel::setRemoteProvisioning (const QString &remoteProvisioning) {
-	if (!CoreManager::getInstance()->getCore()->setProvisioningUri(Utils::appStringToCoreString(remoteProvisioning)))
-		emit remoteProvisioningChanged(remoteProvisioning);
+	QString urlRemoteProvisioning = remoteProvisioning;
+	if( QUrl(urlRemoteProvisioning).isRelative()) {
+		urlRemoteProvisioning = QString(Constants::RemoteProvisioningURL) +"/"+ remoteProvisioning;
+	}
+	if (!CoreManager::getInstance()->getCore()->setProvisioningUri(Utils::appStringToCoreString(urlRemoteProvisioning)))
+		emit remoteProvisioningChanged(urlRemoteProvisioning);
 	else
-		emit remoteProvisioningNotChanged(remoteProvisioning);
+		emit remoteProvisioningNotChanged(urlRemoteProvisioning);
 }
 
 // -----------------------------------------------------------------------------
@@ -1183,9 +1291,59 @@ void SettingsModel::setExitOnClose (bool value) {
 	emit exitOnCloseChanged(value);
 }
 
+bool SettingsModel::isCheckForUpdateEnabled() const{
+	return !!mConfig->getInt(UiSection, "check_for_update_enabled", 1);
+}
+
+void SettingsModel::setCheckForUpdateEnabled(bool enable){
+	mConfig->setInt(UiSection, "check_for_update_enabled", enable);
+	emit checkForUpdateEnabledChanged();
+}
+
+QString SettingsModel::getVersionCheckUrl() const{
+	return Utils::coreStringToAppString(mConfig->getString("misc", "version_check_url_root", Constants::VersionCheckUrl));
+}
+
+void SettingsModel::setVersionCheckUrl(const QString& url){
+	mConfig->setString("misc", "version_check_url_root", Utils::appStringToCoreString(url));
+	emit versionCheckUrlChanged();
+}
+// -----------------------------------------------------------------------------
+
+bool SettingsModel::getShowLocalSipAccount()const{
+	return !!mConfig->getInt(UiSection, "show_local_sip_account", 1);
+}
+
+bool SettingsModel::getShowStartChatButton ()const{
+	return !!mConfig->getInt(UiSection, "show_start_chat_button", 1);
+}
+
+bool SettingsModel::getShowStartVideoCallButton ()const{
+	return !!mConfig->getInt(UiSection, "show_start_video_button", 1);
+}
+
+bool SettingsModel::isMipmapEnabled() const{
+#ifdef __APPLE__
+	return !!mConfig->getInt(UiSection, "mipmap_enabled", 1);
+#else
+	return !!mConfig->getInt(UiSection, "mipmap_enabled", 0);
+#endif
+}
+
+void SettingsModel::setMipmapEnabled(const bool& enabled){
+	mConfig->setInt(UiSection, "mipmap_enabled", enabled);
+	emit mipmapEnabledChanged();
+}
+	
 // =============================================================================
 // Advanced.
 // =============================================================================
+
+void SettingsModel::accessAdvancedSettings() {
+	emit contactImporterChanged();
+}
+
+//------------------------------------------------------------------------------
 
 QString SettingsModel::getLogsFolder () const {
 	return getLogsFolder(mConfig);
@@ -1241,7 +1399,7 @@ void SettingsModel::setLogsEnabled (bool status) {
 
 QString SettingsModel::getLogsEmail () const {
 	return Utils::coreStringToAppString(
-					    mConfig->getString(UiSection, "logs_email", DefaultLogsEmail)
+					    mConfig->getString(UiSection, "logs_email", Constants::DefaultLogsEmail)
 					    );
 }
 
@@ -1263,7 +1421,13 @@ bool SettingsModel::getLogsEnabled (const shared_ptr<linphone::Config> &config) 
 }
 
 // ---------------------------------------------------------------------------
-
+bool SettingsModel::isDeveloperSettingsAvailable() const {
+#ifdef DEBUG
+	return true;
+#else
+	return false;
+#endif
+}
 bool SettingsModel::getDeveloperSettingsEnabled () const {
 #ifdef DEBUG
 	return !!mConfig->getInt(UiSection, "developer_settings", 0);
@@ -1294,4 +1458,12 @@ void SettingsModel::handleEcCalibrationResult(linphone::EcCalibratorStatus statu
 }
 bool SettingsModel::getIsInCall() const {
 	return CoreManager::getInstance()->getCore()->getCallsNb() != 0;
+}
+
+bool SettingsModel::isReadOnly(const std::string& section, const std::string& name) const {
+	return mConfig->hasEntry(section, name+"/readonly");
+}
+
+std::string SettingsModel::getEntryFullName(const std::string& section, const std::string& name) const {
+	return isReadOnly(section, name)?name+"/readonly" : name;
 }

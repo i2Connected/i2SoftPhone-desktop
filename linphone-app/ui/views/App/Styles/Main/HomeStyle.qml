@@ -1,11 +1,11 @@
 pragma Singleton
 import QtQml 2.2
 
-import Colors 1.0
-
+import ColorsList 1.0
 // =============================================================================
 
 QtObject {
-  property color color: Colors.k
-  property int spacing: 20
+	property string sectionName: 'Home'
+	property color color: ColorsList.add(sectionName+'_bg', 'k').color
+	property int spacing: 20
 }

@@ -12,6 +12,7 @@ singleton Constants     1.0 Constants/Constants.qml
 
 BusyIndicator           1.0 Animations/BusyIndicator.qml
 
+DialogDescription       1.0 Dialog/DialogDescription.qml
 ConfirmDialog           1.0 Dialog/ConfirmDialog.qml
 DialogPlus              1.0 Dialog/DialogPlus.qml
 
@@ -47,6 +48,8 @@ TextField               1.0 Form/Fields/TextField.qml
 Form                    1.0 Form/Placements/Form.qml
 FormEmptyLine           1.0 Form/Placements/FormEmptyLine.qml
 FormGroup               1.0 Form/Placements/FormGroup.qml
+FormHGroup              1.0 Form/Placements/FormHGroup.qml
+FormVGroup              1.0 Form/Placements/FormVGroup.qml
 FormLine                1.0 Form/Placements/FormLine.qml
 FormTable               1.0 Form/Placements/FormTable.qml
 FormTableEntry          1.0 Form/Placements/FormTableEntry.qml
@@ -62,6 +65,7 @@ InvertedMouseArea       1.0 Helpers/InvertedMouseArea.qml
 Icon                    1.0 Image/Icon.qml
 RoundedImage            1.0 Image/RoundedImage.qml
 
+MediaProgressBar        1.0 Indicators/MediaProgressBar.qml
 VuMeter                 1.0 Indicators/VuMeter.qml
 
 ApplicationMenu         1.0 Menus/ApplicationMenu.qml

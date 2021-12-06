@@ -3,6 +3,8 @@ import QtQuick 2.7
 import Linphone 1.0
 import LinphoneUtils 1.0
 
+import UtilsCpp 1.0
+
 import App.Styles 1.0
 
 // =============================================================================
@@ -11,7 +13,7 @@ Avatar {
   property var call
 
   readonly property var _sipAddressObserver: SipAddressesModel.getSipAddressObserver(call.fullPeerAddress, call.fullLocalAddress)
-  readonly property var _username: LinphoneUtils.getContactUsername(_sipAddressObserver)
+  readonly property var _username: UtilsCpp.getDisplayName(_sipAddressObserver.peerAddress)
 
   backgroundColor: CallStyle.container.avatar.backgroundColor
   foregroundColor: call.status === CallModel.CallStatusPaused
@@ -35,7 +37,7 @@ Avatar {
     horizontalAlignment: Text.AlignHCenter
     verticalAlignment: Text.AlignVCenter
 
-    text: '&#9616;&nbsp;&#9612;'
+    text: '&#10073;&#10073;'
     textFormat: Text.RichText
     visible: call.status === CallModel.CallStatusPaused
   }

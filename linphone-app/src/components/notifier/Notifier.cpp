@@ -29,6 +29,8 @@
 #include "app/App.hpp"
 #include "components/call/CallModel.hpp"
 #include "components/core/CoreManager.hpp"
+#include "components/timeline/TimelineModel.hpp"
+#include "components/timeline/TimelineListModel.hpp"
 #include "utils/Utils.hpp"
 
 #include "Notifier.hpp"
@@ -61,7 +63,6 @@ namespace {
 
   constexpr int NotificationSpacing = 10;
   constexpr int MaxNotificationsNumber = 5;
-  constexpr int MaxTimeout = 30000;
 }
 
 // =============================================================================
@@ -79,13 +80,15 @@ void setProperty (QObject &object, const char *property, const T &value) {
 // =============================================================================
 
 const QHash<int, Notifier::Notification> Notifier::Notifications = {
-  { Notifier::ReceivedMessage, { "NotificationReceivedMessage.qml", 10 } },
-  { Notifier::ReceivedFileMessage, { "NotificationReceivedFileMessage.qml", 10 } },
-  { Notifier::ReceivedCall, { "NotificationReceivedCall.qml", 30 } },
-  { Notifier::NewVersionAvailable, { "NotificationNewVersionAvailable.qml", 30 } },
-  { Notifier::SnapshotWasTaken, { "NotificationSnapshotWasTaken.qml", 10 } },
-  { Notifier::RecordingCompleted, { "NotificationRecordingCompleted.qml", 10 } }
+  { Notifier::ReceivedMessage, { Notifier::ReceivedMessage, "NotificationReceivedMessage.qml", 10 } },
+  { Notifier::ReceivedFileMessage, { Notifier::ReceivedFileMessage, "NotificationReceivedFileMessage.qml", 10 } },
+  { Notifier::ReceivedCall, { Notifier::ReceivedCall, "NotificationReceivedCall.qml", 30 } },
+  { Notifier::NewVersionAvailable, { Notifier::NewVersionAvailable, "NotificationNewVersionAvailable.qml", 30 } },
+  { Notifier::SnapshotWasTaken, { Notifier::SnapshotWasTaken, "NotificationSnapshotWasTaken.qml", 10 } },
+  { Notifier::RecordingCompleted, { Notifier::RecordingCompleted, "NotificationRecordingCompleted.qml", 10 } }
 };
+
+
 
 // -----------------------------------------------------------------------------
 
@@ -204,13 +207,13 @@ void Notifier::showNotification (QObject *notification, int timeout) {
   QMetaObject::invokeMethod(notification, NotificationShowMethodName, Qt::DirectConnection);
 
   QTimer *timer = new QTimer(notification);
-  timer->setInterval(timeout > MaxTimeout ? MaxTimeout : timeout);
+  timer->setInterval(timeout);
   timer->setSingleShot(true);
   notification->setProperty(NotificationPropertyTimer, QVariant::fromValue(timer));
 
   // Destroy it after timeout.
   QObject::connect(timer, &QTimer::timeout, this, [this, notification]() {
-    deleteNotification(QVariant::fromValue(notification));
+    deleteNotificationOnTimeout(QVariant::fromValue(notification));
   });
 
   // Called explicitly (by a click on notification for example)
@@ -220,6 +223,16 @@ void Notifier::showNotification (QObject *notification, int timeout) {
 }
 
 // -----------------------------------------------------------------------------
+void Notifier::deleteNotificationOnTimeout(QVariant notification) {
+#ifdef Q_OS_MACOS
+	for(auto w : QGuiApplication::topLevelWindows()){
+		if( (w->windowState()&Qt::WindowFullScreen)==Qt::WindowFullScreen){
+			w->requestActivate();// Used to get focus on fullscreens on Mac in order to avoid screen switching.
+		}
+	}
+#endif
+	deleteNotification(notification);
+}
 
 void Notifier::deleteNotification (QVariant notification) {
   mMutex->lock();
@@ -254,7 +267,7 @@ void Notifier::deleteNotification (QVariant notification) {
   QObject * notification = createNotification(TYPE, DATA); \
   if (!notification) \
     return; \
-  const int timeout = Notifications[TYPE].timeout * 1000; \
+  const int timeout = Notifications[TYPE].getTimeout() * 1000; \
   showNotification(notification, timeout);
 
 // -----------------------------------------------------------------------------
@@ -267,22 +280,25 @@ void Notifier::notifyReceivedMessage (const shared_ptr<linphone::ChatMessage> &m
   if(! message->getFileTransferInformation() ){
 	  foreach(auto content, message->getContents()){
 		  if(content->isText())
-			  txt += content->getStringBuffer().c_str();
+			  txt += content->getUtf8Text().c_str();
 	  }
   }else
 	  txt = tr("newFileMessage");
   map["message"] = txt;
   shared_ptr<linphone::ChatRoom> chatRoom(message->getChatRoom());
-  map["peerAddress"] = Utils::coreStringToAppString(chatRoom->getPeerAddress()->asStringUriOnly());
-  map["localAddress"] = Utils::coreStringToAppString(chatRoom->getLocalAddress()->asStringUriOnly());
-  map["fullPeerAddress"] = QString::fromStdString(chatRoom->getPeerAddress()->asString());
-  map["fullLocalAddress"] = QString::fromStdString(chatRoom->getLocalAddress()->asString());
+  map["timelineModel"].setValue(CoreManager::getInstance()->getTimelineListModel()->getTimeline(chatRoom, true).get());
+  map["peerAddress"] = Utils::coreStringToAppString(message->getFromAddress()->asStringUriOnly());
+  map["localAddress"] = Utils::coreStringToAppString(message->getToAddress()->asStringUriOnly());
+  map["fullPeerAddress"] = Utils::coreStringToAppString(message->getFromAddress()->asString());
+  map["fullLocalAddress"] = Utils::coreStringToAppString(message->getToAddress()->asString());
   map["window"].setValue(App::getInstance()->getMainWindow());
   CREATE_NOTIFICATION(Notifier::ReceivedMessage, map)
 }
 
 void Notifier::notifyReceivedFileMessage (const shared_ptr<linphone::ChatMessage> &message) {
   QVariantMap map;
+  shared_ptr<linphone::ChatRoom> chatRoom(message->getChatRoom());
+  map["timelineModel"].setValue(CoreManager::getInstance()->getTimelineListModel()->getTimeline(chatRoom, true).get());
   map["fileUri"] = Utils::coreStringToAppString(message->getFileTransferInformation()->getFilePath());
   if( Utils::getImage(map["fileUri"].toString()).isNull())
     map["imageUri"] = "";

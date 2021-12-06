@@ -14,7 +14,7 @@ Rectangle {
   id: container
 
   property alias proxyModel: history.model
-  signal entryClicked(string sipAddress)
+  signal entryClicked(var entry)
 
   // ---------------------------------------------------------------------------
 
@@ -129,7 +129,7 @@ Rectangle {
           leftMargin: HistoryStyle.entry.leftMargin
           right: parent ? parent.right : undefined
 
-          rightMargin: HistoryStyle.entry.deleteIconSize +
+          rightMargin: HistoryStyle.entry.deleteAction.iconSize +
             HistoryStyle.entry.message.extraContent.spacing +
             HistoryStyle.entry.message.extraContent.rightMargin +
             HistoryStyle.entry.message.extraContent.leftMargin
@@ -183,7 +183,7 @@ Rectangle {
             }
              Connections{
                 target:entryLoader.item
-                onEntryClicked:{entryClicked(sipAddress)}
+                onEntryClicked:{entryClicked(entry)}
               }
           }
         }

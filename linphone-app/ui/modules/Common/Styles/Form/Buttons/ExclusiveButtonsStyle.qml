@@ -1,19 +1,19 @@
 pragma Singleton
 import QtQml 2.2
 
-import Colors 1.0
-
+import ColorsList 1.0
 // =============================================================================
 
 QtObject {
-  property int buttonsSpacing: 8
-
-  property QtObject button: QtObject {
-    property QtObject color: QtObject {
-      property color hovered: Colors.n
-      property color normal: Colors.c
-      property color pressed: Colors.i
-      property color selected: Colors.g
-    }
-  }
+	property string sectionName: 'ExclusiveButtons'
+	property int buttonsSpacing: 8
+	
+	property QtObject button: QtObject {
+		property QtObject color: QtObject {
+			property color hovered: ColorsList.add(sectionName+'_h', 'n').color
+			property color normal: ColorsList.add(sectionName+'_n', 'x').color
+			property color pressed: ColorsList.add(sectionName+'_p', 'i').color
+			property color selected: ColorsList.add(sectionName+'_c', 'g').color
+		}
+	}
 }

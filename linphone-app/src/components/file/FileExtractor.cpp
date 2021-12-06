@@ -27,13 +27,11 @@
 #include "FileDownloader.hpp"
 #include "app/paths/Paths.hpp"
 #include "utils/Utils.hpp"
+#include "utils/Constants.hpp"
 
 // =============================================================================
 
 using namespace std;
-
-constexpr char LinphoneBZip2_exe[] = "http://www.linphone.org/releases/windows/tools/bzip2/bzip2.exe";
-constexpr char LinphoneBZip2_dll[] = "http://www.linphone.org/releases/windows/tools/bzip2/bzip2.dll";
 
 FileExtractor::FileExtractor (QObject *parent) : QObject(parent) {}
 
@@ -62,21 +60,26 @@ void FileExtractor::extract () {
   }
 #ifdef WIN32
 // Test the presence of bzip2 in the system
-	int result = QProcess::execute("bzip2.exe", QStringList());
-	if( result != -2 || QProcess::execute(Utils::coreStringToAppString(Paths::getToolsDirPath())+"\\bzip2.exe", QStringList())!=-2){
+	QProcess process;
+	process.closeReadChannel(QProcess::StandardOutput);
+	process.closeReadChannel(QProcess::StandardError);
+	process.start("bzip2.exe",QStringList("--help") );
+	//int result = QProcess::execute("bzip2.exe", QStringList("--help"));
+	if( process.error() != QProcess::FailedToStart || QProcess::execute(Utils::coreStringToAppString(Paths::getToolsDirPath())+"\\bzip2.exe", QStringList())!=-2){
 		mTimer->start();
 	}else{// Download bzip2
+		qWarning() << "bzip2 was not found. Downloading it.";
 		QTimer * timer = mTimer;
 		FileDownloader * fileDownloader = new FileDownloader();
 		int downloadStep = 0;
-		fileDownloader->setUrl(QUrl(LinphoneBZip2_exe));
+		fileDownloader->setUrl(QUrl(Constants::LinphoneBZip2_exe));
 		fileDownloader->setDownloadFolder(Utils::coreStringToAppString(Paths::getToolsDirPath()));
 		QObject::connect(fileDownloader, &FileDownloader::totalBytesChanged, this, &FileExtractor::setTotalBytes);
 		QObject::connect(fileDownloader, &FileDownloader::readBytesChanged, this, &FileExtractor::setReadBytes);
 
 		QObject::connect(fileDownloader, &FileDownloader::downloadFinished, [fileDownloader, timer, downloadStep ]()mutable {
 			if( downloadStep++ == 0){
-				fileDownloader->setUrl(QUrl(LinphoneBZip2_dll));
+				fileDownloader->setUrl(QUrl(Constants::LinphoneBZip2_dll));
 				fileDownloader->download();
 			}else {
 				fileDownloader->deleteLater();

@@ -30,7 +30,7 @@
 
 class QUrl;
 
-class ChatModel;
+class ChatRoomModel;
 class CoreHandlers;
 class HistoryModel;
 
@@ -60,6 +60,8 @@ public:
 
   QHash<int, QByteArray> roleNames () const override;
   QVariant data (const QModelIndex &index, int role = Qt::DisplayRole) const override;
+  
+  //Q_PROPERTY(QList<QVariant> resultExceptions READ getResultExceptions WRITE setResultExceptions NOTIFY resultExceptionsChanged)
 
   Q_INVOKABLE QVariantMap find (const QString &sipAddress) const;
   Q_INVOKABLE ContactModel *mapSipAddressToContact (const QString &sipAddress) const;
@@ -74,6 +76,7 @@ public:
 
   Q_INVOKABLE static QString interpretSipAddress (const QString &sipAddress, bool checkUsername = true);
   Q_INVOKABLE static QString interpretSipAddress (const QUrl &sipAddress);
+  Q_INVOKABLE static QString interpretSipAddress (const QString &sipAddress, const QString &domain);
 
   Q_INVOKABLE static bool addressIsValid (const QString &address);
   Q_INVOKABLE static bool sipAddressIsValid (const QString &sipAddress);
@@ -93,7 +96,7 @@ private:
 
   // ---------------------------------------------------------------------------
 
-  void handleChatModelCreated (const std::shared_ptr<ChatModel> &chatModel);
+  void handleChatRoomModelCreated (const std::shared_ptr<ChatRoomModel> &chatRoomModel);
   void handleHistoryModelCreated (HistoryModel *historyModel) ;
 
   void handleContactAdded (ContactModel *contact);
@@ -106,10 +109,10 @@ private:
   void handleCallStateChanged (const std::shared_ptr<linphone::Call> &call, linphone::Call::State state);
   void handlePresenceReceived (const QString &sipAddress, const std::shared_ptr<const linphone::PresenceModel> &presenceModel);
 
-  void handleAllEntriesRemoved (ChatModel *chatModel);
-  void handleLastEntryRemoved (ChatModel *chatModel);
+  void handleAllEntriesRemoved (ChatRoomModel *chatRoomModel);
+  void handleLastEntryRemoved (ChatRoomModel *chatRoomModel);
   
-  void handleMessageCountReset (ChatModel *chatModel);
+  void handleMessageCountReset (ChatRoomModel *chatRoomModel);
 
   void handleMessageSent (const std::shared_ptr<linphone::ChatMessage> &message);
 

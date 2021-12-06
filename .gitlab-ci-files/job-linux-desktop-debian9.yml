@@ -2,7 +2,7 @@
 
 job-debian9-ninja-gcc:
   tags: [ "docker-debian9" ]
-  image: gitlab.linphone.org:4567/bc/public/linphone-desktop/bc-dev-debian9-fuse-wget-gpg2-qt-release-no-debug-info:5.12.5
+  image: gitlab.linphone.org:4567/bc/public/linphone-desktop/bc-dev-debian9-qt-fuse-wget-gpg2:$DEBIAN_9_QT_IMAGE_VERSION
   except:
     refs:
       - schedules
@@ -12,7 +12,7 @@ job-debian9-ninja-gcc:
     CXX: g++
   extends: .job-linux-desktop
 
-  
+
 job-debian9-ninja-gcc-smallsdk:
   except:
     refs:
@@ -28,7 +28,7 @@ job-debian9-ninja-gcc-smallsdk:
 
 job-debian9-makefile-gcc:
   tags: [ "docker-debian9" ]
-  image: gitlab.linphone.org:4567/bc/public/linphone-desktop/bc-dev-debian9-fuse-wget-gpg2-qt-release-no-debug-info:5.12.5
+  image: gitlab.linphone.org:4567/bc/public/linphone-desktop/bc-dev-debian9-qt-fuse-wget-gpg2:$DEBIAN_9_QT_IMAGE_VERSION
   only:
     variables:
       - $NIGHTLY_MASTER
@@ -53,7 +53,7 @@ job-debian9-ninja-clang:
   only:
     variables:
       - $NIGHTLY_MASTER
-  image: gitlab.linphone.org:4567/bc/public/linphone-desktop/bc-dev-debian9-fuse-wget-gpg2-qt-release-no-debug-info:5.12.5
+  image: gitlab.linphone.org:4567/bc/public/linphone-desktop/bc-dev-debian9-qt-fuse-wget-gpg2:$DEBIAN_9_QT_IMAGE_VERSION
   variables:
     CMAKE_OPTIONS: -DENABLE_DOC=ON
     CMAKE_GENERATOR: Ninja
@@ -68,18 +68,38 @@ job-debian9-ninja-clang-novideo:
   variables:
     CMAKE_OPTIONS: -DENABLE_VIDEO=NO
   extends: job-debian9-ninja-clang
-  
+
 job-debian9-makefile-clang:
   tags: [ "docker-debian9" ]
-  image: gitlab.linphone.org:4567/bc/public/linphone-desktop/bc-dev-debian9-fuse-wget-gpg2-qt-release-no-debug-info:5.12.5
+  image: gitlab.linphone.org:4567/bc/public/linphone-desktop/bc-dev-debian9-qt-fuse-wget-gpg2:$DEBIAN_9_QT_IMAGE_VERSION
   only:
     variables:
       - $NIGHTLY_MASTER
+      - $DEPLOY_PLUGINS
   variables:
+    CMAKE_OPTIONS: -DLINPHONE_BUILDER_SIGNING_IDENTITY=$GPG_SIGNING_KEYID -DLINPHONE_BUILDER_SIGNING_PASSPHRASE=$GPG_SIGNING_PASS
     CMAKE_GENERATOR: Unix Makefiles
     CC: clang
     CXX: clang++
     ADDITIONAL_BUILD_OPTIONS: -j$MAKEFILE_JOBS
+  script:
+    - echo "$GPG_SIGNING_PUB" > file.key && sed -i 's/\r /\n/g' file.key && chmod 600 file.key
+    - gpg --import file.key
+    - rm -f file.key
+    - echo "$GPG_SIGNING_KEY" > file.key && sed -i 's/\r /\n/g' file.key && chmod 600 file.key
+    - base64 -w 0 file.key | base64 -d | gpg --import --no-tty --batch --yes
+    - rm -f file.key
+    - cmake --version
+    - export CC=$CC
+    - export CXX=$CXX
+    - mkdir -p build/OUTPUT
+    - echo $CI_BUILD_TYPE
+    - echo $CMAKE_GENERATOR
+    - echo $DEFAULT_LINUX_CMAKE_OPTIONS
+    - echo $CMAKE_SANITIZER_OPTIONS
+    - cd build
+    - cmake .. -G "$CMAKE_GENERATOR" -DCMAKE_VERBOSE_MAKEFILE=ON -DLINPHONESDK_PLATFORM=Desktop -DCMAKE_BUILD_TYPE=$CI_BUILD_TYPE $DEFAULT_LINUX_CMAKE_OPTIONS $CMAKE_OPTIONS $SCHEDULE_CMAKE_OPTIONS $CMAKE_SANITIZER_OPTIONS
+    - cmake --build . --target install --config $CI_BUILD_TYPE $LBC_NODEBUG_OPTIONS
   extends: .job-linux-desktop
 
 #################################################
@@ -88,12 +108,13 @@ job-debian9-makefile-clang:
 
 job-debian9-makefile-clang-package:
   stage: package
-  tags: [ "docker-test-debian9-liblinphone-nuc" ]
-  image: gitlab.linphone.org:4567/bc/public/linphone-desktop/bc-dev-debian9-fuse-wget-gpg2-qt-release-no-debug-info:5.12.5
+  tags: [ "docker-test-liblinphone" ]
+  image: gitlab.linphone.org:4567/bc/public/linphone-desktop/bc-dev-debian9-qt-fuse-wget-gpg2:$DEBIAN_9_QT_IMAGE_VERSION
   dependencies: []
   only:
      variables:
        - $NIGHTLY_MASTER
+       - $PACKAGE_LINUX
        - $DEPLOY_LINUX
   variables:
     CMAKE_OPTIONS: -DENABLE_APP_PACKAGING=YES -DLINPHONE_BUILDER_SIGNING_IDENTITY=$GPG_SIGNING_KEYID -DLINPHONE_BUILDER_SIGNING_PASSPHRASE=$GPG_SIGNING_PASS
@@ -117,13 +138,12 @@ job-debian9-makefile-clang-package:
     - echo $DEFAULT_LINUX_CMAKE_OPTIONS
     - echo $CMAKE_SANITIZER_OPTIONS
     - cd build
-    - cmake .. -G "$CMAKE_GENERATOR" -DCMAKE_VERBOSE_MAKEFILE=ON -DLINPHONESDK_PLATFORM=Desktop -DCMAKE_BUILD_TYPE=$CI_BUILD_TYPE $DEFAULT_LINUX_CMAKE_OPTIONS $CMAKE_OPTIONS $SCHEDULE_CMAKE_OPTIONS $CMAKE_SANITIZER_OPTIONS 
+    - cmake .. -G "$CMAKE_GENERATOR" -DCMAKE_VERBOSE_MAKEFILE=ON -DLINPHONESDK_PLATFORM=Desktop -DCMAKE_BUILD_TYPE=$CI_BUILD_TYPE $DEFAULT_LINUX_CMAKE_OPTIONS $CMAKE_OPTIONS $SCHEDULE_CMAKE_OPTIONS $CMAKE_SANITIZER_OPTIONS
     - cmake --build . --target install --config $CI_BUILD_TYPE $LBC_NODEBUG_OPTIONS
   artifacts:
     paths:
       - build/OUTPUT/Packages/*.AppImage
     expire_in: 1 week
-    
 
 #################################################
 # Deploy - Nightly
@@ -132,15 +152,27 @@ job-debian9-makefile-clang-package:
 job-debian9-makefile-clang-deploy:
   stage: deploy
   tags: [ "deploy" ]
-  dependencies:
+  needs:
     - job-debian9-makefile-clang-package
   only:
      variables:
        - $NIGHTLY_MASTER
        - $DEPLOY_LINUX
   script:
-    - rsync -rlv --ignore-existing build/OUTPUT/Packages/*.AppImage $DEPLOY_SERVER:$APPIMAGE_UPLOAD_DIRECTORY/    
-    
+    - rsync -rlv --ignore-existing build/OUTPUT/Packages/*.AppImage $DEPLOY_SERVER:$APPIMAGE_UPLOAD_DIRECTORY/
+
+
+job-debian9-makefile-clang-plugins-deploy:
+  stage: deploy
+  tags: [ "deploy" ]
+  needs:
+    - job-debian9-makefile-clang
+  only:
+     variables:
+       - $DEPLOY_PLUGINS
+  script:
+    - rsync -rlv --ignore-existing build/OUTPUT/plugins/app/*.so $DEPLOY_SERVER:$APPIMAGE_UPLOAD_DIRECTORY/plugins/
+
 #################################################
 # Debug
 #################################################
@@ -149,11 +181,10 @@ job-debian9-makefile-clang-deploy:
 job-debian9-debug:
   stage: deploy
   tags: [ "docker-test-debian9-liblinphone-nuc" ]
-  image: gitlab.linphone.org:4567/bc/public/linphone-desktop/bc-dev-debian9-fuse-wget-gpg2-qt-release-no-debug-info:5.12.5
+  image: gitlab.linphone.org:4567/bc/public/linphone-desktop/bc-dev-debian9-qt-fuse-wget-gpg2:$DEBIAN_9_QT_IMAGE_VERSION
   dependencies: []
   only:
     variables:
       - $DEBUG_DEBIAN9
   script:
     - sleep 10m
-
