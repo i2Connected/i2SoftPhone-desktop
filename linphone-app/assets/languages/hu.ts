@@ -1908,7 +1908,7 @@ Kattintson ide: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>chatNotificationsEnabledLabel</source>
         <extracomment>&apos;Enable notifications&apos;: settings label for enabling notifications.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Értesítések engedélyezése</translation>
     </message>
 </context>
 <context>
