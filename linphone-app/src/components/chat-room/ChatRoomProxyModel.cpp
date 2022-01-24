@@ -270,7 +270,7 @@ QString ChatRoomProxyModel::getCachedText() const{
 // -----------------------------------------------------------------------------
 
 void ChatRoomProxyModel::reload (ChatRoomModel *chatRoomModel) {
-	
+	qInfo() << "Reloading";
 	if (mChatRoomModel) {
 		ChatRoomModel *ChatRoomModel = mChatRoomModel.get();
 		QObject::disconnect(ChatRoomModel, &ChatRoomModel::isRemoteComposingChanged, this, &ChatRoomProxyModel::handleIsRemoteComposingChanged);
@@ -301,6 +301,7 @@ void ChatRoomProxyModel::resetMessageCount(){
 }
 
 void ChatRoomProxyModel::setFilterText(const QString& text){
+	qInfo() << "setFilterText : " << text;
 	if( mFilterText != text && mChatRoomModel){
 		mFilterText = text;
 		int currentRowCount = rowCount();
@@ -319,9 +320,12 @@ ChatRoomModel *ChatRoomProxyModel::getChatRoomModel () const{
 }
 
 void ChatRoomProxyModel::setChatRoomModel (ChatRoomModel *chatRoomModel){
-	reload(chatRoomModel);
-	emit chatRoomModelChanged();
-	emit isRemoteComposingChanged();
+	if( mChatRoomModel.get() != chatRoomModel){
+		qInfo() << "setChatRoomModel : " << mChatRoomModel.get() << "/" << chatRoomModel;
+		reload(chatRoomModel);
+		emit chatRoomModelChanged();
+		emit isRemoteComposingChanged();
+	}
 }
 // -----------------------------------------------------------------------------
 
@@ -339,6 +343,7 @@ void ChatRoomProxyModel::handleIsActiveChanged (QWindow *window) {
 	if (markAsReadEnabled() && mChatRoomModel && window->isActive() && getParentWindow(this) == window) {
 		auto timeline = CoreManager::getInstance()->getTimelineListModel()->getTimeline(mChatRoomModel->getChatRoom(), false);
 		if(timeline && timeline->mSelected){
+			qInfo() << "Active changed : reset message count and focused";
 			mChatRoomModel->resetMessageCount();
 			mChatRoomModel->focused();
 		}

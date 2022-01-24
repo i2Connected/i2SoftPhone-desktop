@@ -885,6 +885,7 @@ void ChatRoomModel::updateNewMessageNotice(const int& count){
 }
 
 void ChatRoomModel::initEntries(){
+	qInfo() << "Init entries";
 // On call : reinitialize all entries. This allow to free up memory
 	QList<std::shared_ptr<ChatEvent> > entries;
 	QList<EntrySorterHelper> prepareEntries;
@@ -920,6 +921,7 @@ void ChatRoomModel::initEntries(){
 }
 
 int ChatRoomModel::loadMoreEntries(){
+	qInfo() << "Load more entries";
 	QList<std::shared_ptr<ChatEvent> > entries;
 	QList<EntrySorterHelper> prepareEntries;
 // Get current event count for each type
