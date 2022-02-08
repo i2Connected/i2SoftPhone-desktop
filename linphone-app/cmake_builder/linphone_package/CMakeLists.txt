@@ -34,6 +34,7 @@ if (POLICY CMP0079)
 endif ()
 
 set(LINPHONE_QML_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../ui")
+set(QT_PATH "${Qt5Core_DIR}/../../..")
 
 # ==============================================================================
 # Build package version.
@@ -148,7 +149,10 @@ if (WIN32)
 		RUNTIME DESTINATION "${LIBDIR}"
 		)
 
-	install(CODE "execute_process(COMMAND ${DEPLOYQT_PROGRAM} \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/${EXECUTABLE_NAME}.exe\" -qmldir=${LINPHONE_QML_DIR} --compiler-runtime)")# -verbose=2)"  COMPONENT binary_application)
+	install(CODE "execute_process(COMMAND ${DEPLOYQT_PROGRAM} \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/${EXECUTABLE_NAME}.exe\" --qmldir=${LINPHONE_QML_DIR} --plugindir ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/plugins --compiler-runtime)")# -verbose=2)"  COMPONENT binary_application)
+#Workaround windeployqt bug on webview plugin : folder "webview" can be in bin/ where it should be in bin/plugins. Else, we got "Webview plugin not found"
+
+	
 #On Windows, OpenLDAP couldn't be build with static libraries. Add them in installation for deployment.
 	find_program(MSYS2_PROGRAM
 		NAMES msys2_shell.cmd
@@ -296,6 +300,8 @@ else()# Not Windows and Apple
 		LIBRARY DESTINATION "${LIBDIR}"
 		RUNTIME DESTINATION "${LIBDIR}"
 		)
+# WEBVIEW
+	install(FILES "${QT_PATH}/plugins/webview/libqtwebview_webengine.so" DESTINATION "plugins/webview")	#Workaround : linuxdeploy doesn't deploy it	
 endif ()
 
 
