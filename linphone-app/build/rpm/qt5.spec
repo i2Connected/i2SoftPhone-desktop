@@ -10,6 +10,7 @@
 %define _qt5_libdir %{_qt5_dir}/lib
 %define _qt5_plugindir %{_qt5_dir}/plugins
 %define _qt5_translationdir %{_qt5_dir}/translations
+%define _qt5_resourcedir %{_qt5_dir}/resources
 
 Name: linphone-qt
 Summary: Qt5
@@ -47,7 +48,7 @@ Qt is a software toolkit for developing applications.
   -confirm-license \
   -release \
   -shared \
-  -c++std c++11 \
+  -c++std c++14 \
   -silent \
   -nomake examples \
   -nomake tests \
@@ -94,6 +95,11 @@ make install INSTALL_ROOT=%{buildroot} -j12
 %{_qt5_libdir}/libQt5*.so*
 %{_qt5_plugindir}/*/*.so*
 %{_qt5_translationdir}/
+%{_qt5_resourcedir}/qtwebengine*_resources*
+%{_qt5_resourcedir}/icudtl.dat
+%{_qt5_dir}/libexec/QtWebEngineProcess
+
+
 
 %files devel
 %defattr(-,root,root,-)
