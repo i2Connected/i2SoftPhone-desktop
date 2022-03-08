@@ -146,6 +146,11 @@
         <source>createAppSipAccount</source>
         <translation>Készítsen egy %1 fiók</translation>
     </message>
+    <message>
+        <source>homeCgu</source>
+        <extracomment>&apos;I accept %1&apos;s %2terms of use%3 and %4privacy policy%5&apos; : where %1 is the vendor name and other %n are internal keywords that encapsulate links.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>AssistantModel</name>
@@ -508,6 +513,14 @@ A kiszolgáló URL-je nincs konfigurálva.</translation>
         <extracomment>&quot;%1 have nothing received&quot; Little message to indicate the state of a message</extracomment>
         <translation>%1 nem kapta meg az üzenetet</translation>
         <extra-Context>%1 is someone. The state is that the message hasn&apos;t been delivered.</extra-Context>
+    </message>
+</context>
+<context>
+    <name>ChatForwardMessage</name>
+    <message>
+        <source>Forwarded</source>
+        <extracomment>&apos;Forwarded&apos; : Header on a message that contains a forward.</extracomment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1553,6 +1566,13 @@ Kattintson ide: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
         <extracomment>&apos;Ephemeral messages have been updated: %1&apos; : Little message to show on the event when ephemeral has been updated. %1 is a date time</extracomment>
         <translation>Mulandó üzenetek frissítve: %1</translation>
     </message>
+    <message numerus="yes">
+        <source>unreadMessageNotice</source>
+        <extracomment>&apos;%1 unread messages&apos; : Little message to show on an event where unread messages begin.</extracomment>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>Notifier</name>
@@ -2261,6 +2281,11 @@ Kattintson ide: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>assistantSupportsPhoneNumbersLabel</source>
         <translation>Támogatja a telefonszámokat</translation>
+    </message>
+    <message>
+        <source>defaultDeviceNameLabel</source>
+        <extracomment>&apos;Device Name&apos; : Label for setting the device name.</extracomment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

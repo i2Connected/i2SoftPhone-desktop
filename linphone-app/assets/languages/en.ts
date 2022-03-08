@@ -7,6 +7,11 @@
         <source>ok</source>
         <translation>OK</translation>
     </message>
+    <message>
+        <source>aboutTranslation</source>
+        <extracomment>&apos;Help us translate %1&apos; : %1 is the application name</extracomment>
+        <translation>Help us translate %1</translation>
+    </message>
 </context>
 <context>
     <name>ActivateAppSipAccountWithEmail</name>
@@ -145,6 +150,11 @@
     <message>
         <source>createAppSipAccount</source>
         <translation>CREATE A %1 ACCOUNT</translation>
+    </message>
+    <message>
+        <source>homeCgu</source>
+        <extracomment>&apos;I accept %1&apos;s %2terms of use%3 and %4privacy policy%5&apos; : where %1 is the vendor name and other %n are internal keywords that encapsulate links.</extracomment>
+        <translation>I accept %1&apos;s %2terms of use%3 and %4privacy policy%5</translation>
     </message>
 </context>
 <context>
@@ -509,6 +519,14 @@ Server URL not configured.</translation>
         <extracomment>&quot;%1 have nothing received&quot; Little message to indicate the state of a message</extracomment>
         <translation>%1 did not receive the message</translation>
         <extra-Context>%1 is someone. The state is that the message hasn&apos;t been delivered.</extra-Context>
+    </message>
+</context>
+<context>
+    <name>ChatForwardMessage</name>
+    <message>
+        <source>Forwarded</source>
+        <extracomment>&apos;Forwarded&apos; : Header on a message that contains a forward.</extracomment>
+        <translation>Forwarded</translation>
     </message>
 </context>
 <context>
@@ -1563,6 +1581,14 @@ Click here: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
         <extracomment>&apos;Ephemeral messages have been updated: %1&apos; : Little message to show on the event when ephemeral has been updated. %1 is a date time</extracomment>
         <translation>Ephemeral messages have been updated: %1</translation>
     </message>
+    <message numerus="yes">
+        <source>unreadMessageNotice</source>
+        <extracomment>&apos;%1 unread messages&apos; : Little message to show on an event where unread messages begin.</extracomment>
+        <translation>
+            <numerusform>%1 unread message</numerusform>
+            <numerusform>%1 unread messages</numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>Notifier</name>
@@ -2295,6 +2321,11 @@ Click here: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
         <source>assistantSupportsPhoneNumbersLabel</source>
         <translation>Supports phone numbers</translation>
     </message>
+    <message>
+        <source>defaultDeviceNameLabel</source>
+        <extracomment>&apos;Device Name&apos; : Label for setting the device name.</extracomment>
+        <translation>Device name</translation>
+    </message>
 </context>
 <context>
     <name>SettingsSipAccountsEdit</name>
@@ -2603,6 +2634,16 @@ Click here: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
         <extracomment>&apos;Mipmap filtering gives better visual quality when scaling down compared to smooth, but it may come at a performance cost (both when initializing the image and during rendering).&apos; : Second line of a tooltip about Mipmap mode.</extracomment>
         <translation>Mipmap filtering gives better visual quality when scaling down compared to smooth, but it may come at a performance cost (both when initializing the image and during rendering).</translation>
     </message>
+    <message>
+        <source>minimalTimelineFilterLabel</source>
+        <extracomment>&apos;Minimal Timeline filter&apos;</extracomment>
+        <translation>Minimal Timeline filter</translation>
+    </message>
+    <message>
+        <source>minimalTimelineFilterTooltip</source>
+        <extracomment>&apos;Show a minimal version of what to display in timeline.&apos; :</extracomment>
+        <translation>Show a minimal version of what to display in timeline.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsVideo</name>
@@ -2802,6 +2843,11 @@ Click here: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
         <extracomment>&apos;No Ephemerals&apos; : Filter item. Selecting it will hide all chat rooms where the ephemeral mode has been enabled.</extracomment>
         <translation>Without ephemerals</translation>
     </message>
+    <message>
+        <source>timelineFilterConferences</source>
+        <extracomment>&apos;Conferences&apos; : Filter item. Selecting it will show all conferences.</extracomment>
+        <translation>Conferences</translation>
+    </message>
 </context>
 <context>
     <name>UseAppSipAccount</name>
@@ -2853,6 +2899,7 @@ Click here: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <name>UseOtherSipAccount</name>
     <message>
         <source>confirmAction</source>
+        <extracomment>&apos;Use&apos; : Popup confirmation for a form</extracomment>
         <translation>USE</translation>
     </message>
     <message>
@@ -2882,6 +2929,26 @@ Click here: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>addOtherSipAccountError</source>
         <translation>Unable to add this account.</translation>
+    </message>
+    <message>
+        <source>understandAction</source>
+        <extracomment>&apos;I understand&apos; : Popup confirmation for a warning</extracomment>
+        <translation>I understand</translation>
+    </message>
+    <message>
+        <source>warningFeatures</source>
+        <extracomment>&apos;Some features require a Linphone account, such as group messaging or ephemeral messaging.&apos; : Warning text about features.</extracomment>
+        <translation>Some features require a Linphone account, such as group messaging or ephemeral messaging.</translation>
+    </message>
+    <message>
+        <source>warningThirdParty</source>
+        <extracomment>&apos;These features are hidden when you register with a third party SIP account.&apos; : Warning text for using third party account.</extracomment>
+        <translation>These features are hidden when you register with a third party SIP account.</translation>
+    </message>
+    <message>
+        <source>warningContact</source>
+        <extracomment>&apos;To enable it in a commercial project, please contact us.&apos; : Warning text for contacting about enabling features.</extracomment>
+        <translation>To enable it in a commercial project, please contact us.</translation>
     </message>
 </context>
 <context>

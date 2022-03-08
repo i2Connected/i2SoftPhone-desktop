@@ -10,6 +10,10 @@ QtObject {
 	property string sectionName : 'Chat'
 	property color color: ColorsList.add(sectionName, 'q').color
 	property string copyTextIcon : 'copy_custom'
+	property int rightButtonMargin: 15
+	property int rightButtonSize: 30
+	property int rightButtonLMargin: 10
+	property int separatorHeight: 2
 	
 	property QtObject sectionHeading: QtObject {
 		property int padding: 5
@@ -26,12 +30,28 @@ QtObject {
 		}
 	}
 	
+	property QtObject gotToBottom: QtObject{
+		property string name: 'goToBottom'
+		property string icon: 'move_to_bottom_custom'
+		property int iconSize: 30
+		property color backgroundNormalColor : ColorsList.addImageColor(sectionName+'_'+name+'_b_n', icon, 's_n_b_bg').color
+		property color backgroundHoveredColor : ColorsList.addImageColor(sectionName+'_'+name+'_b_h', icon, 's_h_b_bg').color
+		property color backgroundPressedColor : ColorsList.addImageColor(sectionName+'_'+name+'_b_p', icon, 's_p_b_bg').color
+		property color foregroundNormalColor : ColorsList.addImageColor(sectionName+'_'+name+'_f_n', icon, 's_n_b_fg').color
+		property color foregroundHoveredColor : ColorsList.addImageColor(sectionName+'_'+name+'_f_h', icon, 's_h_b_fg').color
+		property color foregroundPressedColor : ColorsList.addImageColor(sectionName+'_'+name+'_f_p', icon, 's_p_b_fg').color
+	}
+	
 	property QtObject sendArea: QtObject {
 		property int height: 80
 		
 		property QtObject border: QtObject {
 			property color color: ColorsList.add(sectionName+'_send_border', 'f').color
 			property int width: 1
+		}
+		property QtObject backgroundBorder: QtObject {
+			property color color: ColorsList.add(sectionName+'_send_background_border', 'ag').color
+			property int width: 2
 		}
 	}
 	
@@ -52,7 +72,7 @@ QtObject {
 		property int pointSize: Units.dp * 9
 		property int headerPointSize: Units.dp * 9
 		property QtObject closeButton: QtObject{
-			property int iconSize: 30
+			property int iconSize: rightButtonSize
 			property string name : 'close'
 			property string icon : 'close_custom'
 			property color backgroundNormalColor : ColorsList.addImageColor(sectionName+'_'+replyPreviewObject.name+'_'+name+'_b_n', icon, 'l_n_b_bg').color
@@ -81,6 +101,11 @@ QtObject {
 		property int rightMargin: 18
 		property int lineHeight: 30
 		property int metaWidth: 40
+		
+		property QtObject separator: QtObject {
+			property color color: ColorsList.add(sectionName+'_separator_border', 'g10').color
+			property int width: 2
+		}
 		
 		property QtObject menu: QtObject {
 			property int iconSize: 22

@@ -26,13 +26,16 @@ Column{
 	property string lastTextSelected
 	property alias textColor: message.color
 	property alias textFont: message.font
+	
+	signal rightClicked()
+	
 	height: fitHeight
 	anchors.left: parent.left
 	anchors.right: parent.right
 	
 	spacing: 0
 	
-	property bool isOutgoing : contentModel && (contentModel.chatMessageModel.isOutgoing  || contentModel.chatMessageModel.state == LinphoneEnums.ChatMessageStateIdle);
+	property bool isOutgoing : contentModel && contentModel.chatMessageModel && (contentModel.chatMessageModel.isOutgoing  || contentModel.chatMessageModel.state == LinphoneEnums.ChatMessageStateIdle);
 	
 	ChatAudioMessage{
 		id: audioMessage
@@ -49,5 +52,6 @@ Column{
 		contentModel: mainItem.contentModel
 		onLastTextSelectedChanged: mainItem.lastTextSelected = lastTextSelected
 		color: isOutgoing ? ChatStyle.entry.message.outgoing.text.color : ChatStyle.entry.message.incoming.text.color
+		onRightClicked: mainItem.rightClicked()
 	}
 }

@@ -172,26 +172,12 @@ DialogPlus {
 						chatRoomModel:dialog.chatRoomModel
 						onAddressAdded: smartSearchBar.addAddressToIgnore(sipAddress)
 						onAddressRemoved: smartSearchBar.removeAddressToIgnore(sipAddress)
+						showMe: dialog.adminMode
 						
 					}
 					
-					onEntryClicked: {//actions[0].handler(entry)
-						if(tooltip.delay>0) {
-							tooltip.oldDelay = tooltip.delay
-							tooltip.delay = 0
-						}
-						tooltip.show(entry.sipAddress, -1);
-					}
-					ToolTip{
-						id:tooltip	
-						property int oldDelay : 0
-						MouseArea{
-							anchors.fill:parent
-							onClicked : {
-								tooltip.hide()
-								tooltip.delay = tooltip.oldDelay
-							}
-						}					
+					onEntryClicked: {
+						contactItem.showContactAddress = !contactItem.showContactAddress
 					}
 				}
 			}

@@ -7,6 +7,7 @@ import Linphone 1.0
 import Linphone.Styles 1.0
 import Utils 1.0
 import UtilsCpp 1.0
+import LinphoneEnums 1.0
 
 import Units 1.0
 
@@ -31,69 +32,69 @@ Rectangle {
 	
 	color: ChatStyle.color
 	
+	function positionViewAtIndex(index){
+		chat.bindToEnd = false
+		chat.positionViewAtIndex(index, ListView.Beginning)
+	}
+	
+	function goToMessage(message){
+		positionViewAtIndex(container.proxyModel.loadTillMessage(message))
+	}
+	
 	ColumnLayout {
 		anchors.fill: parent
 		spacing: 0
 		
 		ScrollableListView {
 			id: chat
-			
 			// -----------------------------------------------------------------------
-			
 			property bool bindToEnd: false
-			property bool tryToLoadMoreEntries: true
-			//property var sipAddressObserver: SipAddressesModel.getSipAddressObserver(proxyModel.fullPeerAddress, proxyModel.fullLocalAddress)
+			property bool displaying: false
+			property bool loadingEntries: (container.proxyModel.chatRoomModel && container.proxyModel.chatRoomModel.entriesLoading) || displaying
+			property bool tryToLoadMoreEntries: loadingEntries || remainingLoadersCount>0
+			property bool isMoving : false	// replace moving read-only property to allow using movement signals.
 			
-			// -----------------------------------------------------------------------
+// Load optimizations
+			property int remainingLoadersCount: 0
+			property int syncLoaderBatch: 50	// batch of simultaneous loaders on synchronous mode
+//------------------------------------
+						
+			onLoadingEntriesChanged: {
+				if( loadingEntries && !displaying)
+					displaying = true
+			}
+			onBindToEndChanged: if( bindToEnd){
+				markAsReadTimer.start()
+			}
+			Timer{
+				id: markAsReadTimer
+				interval: 5000
+				repeat: false
+				running: false
+				onTriggered: if(container.proxyModel.chatRoomModel) container.proxyModel.chatRoomModel.resetMessageCount()
+			}
+			
 			Layout.fillHeight: true
 			Layout.fillWidth: true
 			
 			highlightFollowsCurrentItem: false
-			
+			// Use moving event => this is a user action.
+			onIsMovingChanged:{
+				if(!chat.isMoving && chat.atYBeginning && !chat.loadingEntries){// Moving has stopped. Check if we are at beginning
+					chat.displaying = true
+					container.proxyModel.loadMoreEntriesAsync()
+				}
+			}
 			section {
 				criteria: ViewSection.FullString
 				delegate: sectionHeading
 				property: '$sectionDate'
 			}
-			
-			Timer {
-				id: loadMoreEntriesDelayer
-				interval: 1
-				repeat: false
-				running: false
-				
-				onTriggered: {
-					chat.positionViewAtBeginning()
-					container.proxyModel.loadMoreEntries()
-				}
-			}
-			Timer {
-				// Delay each search by 100ms
-				id: endOfLoadMoreEntriesDelayer
-				interval: 100
-				repeat: false
-				running: false
-				
-				onTriggered: {
-					if(chat.atYBeginning){// We are still at the beginning. Try to continue searching
-						loadMoreEntriesDelayer.start()
-					}else// We are not at the begining. New search can be done by moving to the top.
-						chat.tryToLoadMoreEntries = false
-				}
-			}
-			
 			// -----------------------------------------------------------------------
 			
 			Component.onCompleted: Logic.initView()
-			
-			onContentYChanged: {
-				if (chat.atYBeginning && !chat.tryToLoadMoreEntries) {
-					chat.tryToLoadMoreEntries = true// Show busy indicator
-					loadMoreEntriesDelayer.start()// Let GUI time to the busy indicator to be shown
-				}
-			}
-			onMovementEnded: Logic.handleMovementEnded()
-			onMovementStarted: Logic.handleMovementStarted()
+			onMovementStarted: {Logic.handleMovementStarted(); chat.isMoving = true}
+			onMovementEnded: {Logic.handleMovementEnded(); chat.isMoving = false}
 			
 			// -----------------------------------------------------------------------
 			
@@ -104,12 +105,10 @@ Rectangle {
 				// the position is set at end and it can be possible to load
 				// more entries.
 				onEntryTypeFilterChanged: Logic.initView()
+				
 				onMoreEntriesLoaded: {
-					Logic.handleMoreEntriesLoaded(n)
-					if(n>1)// New entries : delay the end
-						endOfLoadMoreEntriesDelayer.start()
-					else// No new entries, we can stop without waiting
-						chat.tryToLoadMoreEntries = false
+					Logic.handleMoreEntriesLoaded(n)// move view to n - 1 item
+					chat.displaying = false
 				}
 			}
 			
@@ -258,9 +257,23 @@ Rectangle {
 							// Display content.
 							Loader {
 								id: loader
+								height: (item !== null && typeof(item)!== 'undefined')? item.height: 0
 								Layout.fillWidth: true
 								source: Logic.getComponentFromEntry($chatEntry)
+								property int loaderIndex: 0	// index of loader from remaining loaders
+								property int remainingIndex : loaderIndex % ((chat.remainingLoadersCount) / chat.syncLoaderBatch) != 0	// Check loader index to remaining loader.
+								onRemainingIndexChanged: if( remainingIndex == 0 && asynchronous) asynchronous = false
+								asynchronous: true
+							
+								onStatusChanged:	if( status == Loader.Ready) {
+														remainingIndex = -1	// overwrite to remove signal changed. That way, there is no more binding loops.
+														--chat.remainingLoadersCount // Loader is ready: remove one from remaining count.
+													}
+								
+								Component.onCompleted: loaderIndex = ++chat.remainingLoadersCount	// on new Loader : one more remaining
+								Component.onDestruction: if( status != Loader.Ready) --chat.remainingLoadersCount	// Remove remaining count if not loaded
 							}
+							
 							Connections{
 								target: loader.item
 								ignoreUnknownSignals: true
@@ -290,148 +303,208 @@ Rectangle {
 										}
 									})
 								}
+								
+								onGoToMessage:{
+									container.goToMessage(message)	// sometimes, there is no access to chat id (maybe because of cleaning component while loading new items). Use a global intermediate.
+								}
 							}
 						}
 					}
 				}
 			}
 			footer: Item{
+				implicitHeight: composersItem.implicitHeight
+				width: parent.width
 				Text {
-					property var composers : container.proxyModel.composers
+					id: composersItem
+					property var composers : container.proxyModel.chatRoomModel ? container.proxyModel.chatRoomModel.composers : undefined
+					property int count : composers && composers.length ? composers.length : 0
 					color: ChatStyle.composingText.color
 					font.pointSize: ChatStyle.composingText.pointSize
 					height: visible ? undefined : 0
 					leftPadding: ChatStyle.composingText.leftPadding
-					visible: composers.length > 0 && (!proxyModel.chatRoomModel.haveEncryption && SettingsModel.standardChatEnabled || proxyModel.chatRoomModel.haveEncryption && SettingsModel.secureChatEnabled)
+					visible: count > 0 && ( (!proxyModel.chatRoomModel.haveEncryption && SettingsModel.standardChatEnabled)
+														 || (proxyModel.chatRoomModel.haveEncryption && SettingsModel.secureChatEnabled) )
 					wrapMode: Text.Wrap
 					//: '%1 is typing...' indicate that someone is composing in chat
-					text:(composers.length==0?'': qsTr('chatTyping','',composers.length).arg(container.proxyModel.getDisplayNameComposers()))
+					text:(count==0?'': qsTr('chatTyping','',count).arg(container.proxyModel.getDisplayNameComposers()))
+				}
+			}
+						
+			ActionButton{
+				id: gotToBottomButton
+				anchors.bottom: parent.bottom
+				anchors.bottomMargin: 10
+				anchors.right: parent.right
+				anchors.rightMargin: 35
+				visible: chat.isIndexAfter(chat.count-1)
+				onVisibleChanged: updateMarkAsRead()
+				Component.onCompleted: updateMarkAsRead()
+				function updateMarkAsRead(){
+					if(!visible)
+						container.proxyModel.markAsReadEnabled = true
+				}
+				
+				Connections{
+					target: container.proxyModel
+					onMarkAsReadEnabledChanged: if( !container.proxyModel.markAsReadEnabled)
+													gotToBottomButton.updateMarkAsRead()
+				}
+				
+				isCustom: true
+				backgroundRadius: width/2
+				colorSet: ChatStyle.gotToBottom
+				onClicked: {
+						chat.bindToEnd = true
+					}
+				MessageCounter{
+					anchors.left: parent.right
+					anchors.bottom: parent.top
+					anchors.bottomMargin: 0
+					anchors.leftMargin: -14
+					count: container.proxyModel.chatRoomModel ? container.proxyModel.chatRoomModel.unreadMessagesCount : 0
+					showOnlyNumber: true
+					iconSize: 15
+					pointSize: Units.dp * 7
 				}
 			}
 			
-			ChatMessagePreview{
-				id: chatMessagePreview
-				replyChatRoomModel: proxyModel.chatRoomModel
-			}
-			Rectangle{
-				id: messageBlock
-				height: 32
-				anchors.left: parent.left
-				anchors.right: parent.right
-				anchors.bottom: parent.bottom
-				anchors.leftMargin: ChatStyle.entry.leftMargin
-				anchors.rightMargin: ChatStyle.entry.leftMargin
-				anchors.bottomMargin: ChatStyle.entry.bottomMargin
-				color: ChatStyle.messageBanner.color
-				radius: 10
-				state: "hidden"
-				Timer{
-					id: hideNoticeBanner
-					interval: 4000
-					repeat: false
-					onTriggered: messageBlock.state = "hidden"
-				}
-				RowLayout{
-					anchors.centerIn: parent
-					spacing: 5
-					Icon{
-						icon: ChatStyle.copyTextIcon
-						overwriteColor: ChatStyle.messageBanner.textColor
-						iconSize: 20
-					}
-					Text{
-						Layout.fillHeight: true
-						Layout.fillWidth: true
-						text: container.noticeBannerText
-						font {
-							pointSize: ChatStyle.messageBanner.pointSize
-						}
-						color: ChatStyle.messageBanner.textColor
-					}
-				}
-				states: [
-					State {
-						name: "hidden"
-						PropertyChanges { target: messageBlock; opacity: 0 }
-					},
-					State {
-						name: "showed"
-						PropertyChanges { target: messageBlock; opacity: 1 }
-					}
-				]
-				transitions: [
-					Transition {
-						from: "*"; to: "showed"
-						SequentialAnimation{
-							NumberAnimation{ properties: "opacity"; easing.type: Easing.OutBounce; duration: 500 }
-							ScriptAction{ script: hideNoticeBanner.start()}	
-						}
-					},
-					Transition {
-						SequentialAnimation{
-							NumberAnimation{ properties: "opacity"; duration: 1000 }
-							ScriptAction{ script: container.noticeBannerText = '' }
-						}
-					}
-				]
-			}
+			
 		}
-		
-		// -------------------------------------------------------------------------
-		// Send area.
-		// -------------------------------------------------------------------------
-		
-		Borders {
-			id: textAreaBorders
+		Rectangle {
+			id: bottomChatBackground
 			Layout.fillWidth: true
-			Layout.preferredHeight: textArea.height
-			
-			borderColor: ChatStyle.sendArea.border.color
-			topWidth: ChatStyle.sendArea.border.width
-			visible: proxyModel.chatRoomModel && !proxyModel.chatRoomModel.hasBeenLeft && (!proxyModel.chatRoomModel.haveEncryption && SettingsModel.standardChatEnabled || proxyModel.chatRoomModel.haveEncryption && SettingsModel.secureChatEnabled)
-			
-			
-			DroppableTextArea {
-				id: textArea
-				
-				enabled:proxyModel && proxyModel.chatRoomModel ? !proxyModel.chatRoomModel.hasBeenLeft:false
-				isEphemeral : proxyModel && proxyModel.chatRoomModel ? proxyModel.chatRoomModel.ephemeralEnabled:false
-				
-				anchors.left: parent.left
-				anchors.right: parent.right
-				anchors.bottom: parent.bottom
-				
-				height:ChatStyle.sendArea.height + ChatStyle.sendArea.border.width
-				minimumHeight:ChatStyle.sendArea.height + ChatStyle.sendArea.border.width
-				maximumHeight:container.height/2
-				
-				dropEnabled: SettingsModel.fileTransferUrl.length > 0
-				dropDisabledReason: qsTr('noFileTransferUrl')
-				placeholderText: qsTr('newMessagePlaceholder')
-				
-				onDropped: Logic.handleFilesDropped(files)
-				onTextChanged: Logic.handleTextChanged(text)
-				onValidText: {
-					textArea.text = ''
-					chat.bindToEnd = true
-					if(proxyModel.chatRoomModel) {
-						proxyModel.sendMessage(text)
-					}else{
-						console.log("Peer : " +proxyModel.peerAddress+ "/"+chat.model.peerAddress)
-						proxyModel.chatRoomModel = CallsListModel.createChat(proxyModel.peerAddress)
-						proxyModel.sendMessage(text)
-					}
-				}
-				onAudioRecordRequest: RecorderManager.resetVocalRecorder()
-				Component.onCompleted: {text = proxyModel.cachedText; cursorPosition=text.length}
+			Layout.preferredHeight: textAreaBorders.height + chatMessagePreview.height+messageBlock.height
+			color: ChatStyle.sendArea.backgroundBorder.color
+			clip: true
+			ColumnLayout{
+				anchors.fill: parent				
+				spacing: 0
 				Rectangle{
-					anchors.fill:parent
-					color:'white'
-					opacity: 0.5
-					visible:!textArea.enabled
+					id: messageBlock
+					onHeightChanged: height = Layout.preferredHeight
+					Layout.preferredHeight: visible && opacity > 0 ? 32 : 0
+					Layout.fillWidth: true
+					Layout.leftMargin: ChatStyle.entry.leftMargin
+					Layout.rightMargin: ChatStyle.entry.rightMargin
+					color: ChatStyle.messageBanner.color
+					radius: 10
+					state: "hidden"
+					Timer{
+						id: hideNoticeBanner
+						interval: 4000
+						repeat: false
+						onTriggered: messageBlock.state = "hidden"
+					}
+					RowLayout{
+						anchors.centerIn: parent
+						spacing: 5
+						Icon{
+							icon: ChatStyle.copyTextIcon
+							overwriteColor: ChatStyle.messageBanner.textColor
+							iconSize: 20
+						}
+						Text{
+							Layout.fillHeight: true
+							Layout.fillWidth: true
+							text: container.noticeBannerText
+							font {
+								pointSize: ChatStyle.messageBanner.pointSize
+							}
+							color: ChatStyle.messageBanner.textColor
+						}
+					}
+					states: [
+						State {
+							name: "hidden"
+							PropertyChanges { target: messageBlock; opacity: 0 }
+						},
+						State {
+							name: "showed"
+							PropertyChanges { target: messageBlock; opacity: 1 }
+						}
+					]
+					transitions: [
+						Transition {
+							from: "*"; to: "showed"
+							SequentialAnimation{
+								NumberAnimation{ properties: "opacity"; easing.type: Easing.OutBounce; duration: 500 }
+								ScriptAction{ script: hideNoticeBanner.start()}	
+							}
+						},
+						Transition {
+							SequentialAnimation{
+								NumberAnimation{ properties: "opacity"; duration: 1000 }
+								ScriptAction{ script: container.noticeBannerText = '' }
+							}
+						}
+					]
+				}// MessageBlock
+				ChatMessagePreview{
+						id: chatMessagePreview
+						Layout.fillWidth: true
+						Layout.leftMargin: ChatStyle.sendArea.backgroundBorder.width
+						maxHeight: container.height - textAreaBorders.height
+						replyChatRoomModel: proxyModel.chatRoomModel
+						
 				}
-			}
-		}
+				// -------------------------------------------------------------------------
+				// Send area.
+				// -------------------------------------------------------------------------
+				
+				Borders {
+					id: textAreaBorders
+					Layout.fillWidth: true
+					Layout.preferredHeight: textArea.height
+					Layout.leftMargin: ChatStyle.sendArea.backgroundBorder.width
+					borderColor: ChatStyle.sendArea.border.color
+					topWidth: ChatStyle.sendArea.border.width
+					visible: proxyModel.chatRoomModel && !proxyModel.chatRoomModel.hasBeenLeft && (!proxyModel.chatRoomModel.haveEncryption && SettingsModel.standardChatEnabled || proxyModel.chatRoomModel.haveEncryption && SettingsModel.secureChatEnabled)
+					
+					DroppableTextArea {
+						id: textArea
+						
+						enabled:proxyModel && proxyModel.chatRoomModel ? !proxyModel.chatRoomModel.hasBeenLeft:false
+						isEphemeral : proxyModel && proxyModel.chatRoomModel ? proxyModel.chatRoomModel.ephemeralEnabled:false
+						
+						anchors.left: parent.left
+						anchors.right: parent.right
+						anchors.bottom: parent.bottom
+						
+						height:ChatStyle.sendArea.height + ChatStyle.sendArea.border.width
+						minimumHeight:ChatStyle.sendArea.height + ChatStyle.sendArea.border.width
+						maximumHeight:container.height/2
+						
+						dropEnabled: SettingsModel.fileTransferUrl.length > 0
+						dropDisabledReason: qsTr('noFileTransferUrl')
+						placeholderText: qsTr('newMessagePlaceholder')
+						recordAudioToggled: RecorderManager.haveVocalRecorder && RecorderManager.getVocalRecorder().state != LinphoneEnums.RecorderStateClosed
+						
+						onDropped: Logic.handleFilesDropped(files)
+						onTextChanged: Logic.handleTextChanged(text)
+						onValidText: {
+							textArea.text = ''
+							chat.bindToEnd = true
+							if(proxyModel.chatRoomModel) {
+								proxyModel.sendMessage(text)
+							}else{
+								console.log("Peer : " +proxyModel.peerAddress+ "/"+chat.model.peerAddress)
+								proxyModel.chatRoomModel = CallsListModel.createChat(proxyModel.peerAddress)
+								proxyModel.sendMessage(text)
+							}
+						}
+						onAudioRecordRequest: RecorderManager.resetVocalRecorder()
+						Component.onCompleted: {text = proxyModel.cachedText; cursorPosition=text.length}
+						Rectangle{
+							anchors.fill:parent
+							color:'white'
+							opacity: 0.5
+							visible:!textArea.enabled
+						}
+					}
+				}// Send Area
+			}// ColumnLayout
+		}// Bottom background
 	}
 	
 	
@@ -449,3 +522,4 @@ Rectangle {
 	}
 	
 }
+

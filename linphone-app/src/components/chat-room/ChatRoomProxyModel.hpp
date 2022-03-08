@@ -47,22 +47,25 @@ class ChatRoomProxyModel : public QSortFilterProxyModel {
 	Q_PROPERTY(QString cachedText READ getCachedText)
 	
 	Q_PROPERTY(QString filterText MEMBER mFilterText WRITE setFilterText NOTIFY filterTextChanged)
+	Q_PROPERTY(bool markAsReadEnabled READ markAsReadEnabled WRITE enableMarkAsRead NOTIFY markAsReadEnabledChanged)// Focus is at end of the list. Used to reset message count if not at end
 	
 public:
 	ChatRoomProxyModel (QObject *parent = Q_NULLPTR);
 	
+	int getEntryTypeFilter ();
+	Q_INVOKABLE void setEntryTypeFilter (int type);
+	
 	Q_INVOKABLE QString getDisplayNameComposers()const;
 	Q_INVOKABLE QVariant getAt(int row);
 	
+	
+	Q_INVOKABLE void loadMoreEntriesAsync ();
 	Q_INVOKABLE void loadMoreEntries ();
-	Q_INVOKABLE void setEntryTypeFilter (int type);
 	
 	Q_INVOKABLE void removeAllEntries ();
 	Q_INVOKABLE void removeRow (int index);
 	
 	Q_INVOKABLE void sendMessage (const QString &message);
-	
-	Q_INVOKABLE void sendFileMessage (const QString &path);
 	
 	Q_INVOKABLE void forwardMessage(ChatMessageModel * model);
 	
@@ -72,12 +75,18 @@ public:
 	
 	Q_INVOKABLE void setFilterText(const QString& text);
 	
+	Q_INVOKABLE int loadTillMessage(ChatMessageModel * message);// Load all entries till message and return its index in displayed list (-1 if not found)
+	
+public slots:
+	void onMoreEntriesLoaded(const int& count);
+	
 signals:
 	void peerAddressChanged (const QString &peerAddress);
 	void localAddressChanged (const QString &localAddress);
 	void fullPeerAddressChanged (const QString &fullPeerAddress);
 	void fullLocalAddressChanged (const QString &fullLocalAddress);
 	bool isRemoteComposingChanged ();
+	void markAsReadEnabledChanged();
 	//bool isSecureChanged(bool secure);
 	
 	void chatRoomModelChanged();
@@ -104,6 +113,9 @@ private:
 	QString getFullLocalAddress () const;
 	void setFullLocalAddress (const QString &localAddress);
 	
+	bool markAsReadEnabled() const;
+	void enableMarkAsRead(const bool& enable);
+	
 	//bool isSecure () const;
 	//void setIsSecure (const int &secure);
 	
@@ -123,12 +135,14 @@ private:
 	void handleMessageSent (const std::shared_ptr<linphone::ChatMessage> &message);
 	
 	int mMaxDisplayedEntries = EntriesChunkSize;
+	int mEntryTypeFilter = ChatRoomModel::EntryType::GenericEntry;
 	
 	QString mPeerAddress;
 	QString mLocalAddress;
 	QString mFullPeerAddress;
 	QString mFullLocalAddress;
 	static QString gCachedText;
+	bool mMarkAsReadEnabled;
 	
 	QString mFilterText;
 	

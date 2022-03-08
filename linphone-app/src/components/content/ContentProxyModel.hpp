@@ -41,6 +41,10 @@ public:
 	Q_PROPERTY(ChatMessageModel * chatMessageModel WRITE setChatMessageModel NOTIFY chatMessageModelChanged)
 	
 	void setChatMessageModel(ChatMessageModel * message);
+	Q_INVOKABLE void setContentListModel(ContentListModel * model);
+	Q_INVOKABLE void addFile(const QString& path);
+	Q_INVOKABLE void remove(ContentModel * model);
+	Q_INVOKABLE void clear();
 	
 signals:
 	void chatMessageModelChanged();
@@ -49,7 +53,7 @@ protected:
 	virtual bool filterAcceptsRow (int sourceRow, const QModelIndex &sourceParent) const override;
 	virtual bool lessThan (const QModelIndex &left, const QModelIndex &right) const override;
 	
-	std::shared_ptr<ContentListModel> mContens;
+	std::shared_ptr<ContentListModel> mContents;
 	
 };
 

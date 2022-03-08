@@ -28,18 +28,49 @@
 #include "TimelineModel.hpp"
 #include "TimelineListModel.hpp"
 
+#include "../calls/CallsListModel.hpp"
+
 #include <QDebug>
 #include <qqmlapplicationengine.h>
 #include <QTimer>
 
 
 // =============================================================================
-std::shared_ptr<TimelineModel> TimelineModel::create(std::shared_ptr<linphone::ChatRoom> chatRoom, QObject *parent){
+std::shared_ptr<TimelineModel> TimelineModel::create(std::shared_ptr<linphone::ChatRoom> chatRoom, const std::list<std::shared_ptr<linphone::CallLog>>& callLogs, QObject *parent){
 	if(!CoreManager::getInstance()->getTimelineListModel() || !CoreManager::getInstance()->getTimelineListModel()->getTimeline(chatRoom, false)) {
 		std::shared_ptr<TimelineModel> model = std::make_shared<TimelineModel>(chatRoom, parent);
 		if(model && model->getChatRoomModel()){
 			model->mSelf = model;
 			chatRoom->addListener(model);
+			// Get Max updatetime from chat room and last call event
+			auto timelineChatRoom = model->getChatRoomModel();
+			std::shared_ptr<linphone::CallLog> lastCall = nullptr;
+			QString peerAddress = timelineChatRoom->getParticipantAddress();
+			std::shared_ptr<const linphone::Address> lLocalAddress = chatRoom->getLocalAddress();
+			QString localAddress = Utils::coreStringToAppString(lLocalAddress->asStringUriOnly());
+			
+			if(callLogs.size() == 0) {
+				auto callHistory = CallsListModel::getCallHistory(peerAddress, localAddress);
+				if(callHistory.size() > 0)
+					lastCall = callHistory.front();
+			}else{// Find the last call in list
+				std::shared_ptr<linphone::Address> lPeerAddress = Utils::interpretUrl(peerAddress);
+				if( lPeerAddress && lLocalAddress){
+					auto itCallLog = std::find_if(callLogs.begin(), callLogs.end(), [lPeerAddress, lLocalAddress](std::shared_ptr<linphone::CallLog> c){
+						return c->getLocalAddress()->weakEqual(lLocalAddress) && c->getRemoteAddress()->weakEqual(lPeerAddress);
+					});
+					if( itCallLog != callLogs.end())
+						lastCall = *itCallLog;
+					}
+			}
+				
+			if(lastCall){
+				auto callDate = lastCall->getStartDate();
+				if( lastCall->getStatus() == linphone::Call::Status::Success )
+					callDate += lastCall->getDuration();
+				timelineChatRoom->setLastUpdateTime(QDateTime::fromMSecsSinceEpoch(std::max(chatRoom->getLastUpdateTime(), callDate )*1000));
+			}else
+				timelineChatRoom->setLastUpdateTime(QDateTime::fromMSecsSinceEpoch(chatRoom->getLastUpdateTime()*1000));
 			return model;
 		}
 	}
@@ -99,18 +130,14 @@ void TimelineModel::setSelected(const bool& selected){
 				<< ", isAdmin:"<< mChatRoomModel->isMeAdmin()
 				<< ", canHandleParticipants:"<< mChatRoomModel->canHandleParticipants()
 				<< ", hasBeenLeft:" << mChatRoomModel->hasBeenLeft();
-			mChatRoomModel->initEntries();
 		}
 		emit selectedChanged(mSelected);
-	}else if(selected)//  Warning, Setting to true is only when we want to force a selection. It's why we send a signal only in this case. We want avoid to change the counter on timelines that are already unselected.
-	// This only work because we want at least only one timeline selected
-		emit selectedChanged(mSelected);
-	
+	}
 }
 
 void TimelineModel::updateUnreadCount(){
-	if(mSelected){
-		mChatRoomModel->resetMessageCount();
+	if(!mSelected){// updateUnreadCount is called when selected has changed;: So if mSelected is false then we are going out of it.
+		mChatRoomModel->resetMessageCount();// The reset will appear when the chat room has "mark as read enabled", that means that we should have read messages when going out.
 	}
 }
 void TimelineModel::onDefaultProxyChanged(){

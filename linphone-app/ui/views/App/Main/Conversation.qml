@@ -455,7 +455,7 @@ ColumnLayout  {
 			anchors.leftMargin: 50
 			anchors.verticalCenter: parent.verticalCenter
 			//anchors.horizontalCenter: parent.horizontalCenter
-			visible: chatArea.tryingToLoadMoreEntries
+			running: chatArea.tryingToLoadMoreEntries
 		}
 			
 		// -------------------------------------------------------------------------
@@ -492,7 +492,7 @@ ColumnLayout  {
 			anchors.leftMargin: 50
 			anchors.topMargin: 10
 			anchors.bottomMargin: 10
-			visible: false
+			visible: true
 			
 			TextField {
 				id:searchBar
@@ -503,16 +503,24 @@ ColumnLayout  {
 				width: parent.width-14
 				icon: 'close_custom'
 				overwriteColor: ConversationStyle.filters.iconColor
-				persistentIcon: true
+				showWhenEmpty: false
 				//: 'Search in messages' : this is a placeholder when searching something in the timeline list
 				placeholderText: qsTr('searchMessagesPlaceholder')
 				
-				onTextChanged: chatRoomProxyModel.filterText = text
+				onTextChanged: searchDelay.restart()
 				onIconClicked: {
-					searchView.visible = false
-					chatRoomProxyModel.filterText = ''
+					searchView.text = ''
 				}
 				font.pointSize: ConversationStyle.filters.pointSize
+				
+				Timer{
+					id: searchDelay
+					interval: 500
+					running: false
+					onTriggered: if( searchView.visible){
+						chatRoomProxyModel.filterText = searchBar.text
+					}
+				}
 			}
 			
 		}
@@ -527,7 +535,6 @@ ColumnLayout  {
 		id:chatArea
 		Layout.fillHeight: true
 		Layout.fillWidth: true
-		
 		proxyModel: ChatRoomProxyModel {
 			id: chatRoomProxyModel
 			

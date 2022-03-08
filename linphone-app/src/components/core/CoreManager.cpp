@@ -29,6 +29,7 @@
 
 #include "app/paths/Paths.hpp"
 #include "components/calls/CallsListModel.hpp"
+#include "components/chat/ChatModel.hpp"
 #include "components/chat-room/ChatRoomModel.hpp"
 #include "components/chat-room/ChatRoomListModel.hpp"
 #include "components/contact/VcardModel.hpp"
@@ -90,6 +91,7 @@ CoreManager::~CoreManager(){
 
 void CoreManager::initCoreManager(){
 	mCallsListModel = new CallsListModel(this);
+	mChatModel = new ChatModel(this);
 	mChatRoomListModel = new ChatRoomListModel(this);
 	mContactsListModel = new ContactsListModel(this);
 	mContactsImporterListModel = new ContactsImporterListModel(this);
@@ -261,15 +263,6 @@ void CoreManager::createLinphoneCore (const QString &configPath) {
 	mCore->setVideoDisplayFilter("MSQOGL");
 	mCore->usePreviewWindow(true);
 	mCore->enableVideoPreview(false);
-	mCore->setUserAgent(
-				Utils::appStringToCoreString(
-					QStringLiteral(APPLICATION_NAME" Desktop/%1 (%2, Qt %3) LinphoneCore")
-					.arg(QCoreApplication::applicationVersion())
-					.arg(QSysInfo::prettyProductName())
-					.arg(qVersion())
-					),
-				mCore->getVersion()
-				);
 	// Force capture/display.
 	// Useful if the app was built without video support.
 	// (The capture/display attributes are reset by the core in this case.)
@@ -278,10 +271,17 @@ void CoreManager::createLinphoneCore (const QString &configPath) {
 		config->setInt("video", "capture", 1);
 		config->setInt("video", "display", 1);
 	}
+	QString userAgent = Utils::computeUserAgent(config);
+	mCore->setUserAgent(Utils::appStringToCoreString(userAgent), mCore->getVersion());
 	mCore->start();
 	setDatabasesPaths();
 	setOtherPaths();
 	mCore->enableFriendListSubscription(true);
+}
+
+void CoreManager::updateUserAgent(){
+	mCore->setUserAgent(Utils::appStringToCoreString(Utils::computeUserAgent(mCore->getConfig())), mCore->getVersion());
+	forceRefreshRegisters(); 	// After setting a new device name, REGISTER need to take account it.
 }
 
 void CoreManager::handleChatRoomCreated(const std::shared_ptr<ChatRoomModel> &chatRoomModel){
@@ -316,13 +316,20 @@ void CoreManager::migrate () {
 		auto params = account->getParams();
 		if( params->getDomain() == Constants::LinphoneDomain) {
 			auto newParams = params->clone();
+			QString accountIdentity = (newParams->getIdentityAddress() ? newParams->getIdentityAddress()->asString().c_str() : "no-identity");
 			if( rcVersion < 1) {
 				newParams->setContactParameters(Constants::DefaultContactParameters);
 				newParams->setExpires(Constants::DefaultExpires);
+				qInfo() << "Migrating " << accountIdentity << " for version 1. contact parameters = " << Constants::DefaultContactParameters << ", expires = " << Constants::DefaultExpires;
 			}
 			if( rcVersion < 2) {
 				newParams->setConferenceFactoryUri(Constants::DefaultConferenceURI);
 				setlimeServerUrl = true;
+				qInfo() << "Migrating " << accountIdentity << " for version 2. conference factory URI = " << Constants::DefaultConferenceURI;
+			}
+			if( rcVersion < 3){
+				newParams->enableCpimInBasicChatRoom(true);
+				qInfo() << "Migrating " << accountIdentity << " for version 3. enable Cpim in basic chat rooms";
 			}
 			account->setParams(newParams);
 		}

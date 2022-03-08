@@ -28,7 +28,7 @@ Rectangle{
 							  mediaProgressBar.stop()
 	onIsPlayingChanged: isPlaying ? mediaProgressBar.resume() : mediaProgressBar.stop()
 	
-	Layout.preferredHeight: 70
+	Layout.preferredHeight: visible ? ChatAudioPreviewStyle.height  : 0
 	
 	color: ChatAudioPreviewStyle.backgroundColor
 	radius: 0
@@ -54,31 +54,48 @@ Rectangle{
 	RowLayout{
 		id: lineLayout
 		anchors.fill: parent
-		spacing: 10
+		spacing: 0
 		ActionButton{
 			Layout.preferredHeight: iconSize
 			Layout.preferredWidth: iconSize
-			Layout.leftMargin: 10
+			Layout.leftMargin: 6
 			Layout.alignment: Qt.AlignVCenter
 			isCustom: true
 			colorSet: ChatAudioPreviewStyle.deleteAction
 			onClicked: RecorderManager.clearVocalRecorder()
 		}
+		VuMeter {
+			Layout.leftMargin: 6
+			Layout.rightMargin: 6
+			Timer {
+				interval: 50
+				repeat: true
+				running: audioPreviewBlock.isRecording
+				
+				onTriggered: parent.value = audioPreviewBlock.vocalRecorder.getCaptureVolume()
+			}
+			visible: audioPreviewBlock.isRecording
+		}
 		Item{
 			Layout.fillHeight: true
 			Layout.fillWidth: true
 			Layout.alignment: Qt.AlignVCenter
-			Layout.topMargin: 5
-			Layout.bottomMargin: 5
+			Layout.topMargin: 10
+			Layout.bottomMargin: 10
+			Layout.leftMargin: 6
 			MediaProgressBar{
 				id: mediaProgressBar
 				anchors.fill: parent
+				waveLeftMargin: !vocalPlayer.item && vocalRecorder ? 10 : 0
 				progressDuration: !vocalPlayer.item && vocalRecorder? vocalRecorder.getDuration() : 0
 				progressPosition: !vocalPlayer.item ? progressDuration : 0
 				value: !vocalPlayer.item ? 0.01 * progressDuration / 5 : 100
 				stopAtEnd: !audioPreviewBlock.isRecording 
 				resetAtEnd: false
 				colorSet: isRecording ? ChatAudioPreviewStyle.recordingProgressionWave : ChatAudioPreviewStyle.progressionWave
+				function progressComputation(t) {
+					return 1 * Math.sqrt(1 - (t=t/1-1)*t);
+				}
 				function refresh(){
 					if( vocalPlayer.item){
 						progressPosition = vocalPlayer.item.getPosition()
@@ -86,7 +103,10 @@ Rectangle{
 					}else{// Recording
 						progressDuration = vocalRecorder.getDuration()
 						progressPosition = progressDuration
-						value = value + 0.01
+						if( value == 0)
+							value = 1
+						else
+							value = value + Math.pow(value,-0.7)
 					}
 				}
 				onEndReached:{
@@ -104,8 +124,8 @@ Rectangle{
 		ActionButton{
 			Layout.preferredHeight: iconSize
 			Layout.preferredWidth: iconSize
-			Layout.rightMargin: 15
-			Layout.leftMargin: 5
+			Layout.rightMargin: ChatStyle.rightButtonMargin
+			Layout.leftMargin: ChatStyle.rightButtonLMargin
 			Layout.alignment: Qt.AlignVCenter
 			isCustom: true
 			colorSet: audioPreviewBlock.isRecording ? ChatAudioPreviewStyle.stopAction
@@ -114,7 +134,7 @@ Rectangle{
 			onClicked:{
 				if(audioPreviewBlock.isRecording){// Stop the record and save the file
 					audioPreviewBlock.vocalRecorder.stop()
-					//mediaProgressBar.value = 100
+					mediaProgressBar.value = 0
 				}else if(audioPreviewBlock.isPlaying){// Pause the play
 					vocalPlayer.item.pause()
 				}else{// Play the audio

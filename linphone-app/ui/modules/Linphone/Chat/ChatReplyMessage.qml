@@ -36,6 +36,7 @@ Item {
 	height: fitHeight
 	onMainChatMessageModelChanged: if( mainChatMessageModel && mainChatMessageModel.replyChatMessageModel) chatMessageModel = mainChatMessageModel.replyChatMessageModel
 	
+	signal goToMessage(ChatMessageModel message)
 	
 	ColumnLayout{
 		anchors.fill: parent
@@ -51,6 +52,10 @@ Item {
 				iconSize: ChatReplyMessageStyle.header.replyIcon.iconSize
 				height: iconSize
 				overwriteColor: ChatReplyMessageStyle.header.color
+				MouseArea{
+					anchors.fill: parent
+					onClicked: mainItem.goToMessage(mainItem.chatMessageModel)
+				}
 			}
 			Text{
 				id: headerText
@@ -62,6 +67,10 @@ Item {
 				font.family: mainItem.customFont.family
 				font.pointSize: Units.dp * (mainItem.customFont.pointSize + ChatReplyMessageStyle.header.pointSizeOffset)
 				color: ChatReplyMessageStyle.header.color
+				MouseArea{
+					anchors.fill: parent
+					onClicked: mainItem.goToMessage(mainItem.chatMessageModel)
+				}
 			}
 		}
 		Rectangle{
@@ -99,9 +108,10 @@ Item {
 				
 				color: ChatReplyMessageStyle.replyArea.foregroundColor
 			}
-			ListView {
+			ScrollableListView {
 				id: replyMessage
 				property int fitWidth : 0
+				hideScrollBars: true
 				anchors.top: usernameReplied.bottom
 				anchors.left: parent.left
 				anchors.right: parent.right
@@ -121,7 +131,13 @@ Item {
 				model: ContentProxyModel{
 					chatMessageModel: mainItem.chatMessageModel
 				}
-				height: contentHeight
+				Timer{// Delay to avoid binding loops
+					id:delayUpdate
+					interval:10
+					onTriggered: replyMessage.height = replyMessage.contentHeight
+				}
+				onContentHeightChanged: delayUpdate.restart()
+				//height: contentHeight
 				
 				delegate: ChatContent{
 					contentModel: modelData
@@ -131,6 +147,13 @@ Item {
 					onFitWidthChanged:{
 						replyMessage.updateWidth()			
 					}
+					Rectangle{
+							anchors.left: parent.left
+							anchors.right: parent.right
+							color: ChatStyle.entry.separator.color
+							height: visible ? ChatStyle.entry.separator.width : 0
+							visible: (index !== (replyMessage.count - 1)) 
+						}
 				}
 			}
 		}

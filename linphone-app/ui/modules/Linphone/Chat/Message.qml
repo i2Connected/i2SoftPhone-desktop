@@ -34,10 +34,11 @@ Item {
 	signal copySelectionDone()
 	signal replyClicked()
 	signal forwardClicked()
+	signal goToMessage(ChatMessageModel message)
 	
 	// ---------------------------------------------------------------------------
 	property string lastTextSelected
-	implicitHeight: (deliveryLayout.visible? deliveryLayout.height : 0) +(ephemeralTimerRow.visible? 16 : 0) + messageData.height +5
+	implicitHeight: (deliveryLayout.visible? deliveryLayout.height : 0) +(ephemeralTimerRow.visible? 16 : 0) + messageData.height
 	
 	Rectangle {
 		id: rectangle
@@ -87,25 +88,36 @@ Item {
 				onFitWidthChanged:{
 					rectangle.updateWidth()
 				}
+				onGoToMessage: container.goToMessage(message)
 			}
-			
 			ListView {
 				id: messageContentsList
 				anchors.left: parent.left
 				anchors.right: parent.right
+				visible: count > 0
 				spacing: 0
 				model: ContentProxyModel{
 					chatMessageModel: $chatEntry
 				}
 				height: contentHeight
-				
-				delegate: ChatContent{
-					contentModel: modelData
-					onFitWidthChanged:{
-						rectangle.updateWidth()			
+				boundsBehavior: Flickable.StopAtBounds
+				interactive: false
+				delegate: 
+					ChatContent{
+						contentModel: modelData
+						onFitWidthChanged:{
+							rectangle.updateWidth()			
+						}
+						onLastTextSelectedChanged: container.lastTextSelected= lastTextSelected
+						onRightClicked: chatMenu.open()
+						Rectangle{
+							anchors.left: parent.left
+							anchors.right: parent.right
+							color: ChatStyle.entry.separator.color
+							height: visible ? ChatStyle.entry.separator.width : 0
+							visible: (index !== (messageContentsList.count - 1)) 
+						}
 					}
-					onLastTextSelectedChanged: container.lastTextSelected= lastTextSelected
-				}
 			}
 		}
 		Row{

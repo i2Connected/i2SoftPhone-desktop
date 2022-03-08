@@ -38,6 +38,7 @@
 #include "app/paths/Paths.hpp"
 #include "app/providers/ThumbnailProvider.hpp"
 #include "components/calls/CallsListModel.hpp"
+#include "components/chat/ChatModel.hpp"
 #include "components/chat-events/ChatCallModel.hpp"
 #include "components/chat-events/ChatEvent.hpp"
 #include "components/chat-events/ChatMessageModel.hpp"
@@ -45,6 +46,8 @@
 #include "components/contact/ContactModel.hpp"
 #include "components/contact/VcardModel.hpp"
 #include "components/contacts/ContactsListModel.hpp"
+#include "components/content/ContentListModel.hpp"
+#include "components/content/ContentModel.hpp"
 #include "components/core/CoreHandlers.hpp"
 #include "components/core/CoreManager.hpp"
 #include "components/notifier/Notifier.hpp"
@@ -196,15 +199,16 @@ ChatRoomModel::ChatRoomModel (std::shared_ptr<linphone::ChatRoom> chatRoom, QObj
 	mChatRoomModelListener = std::make_shared<ChatRoomModelListener>(this, parent);
 	mChatRoom->addListener(mChatRoomModelListener);	
 	
-	setUnreadMessagesCount(mChatRoom->getUnreadMessagesCount());
-	setMissedCallsCount(0);
-	
 	// Get messages.
 	mEntries.clear();
+	
+	setUnreadMessagesCount(mChatRoom->getUnreadMessagesCount());
+	setMissedCallsCount(0);
 	
 	QElapsedTimer timer;
 	timer.start();
 	CoreHandlers *coreHandlers = mCoreHandlers.get();
+	QObject::connect(this, &ChatRoomModel::messageSent, this, &ChatRoomModel::resetMessageCount);
 	//QObject::connect(coreHandlers, &CoreHandlers::messageReceived, this, &ChatRoomModel::handleMessageReceived);
 	QObject::connect(coreHandlers, &CoreHandlers::callCreated, this, &ChatRoomModel::handleCallCreated);
 	QObject::connect(coreHandlers, &CoreHandlers::callStateChanged, this, &ChatRoomModel::handleCallStateChanged);
@@ -232,17 +236,10 @@ ChatRoomModel::ChatRoomModel (std::shared_ptr<linphone::ChatRoom> chatRoom, QObj
 				connect(contact, &ContactModel::contactUpdated, this, &ChatRoomModel::fullPeerAddressChanged);
 			}
 		}
+		
 	}else
 		mParticipantListModel = nullptr;
-	// Get Max updatetime from chat room and last call event
-	auto callHistory = CallsListModel::getCallHistory(getParticipantAddress(), Utils::coreStringToAppString(mChatRoom->getLocalAddress()->asStringUriOnly()));
-	if(callHistory.size() > 0){
-		auto callDate = callHistory.front()->getStartDate();
-		if( callHistory.front()->getStatus() == linphone::Call::Status::Success )
-			callDate += callHistory.front()->getDuration();
-		setLastUpdateTime(QDateTime::fromMSecsSinceEpoch(max(mChatRoom->getLastUpdateTime(), callDate )*1000));
-	}else
-		setLastUpdateTime(QDateTime::fromMSecsSinceEpoch(mChatRoom->getLastUpdateTime()*1000));
+	
 }
 
 ChatRoomModel::~ChatRoomModel () {
@@ -295,7 +292,7 @@ QVariant ChatRoomModel::data (const QModelIndex &index, int role) const {
 				return QVariant();
 		}
 		case Roles::SectionDate:
-			return QVariant::fromValue(mEntries[row]->mTimestamp.date());
+			return QVariant::fromValue(mEntries[row]->getTimestamp().date());
 	}
 	
 	return QVariant();
@@ -366,7 +363,7 @@ void ChatRoomModel::emitFullPeerAddressChanged(){
 //--------------------------------------------------------------------------------------------
 
 QString ChatRoomModel::getPeerAddress () const {
-	return mChatRoom ? Utils::coreStringToAppString(mChatRoom->getPeerAddress()->asStringUriOnly()) : "";
+	return mChatRoom && mChatRoom->getPeerAddress() ? Utils::coreStringToAppString(mChatRoom->getPeerAddress()->asStringUriOnly()) : "";
 }
 
 QString ChatRoomModel::getLocalAddress () const {
@@ -428,7 +425,15 @@ QString ChatRoomModel::getUsername () const {
 	username = Utils::getDisplayName(mChatRoom->getPeerAddress());
 	if(username != "")
 		return username;
-	return Utils::coreStringToAppString(mChatRoom->getPeerAddress()->asStringUriOnly());
+	auto addr = mChatRoom->getPeerAddress();
+	if( addr)
+		return Utils::coreStringToAppString(addr->asStringUriOnly());
+	else {
+		qWarning() << "ChatRoom has no peer address or address is invalid : Subject=" << mChatRoom->getSubject().c_str() 
+			<< ", created at " << QDateTime::fromSecsSinceEpoch(mChatRoom->getCreationTime())
+			<< " (" << mChatRoom.get() << ")";
+		return "";
+	}
 }
 
 QString ChatRoomModel::getAvatar () const {
@@ -482,6 +487,10 @@ bool ChatRoomModel::haveEncryption() const{
 	return mChatRoom && mChatRoom->getCurrentParams()->getEncryptionBackend() != linphone::ChatRoomEncryptionBackend::None;
 }
 
+bool ChatRoomModel::markAsReadEnabled() const{
+	return mMarkAsReadEnabled;
+}
+
 bool ChatRoomModel::isSecure() const{
 	return mChatRoom && (mChatRoom->getSecurityLevel() == linphone::ChatRoomSecurityLevel::Encrypted
 			|| mChatRoom->getSecurityLevel() == linphone::ChatRoomSecurityLevel::Safe);
@@ -514,11 +523,14 @@ bool ChatRoomModel::isCurrentProxy() const{
 bool ChatRoomModel::canHandleParticipants() const{
 	return mChatRoom->canHandleParticipants();
 }
-/*
+
 bool ChatRoomModel::getIsRemoteComposing () const {
-	return mIsRemoteComposing;
+	return mComposers.size() > 0;
 }
-*/
+
+bool ChatRoomModel::isEntriesLoading() const{
+	return mEntriesLoading;
+}
 
 std::shared_ptr<linphone::ChatRoom> ChatRoomModel::getChatRoom(){
 	return mChatRoom;
@@ -529,15 +541,37 @@ QList<QString> ChatRoomModel::getComposers(){
 }
 
 QString ChatRoomModel::getParticipantAddress(){
-	if(!isSecure())
-		return Utils::coreStringToAppString(mChatRoom->getPeerAddress()->asString());
-	else{
+	if(!isSecure()){
+		auto peerAddress = mChatRoom->getPeerAddress();
+		if( peerAddress)
+			return Utils::coreStringToAppString(peerAddress->asString());
+		else if(isConference()){
+			auto conferenceAddress = mChatRoom->getConferenceAddress();
+			if( conferenceAddress)
+				return Utils::coreStringToAppString(conferenceAddress->asString());
+			else{
+				qWarning() << "ConferenceAddress is NULL when requesting it from not secure and conference ChatRoomModel. Subject=" << mChatRoom->getSubject().c_str() 
+					<< ", created at " << QDateTime::fromSecsSinceEpoch(mChatRoom->getCreationTime())
+					<< " (" << mChatRoom.get() << ")";
+				return "";
+			}
+		}else {
+			qWarning() << "PeerAddress is NULL when requesting it from not secure ChatRoomModel. Subject=" << mChatRoom->getSubject().c_str()
+				<< ", created at " << QDateTime::fromSecsSinceEpoch(mChatRoom->getCreationTime())
+				<< " (" << mChatRoom.get() << ")";
+			return "";
+		}
+	}else{
 		auto participants = getParticipants();
 		if(participants->getCount() > 1)
 			return participants->getAt(1)->getSipAddress();
 		else
 			return "";
 	}	
+}
+
+int ChatRoomModel::getAllUnreadCount(){
+	return mUnreadMessagesCount + mMissedCallsCount;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -557,16 +591,19 @@ void ChatRoomModel::setLastUpdateTime(const QDateTime& lastUpdateDate) {
 }
 
 void ChatRoomModel::updateLastUpdateTime(){
-	QDateTime lastDateTime = QDateTime::fromMSecsSinceEpoch(mChatRoom->getLastUpdateTime()*1000);
-	QDateTime lastCallTime = lastDateTime;
-	for(auto e : mEntries){
-		if(e->mType == CallEntry && e->mTimestamp > lastCallTime)
-			lastCallTime = e->mTimestamp;
-	}	
-	setLastUpdateTime(lastCallTime);
+	if( mChatRoom ){
+		QDateTime lastDateTime = QDateTime::fromMSecsSinceEpoch(mChatRoom->getLastUpdateTime()*1000);
+		QDateTime lastCallTime = lastDateTime;
+		for(auto e : mEntries){
+			if(e->mType == CallEntry && e->getTimestamp() > lastCallTime)
+				lastCallTime = e->getTimestamp();
+		}	
+		setLastUpdateTime(lastCallTime);
+	}
 }
 
 void ChatRoomModel::setUnreadMessagesCount(const int& count){
+	updateNewMessageNotice(count);
 	if(count != mUnreadMessagesCount){
 		mUnreadMessagesCount = count;
 		emit unreadMessagesCountChanged();
@@ -603,6 +640,13 @@ void ChatRoomModel::setEphemeralLifetime(long lifetime){
 	}
 }
 
+void ChatRoomModel::enableMarkAsRead(const bool& enable){
+	if( mMarkAsReadEnabled != enable){
+		mMarkAsReadEnabled = enable;
+		emit markAsReadEnabledChanged();
+	}
+}
+
 void ChatRoomModel::setReply(ChatMessageModel * model){
 	if(model != mReplyModel.get()){
 		if( model && model->getChatMessage() )
@@ -616,7 +660,6 @@ void ChatRoomModel::setReply(ChatMessageModel * model){
 ChatMessageModel * ChatRoomModel::getReply()const{
 	return mReplyModel.get();
 }
-
 
 //------------------------------------------------------------------------------------------------
 
@@ -657,63 +700,33 @@ void ChatRoomModel::updateParticipants(const QVariantList& participants){
 
 void ChatRoomModel::sendMessage (const QString &message) {
 	shared_ptr<linphone::ChatMessage> _message;
-	if(mReplyModel && mReplyModel->getChatMessage())
+	if(mReplyModel && mReplyModel->getChatMessage()) {
 		_message = mChatRoom->createReplyMessage(mReplyModel->getChatMessage());
-	else
+	}else
 		 _message= mChatRoom->createEmptyMessage();
 	auto recorder = CoreManager::getInstance()->getRecorderManager();
 	if(recorder->haveVocalRecorder()) {
 		recorder->getVocalRecorder()->stop();
 		auto content = recorder->getVocalRecorder()->getRecorder()->createContent();
-		if(content)
+		if(content) {
 			_message->addContent(content);
-	}
-	if(!message.isEmpty())
-		_message->addUtf8TextContent(message.toUtf8().toStdString());
-	_message->send();
-	emit messageSent(_message);
-	setReply(nullptr);
-	if(recorder->haveVocalRecorder())
-		recorder->clearVocalRecorder();
-}
-
-void ChatRoomModel::sendFileMessage (const QString &path) {
-	
-	QFile file(path);
-	if (!file.exists())
-		return;
-	
-	qint64 fileSize = file.size();
-	if (fileSize > Constants::FileSizeLimit) {
-		qWarning() << QStringLiteral("Unable to send file. (Size limit=%1)").arg(Constants::FileSizeLimit);
-		return;
-	}
-	
-	shared_ptr<linphone::Content> content = CoreManager::getInstance()->getCore()->createContent();
-	{
-		QStringList mimeType = QMimeDatabase().mimeTypeForFile(path).name().split('/');
-		if (mimeType.length() != 2) {
-			qWarning() << QStringLiteral("Unable to get supported mime type for: `%1`.").arg(path);
-			return;
 		}
-		content->setType(Utils::appStringToCoreString(mimeType[0]));
-		content->setSubtype(Utils::appStringToCoreString(mimeType[1]));
 	}
-	content->setSize(size_t(fileSize)); 
-	content->setName(QFileInfo(file).fileName().toStdString());
-
-	shared_ptr<linphone::ChatMessage> message = mChatRoom->createFileTransferMessage(content);
-	message->getContents().front()->setFilePath(Utils::appStringToCoreString(path));
-	
-	auto recorder = CoreManager::getInstance()->getRecorderManager();
-	if(recorder->haveVocalRecorder()) {
-		auto content = recorder->getVocalRecorder()->getRecorder()->createContent();
-		if(content)
-			message->addContent(content);
+	auto fileContents = CoreManager::getInstance()->getChatModel()->getContentListModel()->getContents();
+	for(auto content : fileContents){
+		_message->addFileContent(content->getContent());
 	}
-	message->send();
-	
-	emit messageSent(message);
+	if(!message.isEmpty()) {
+		_message->addUtf8TextContent(message.toUtf8().toStdString());
+	}
+	if(_message->getContents().size() > 0){// Have something to send
+		_message->send();
+		emit messageSent(_message);
+		setReply(nullptr);
+		if(recorder->haveVocalRecorder())
+			recorder->clearVocalRecorder();
+		CoreManager::getInstance()->getChatModel()->clear();
+	}
 }
 
 void ChatRoomModel::forwardMessage(ChatMessageModel * model){
@@ -738,7 +751,7 @@ void ChatRoomModel::compose () {
 }
 
 void ChatRoomModel::resetMessageCount () {
-	if(mChatRoom && !mDeleteChatRoom){
+	if(mChatRoom && !mDeleteChatRoom && markAsReadEnabled()){
 		if (mChatRoom->getUnreadMessagesCount() > 0){
 			mChatRoom->markAsRead();// Marking as read is only for messages. Not for calls.
 		}
@@ -820,22 +833,87 @@ public:
 					}
 				}
 			}else{
-			auto entry = ChatNoticeModel::create(std::dynamic_pointer_cast<linphone::EventLog>(itEntries->mObject), chatRoomModel);
-				if(entry)
+				auto entry = ChatNoticeModel::create(std::dynamic_pointer_cast<linphone::EventLog>(itEntries->mObject), chatRoomModel);
+				if(entry) {
 					*resultEntries << entry;
+				}
 			}	
 		}
 	}
 };
+
+void ChatRoomModel::updateNewMessageNotice(const int& count){
+	if( mChatRoom ) {
+		if(mUnreadMessageNotice ) {
+				removeEntry(mUnreadMessageNotice.get());
+				mUnreadMessageNotice = nullptr;
+		}
+		if(count > 0){
+			QDateTime lastUnreadMessage = QDateTime::currentDateTime();
+			enableMarkAsRead(false);
+// Get chat messages
+			for (auto &message : mChatRoom->getHistory(mLastEntriesStep)) {
+				if( !message->isRead()) {
+					lastUnreadMessage = min(lastUnreadMessage, QDateTime::fromMSecsSinceEpoch(message->getTime() * 1000 - 1 ));	//-1 to be sure that event will be before the message
+				}
+			}			
+			mUnreadMessageNotice = ChatNoticeModel::create(ChatNoticeModel::NoticeType::NoticeUnreadMessages, lastUnreadMessage, QString::number(count));
+			beginInsertRows(QModelIndex(), 0, 0);
+			mEntries.prepend(mUnreadMessageNotice);
+			endInsertRows();
+			qDebug() << "New message notice timestamp to :" << lastUnreadMessage.toString();
+		}
+		//emit layoutChanged();
+	}
+}
+
+int ChatRoomModel::loadTillMessage(ChatMessageModel * message){
+	if( message){
+		qDebug() << "Load history till message : " << message->getChatMessage()->getMessageId().c_str();
+		auto linphoneMessage = message->getChatMessage();
+	// First find on current list
+		auto entry = std::find_if(mEntries.begin(), mEntries.end(), [linphoneMessage](const std::shared_ptr<ChatEvent>& entry ){
+			return entry->mType == ChatRoomModel::EntryType::MessageEntry && dynamic_cast<ChatMessageModel*>(entry.get())->getChatMessage() == linphoneMessage;
+		});
+	// if not find, load more entries and find it in new entries.
+		if( entry == mEntries.end()){
+			int newEntries = loadMoreEntries();
+			while( newEntries > 0){// no more new entries
+				int entryCount = 0;
+				entry = mEntries.begin();
+				while(entryCount < newEntries && 
+					((*entry)->mType != ChatRoomModel::EntryType::MessageEntry || dynamic_cast<ChatMessageModel*>(entry->get())->getChatMessage() != linphoneMessage)
+				){
+					++entryCount;
+					++entry;
+				}
+				if( entryCount < newEntries){// We got it
+					qDebug() << "Find message at " << entryCount << " after loading new entries";
+					return entryCount;
+				}else
+					newEntries = loadMoreEntries();// continue
+			}
+		}else{
+			int entryCount = entry - mEntries.begin();
+			qDebug() << "Find message at " << entryCount;
+			return entryCount;
+		}
+		qWarning() << "Message has not been found in history";
+	}
+	return -1;
+}
+
 void ChatRoomModel::initEntries(){
+	qDebug() << "Internal Entries : Init";
 // On call : reinitialize all entries. This allow to free up memory
 	QList<std::shared_ptr<ChatEvent> > entries;
 	QList<EntrySorterHelper> prepareEntries;
 // Get chat messages
-	for (auto &message : mChatRoom->getHistory(mLastEntriesStep))
+	for (auto &message : mChatRoom->getHistory(mFirstLastEntriesStep)) {
 		prepareEntries << EntrySorterHelper(message->getTime() ,MessageEntry, message);
+	}
 // Get events
-	for(auto &eventLog : mChatRoom->getHistoryEvents(mLastEntriesStep))
+	for(auto &eventLog : mChatRoom->getHistoryEvents(mFirstLastEntriesStep))
 		prepareEntries << EntrySorterHelper(eventLog->getCreationTime() , NoticeEntry, eventLog);
 // Get calls.
 	bool secureChatEnabled = CoreManager::getInstance()->getSettingsModel()->getSecureChatEnabled();
@@ -846,90 +924,108 @@ void ChatRoomModel::initEntries(){
 		auto callHistory = CallsListModel::getCallHistory(getParticipantAddress(), Utils::coreStringToAppString(mChatRoom->getLocalAddress()->asStringUriOnly()));
 		// callhistory is sorted from newest to oldest
 		int count = 0;
-		for (auto callLog = callHistory.begin() ; count < mLastEntriesStep && callLog != callHistory.end() ; ++callLog, ++count ){
+		for (auto callLog = callHistory.begin() ; count < mFirstLastEntriesStep && callLog != callHistory.end() ; ++callLog, ++count ){
 			prepareEntries << EntrySorterHelper((*callLog)->getStartDate(), CallEntry, *callLog);
 		}
 	}
-	EntrySorterHelper::getLimitedSelection(&entries, prepareEntries, mLastEntriesStep, this);
-	
+	EntrySorterHelper::getLimitedSelection(&entries, prepareEntries, mFirstLastEntriesStep, this);
+	qDebug() << "Internal Entries : Built";
 	mIsInitialized = true;
 	if(entries.size() >0){
 		beginResetModel();
 		mEntries = entries;
+		updateNewMessageNotice(mChatRoom->getUnreadMessagesCount());
 		endResetModel();
+	}
+	qDebug() << "Internal Entries : End";
+}
+void ChatRoomModel::setEntriesLoading(const bool& loading){
+	if( mEntriesLoading != loading){
+		mEntriesLoading = loading;
+		emit entriesLoadingChanged(mEntriesLoading);
+		qApp->processEvents();
 	}
 }
 
 int ChatRoomModel::loadMoreEntries(){
-	QList<std::shared_ptr<ChatEvent> > entries;
-	QList<EntrySorterHelper> prepareEntries;
-// Get current event count for each type
-	QVector<int> entriesCounts;
-	entriesCounts.resize(3);
-	for(auto itEntries = mEntries.begin() ; itEntries != mEntries.end() ; ++itEntries){
-		if( (*itEntries)->mType == MessageEntry)
-			++entriesCounts[0];
-		else if( (*itEntries)->mType == CallEntry){
-			if(dynamic_cast<ChatCallModel*>((*itEntries).get())->mIsStart)
-				++entriesCounts[1];
-		} else
-			++entriesCounts[2];
-	}
+	setEntriesLoading(true);
+	int currentRowCount = rowCount();
+	int newEntries = 0;
+	do{
+		QList<std::shared_ptr<ChatEvent> > entries;
+		QList<EntrySorterHelper> prepareEntries;
+	// Get current event count for each type
+		QVector<int> entriesCounts;
+		entriesCounts.resize(3);
+		for(auto itEntries = mEntries.begin() ; itEntries != mEntries.end() ; ++itEntries){
+			if( (*itEntries)->mType == MessageEntry)
+				++entriesCounts[0];
+			else if( (*itEntries)->mType == CallEntry){
+				if(dynamic_cast<ChatCallModel*>((*itEntries).get())->mIsStart)
+					++entriesCounts[1];
+			} else
+				++entriesCounts[2];
+		}
+		
+	// Messages
+		for (auto &message : mChatRoom->getHistoryRange(entriesCounts[0], entriesCounts[0]+mLastEntriesStep)){
+			auto itEntries = mEntries.begin();
+			bool haveEntry = false;
+			while(!haveEntry && itEntries != mEntries.end()){
+				auto entry = dynamic_cast<ChatMessageModel*>(itEntries->get());
+				haveEntry = (entry && entry->getChatMessage() == message);
+				++itEntries;
+			}
+			if(!haveEntry)
+				prepareEntries << EntrySorterHelper(message->getTime() ,MessageEntry, message);
+		}
 	
-// Messages
-	for (auto &message : mChatRoom->getHistoryRange(entriesCounts[0], entriesCounts[0]+mLastEntriesStep)){
-		auto itEntries = mEntries.begin();
-		bool haveEntry = false;
-		while(!haveEntry && itEntries != mEntries.end()){
-			auto entry = dynamic_cast<ChatMessageModel*>(itEntries->get());
-			haveEntry = (entry && entry->getChatMessage() == message);
-			++itEntries;
+	// Calls
+		bool secureChatEnabled = CoreManager::getInstance()->getSettingsModel()->getSecureChatEnabled();
+		bool standardChatEnabled = CoreManager::getInstance()->getSettingsModel()->getStandardChatEnabled();
+	
+		if( isOneToOne() && (secureChatEnabled && !standardChatEnabled && isSecure()
+			|| standardChatEnabled && !isSecure()) ) {
+			auto callHistory = CallsListModel::getCallHistory(getParticipantAddress(), Utils::coreStringToAppString(mChatRoom->getLocalAddress()->asStringUriOnly()));
+			int count = 0;
+			auto itCallHistory = callHistory.begin();
+			while(count < entriesCounts[1] && itCallHistory != callHistory.end()){
+				++itCallHistory;
+				++count;
+			}
+			count = 0;
+			while( count < mLastEntriesStep && itCallHistory != callHistory.end()){
+				prepareEntries << EntrySorterHelper((*itCallHistory)->getStartDate(), CallEntry, *itCallHistory);
+				++itCallHistory;
+			}
 		}
-		if(!haveEntry)
-			prepareEntries << EntrySorterHelper(message->getTime() ,MessageEntry, message);
-	}
-
-// Calls
-	bool secureChatEnabled = CoreManager::getInstance()->getSettingsModel()->getSecureChatEnabled();
-	bool standardChatEnabled = CoreManager::getInstance()->getSettingsModel()->getStandardChatEnabled();
-
-	if( isOneToOne() && (secureChatEnabled && !standardChatEnabled && isSecure()
-		|| standardChatEnabled && !isSecure()) ) {
-		auto callHistory = CallsListModel::getCallHistory(getParticipantAddress(), Utils::coreStringToAppString(mChatRoom->getLocalAddress()->asStringUriOnly()));
-		int count = 0;
-		auto itCallHistory = callHistory.begin();
-		while(count < entriesCounts[1] && itCallHistory != callHistory.end()){
-			++itCallHistory;
-			++count;
+	// Notices
+		for (auto &eventLog : mChatRoom->getHistoryRangeEvents(entriesCounts[2], entriesCounts[2]+mLastEntriesStep)){
+			auto itEntries = mEntries.begin();
+			bool haveEntry = false;
+			while(!haveEntry && itEntries != mEntries.end()){
+				auto entry = dynamic_cast<ChatNoticeModel*>(itEntries->get());
+				haveEntry = (entry && entry->getEventLog() && entry->getEventLog() == eventLog);
+				++itEntries;
+			}
+			if(!haveEntry)
+				prepareEntries << EntrySorterHelper(eventLog->getCreationTime() , NoticeEntry, eventLog);
 		}
-		count = 0;
-		while( count < mLastEntriesStep && itCallHistory != callHistory.end()){
-			prepareEntries << EntrySorterHelper((*itCallHistory)->getStartDate(), CallEntry, *itCallHistory);
-			++itCallHistory;
+		EntrySorterHelper::getLimitedSelection(&entries, prepareEntries, mLastEntriesStep, this);
+		if(entries.size() >0){
+			beginInsertRows(QModelIndex(), 0, entries.size()-1);
+			for(auto entry : entries)
+				mEntries.prepend(entry);
+			endInsertRows();
+			//emit layoutChanged();
+			updateLastUpdateTime();
 		}
-	}
-// Notices
-	for (auto &eventLog : mChatRoom->getHistoryRangeEvents(entriesCounts[2], entriesCounts[2]+mLastEntriesStep)){
-		auto itEntries = mEntries.begin();
-		bool haveEntry = false;
-		while(!haveEntry && itEntries != mEntries.end()){
-			auto entry = dynamic_cast<ChatNoticeModel*>(itEntries->get());
-			haveEntry = (entry && entry->getEventLog() == eventLog);
-			++itEntries;
-		}
-		if(!haveEntry)
-			prepareEntries << EntrySorterHelper(eventLog->getCreationTime() , NoticeEntry, eventLog);
-	}	
-	EntrySorterHelper::getLimitedSelection(&entries, prepareEntries, mLastEntriesStep, this);
-	if(entries.size() >0){
-		beginInsertRows(QModelIndex(), 0, entries.size()-1);
-		for(auto entry : entries)
-			mEntries.prepend(entry);
-		endInsertRows();
-		emit layoutChanged();
-		updateLastUpdateTime();
-	}
-	return entries.size();
+		newEntries = entries.size();
+	}while( newEntries>0 && currentRowCount == rowCount());
+	currentRowCount = rowCount() - currentRowCount + 1;
+	setEntriesLoading(false);
+	emit moreEntriesLoaded(currentRowCount);
+	return currentRowCount;
 }
 
 //-------------------------------------------------
@@ -1016,11 +1112,11 @@ void ChatRoomModel::insertMessages (const QList<std::shared_ptr<linphone::ChatMe
 				entries << model;
 		}
 		if(entries.size() > 0){
-			setUnreadMessagesCount(mChatRoom->getUnreadMessagesCount());
 			beginInsertRows(QModelIndex(), 0, entries.size()-1);
 			entries << mEntries;
 			mEntries = entries;
 			endInsertRows();
+			setUnreadMessagesCount(mChatRoom->getUnreadMessagesCount());
 			emit layoutChanged();
 		}
 	}
@@ -1044,8 +1140,9 @@ void ChatRoomModel::insertNotices (const QList<std::shared_ptr<linphone::EventLo
 		
 		for(auto eventLog : eventLogs) {
 			std::shared_ptr<ChatNoticeModel> model = ChatNoticeModel::create(eventLog, this);
-			if(model)
+			if(model) {
 				entries << model;
+			}
 		}
 		
 		if(entries.size() > 0){
@@ -1057,6 +1154,12 @@ void ChatRoomModel::insertNotices (const QList<std::shared_ptr<linphone::EventLo
 		}
 	}
 }
+
+// -----------------------------------------------------------------------------
+/*
+void ChatRoomModel::removeUnreadMessagesNotice() {
+	
+}*/
 // -----------------------------------------------------------------------------
 
 void ChatRoomModel::handleCallStateChanged (const std::shared_ptr<linphone::Call> &call, linphone::Call::State state) {

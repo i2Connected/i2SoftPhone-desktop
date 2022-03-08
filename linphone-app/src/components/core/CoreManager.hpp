@@ -34,6 +34,7 @@ class QTimer;
 class AbstractEventCountNotifier;
 class AccountSettingsModel;
 class CallsListModel;
+class ChatModel;
 class ChatRoomModel;
 class ChatRoomListModel;
 class ContactsListModel;
@@ -140,6 +141,10 @@ public:
 	
 	AbstractEventCountNotifier * getEventCountNotifier();
 	
+	ChatModel * getChatModel() const{
+		return mChatModel;
+	}
+	
 	static CoreManager *getInstance ();
 	
 	// ---------------------------------------------------------------------------
@@ -168,6 +173,7 @@ public:
 	
 	Q_INVOKABLE bool isLastRemoteProvisioningGood();
 	Q_INVOKABLE QString getUserAgent()const;
+	void updateUserAgent();
 	
 public slots:
 	void initCoreManager();
@@ -219,6 +225,7 @@ private:
 	ContactsImporterListModel *mContactsImporterListModel = nullptr;
 	TimelineListModel *mTimelineListModel = nullptr;
 	ChatRoomListModel *mChatRoomListModel = nullptr;
+	ChatModel *mChatModel = nullptr;
 	
 	SipAddressesModel *mSipAddressesModel = nullptr;
 	SettingsModel *mSettingsModel = nullptr;

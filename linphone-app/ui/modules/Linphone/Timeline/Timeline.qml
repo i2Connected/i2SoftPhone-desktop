@@ -22,16 +22,17 @@ Rectangle {
 	property string _selectedSipAddress
 	property bool showHistoryButton : true
 	property bool updateSelectionModels : true
-	property bool isFilterVisible: searchView.visible || filterView.visible
+	property bool isFilterVisible: searchView.visible || showFilterView
 	
 	// ---------------------------------------------------------------------------
 	
 	//signal entrySelected (string entry)
 	signal entrySelected (TimelineModel entry)
+	signal entryClicked(TimelineModel entry)
 	signal showHistoryRequest()
 	
 	// ---------------------------------------------------------------------------
-	
+	property bool showFilterView : false
 	color: TimelineStyle.color
 	
 	ColumnLayout {
@@ -67,7 +68,7 @@ Rectangle {
 				id:showHistory
 				anchors.fill:parent
 				onClicked: {
-					filterView.visible = !filterView.visible
+					timeline.showFilterView = !timeline.showFilterView
 				}
 			}
 			RowLayout{
@@ -98,7 +99,7 @@ Rectangle {
 					MouseArea{
 						anchors.fill:parent
 						onClicked:{
-							filterView.visible = !filterView.visible
+							timeline.showFilterView = !timeline.showFilterView
 						}
 					}
 				}
@@ -145,13 +146,13 @@ Rectangle {
 		// Filter.
 		// -------------------------------------------------------------------------
 		Rectangle{
-			id:filterView
+			id:exhaustiveFilterView
 			Layout.fillWidth: true
 			Layout.preferredHeight: filterChoices.height
 			Layout.alignment: Qt.AlignCenter
 			border.color: TimelineStyle.filterField.borderColor
 			border.width: 2
-			visible:false
+			visible: timeline.showFilterView && !SettingsModel.useMinimalTimelineFilter
 			
 			ColumnLayout{
 				id:filterChoices
@@ -230,6 +231,75 @@ Rectangle {
 					backgroundColor: 'transparent'
 					visible: SettingsModel.secureChatEnabled || SettingsModel.standardChatEnabled
 					onActivated:  timeline.model.filterFlags = filterChoices.getFilterFlags()
+				}
+			}
+		}
+		Rectangle{
+			id:minimalFilterView
+			Layout.fillWidth: true
+			Layout.preferredHeight: minimalFilterChoices.height
+			Layout.alignment: Qt.AlignCenter
+			border.color: TimelineStyle.filterField.borderColor
+			border.width: 2
+			visible: timeline.showFilterView && SettingsModel.useMinimalTimelineFilter
+			
+			ColumnLayout{
+				id:minimalFilterChoices
+				anchors.leftMargin: 20
+				anchors.left:parent.left
+				anchors.right:parent.right
+				spacing:-4
+				function getFilterFlags(){
+					return securedCheckBox.getValue() | groupCheckBox.getValue() | conferenceCheckBox.getValue();
+				}
+				CheckBoxText {
+					id: securedCheckBox
+					Layout.fillWidth: true
+					visible: SettingsModel.secureChatEnabled && SettingsModel.standardChatEnabled
+					//: 'Secure rooms' : Filter item. Selecting it will show all secure rooms.
+					text: qsTr('timelineFilterSecureRooms')
+					
+					onClicked: {
+						timeline.model.filterFlags = minimalFilterChoices.getFilterFlags()
+					}
+					function getValue(){
+						if( checked)
+							return TimelineProxyModel.SecureChatRoom
+						else
+							return 0
+					}
+				}
+				CheckBoxText {
+					id: groupCheckBox
+					Layout.fillWidth: true
+					visible: SettingsModel.secureChatEnabled || SettingsModel.standardChatEnabled
+					//: 'Chat groups' : Filter item. Selecting it will show all chat groups (with more than one participant).
+					text: qsTr('timelineFilterChatGroups')
+					
+					onClicked: {
+						timeline.model.filterFlags = minimalFilterChoices.getFilterFlags()
+					}
+					function getValue(){
+						if( checked)
+							return TimelineProxyModel.GroupChatRoom
+						else
+							return 0
+					}
+				}
+				
+				CheckBoxText {
+					id: conferenceCheckBox
+					Layout.fillWidth: true
+					visible: false
+					//: 'Conferences' : Filter item. Selecting it will show all conferences.
+					text: qsTr('timelineFilterConferences')
+					
+					onClicked: {
+						timeline.model.filterFlags = minimalFilterChoices.getFilterFlags()
+					}
+					function getValue(){
+							return 0
+					}
 				}
 			}
 		}
@@ -329,8 +399,8 @@ Rectangle {
 					preventStealing: false
 					onClicked: {
 						if(mouse.button == Qt.LeftButton){
-							if(modelData.selected || !view.updateSelectionModels)// Update selection
-								timeline.entrySelected(modelData)
+							//if(modelData.selected || !view.updateSelectionModels)// Update selection
+							timeline.entryClicked(modelData)
 							if(view){
 								if(view.updateSelectionModels)
 									modelData.selected = true

@@ -190,6 +190,33 @@ void SettingsModel::setAssistantLogoutUrl (QString url) {
 	emit assistantLogoutUrlChanged(url);
 }
 
+bool SettingsModel::isCguAccepted () const{
+	return !!mConfig->getInt(UiSection, "read_and_agree_terms_and_privacy", 0);
+}
+
+void SettingsModel::acceptCgu(const bool accept){
+	mConfig->setInt(UiSection, "read_and_agree_terms_and_privacy", accept);
+	emit cguAcceptedChanged(accept);
+}
+
+// =============================================================================
+// SIP Accounts.
+// =============================================================================
+
+QString SettingsModel::getDeviceName(const std::shared_ptr<linphone::Config>& config){
+	return Utils::coreStringToAppString(config->getString(UiSection, "device_name", Utils::appStringToCoreString(QSysInfo::machineHostName())));
+}
+
+QString SettingsModel::getDeviceName() const{
+	return getDeviceName(mConfig);
+}
+
+void SettingsModel::setDeviceName(const QString& deviceName){
+	mConfig->setString(UiSection, "device_name", Utils::appStringToCoreString(deviceName));
+	emit deviceNameChanged();
+	CoreManager::getInstance()->updateUserAgent();
+}
+
 // =============================================================================
 // Audio.
 // =============================================================================
@@ -1345,7 +1372,16 @@ void SettingsModel::setMipmapEnabled(const bool& enabled){
 	mConfig->setInt(UiSection, "mipmap_enabled", enabled);
 	emit mipmapEnabledChanged();
 }
-	
+
+bool SettingsModel::useMinimalTimelineFilter() const{
+	return !!mConfig->getInt(UiSection, "use_minimal_timeline_filter", 1);
+}
+
+void SettingsModel::setUseMinimalTimelineFilter(const bool& useMinimal) {
+	mConfig->setInt(UiSection, "use_minimal_timeline_filter", useMinimal);
+	emit useMinimalTimelineFilterChanged();
+}
+
 // =============================================================================
 // Advanced.
 // =============================================================================

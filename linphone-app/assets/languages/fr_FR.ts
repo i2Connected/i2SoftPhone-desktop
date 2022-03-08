@@ -7,6 +7,11 @@
         <source>ok</source>
         <translation>OK</translation>
     </message>
+    <message>
+        <source>aboutTranslation</source>
+        <extracomment>&apos;Help us translate %1&apos; : %1 is the application name</extracomment>
+        <translation>Contribuer aux traductions</translation>
+    </message>
 </context>
 <context>
     <name>ActivateAppSipAccountWithEmail</name>
@@ -145,6 +150,11 @@
     <message>
         <source>createAppSipAccount</source>
         <translation>CRÉER UN COMPTE %1</translation>
+    </message>
+    <message>
+        <source>homeCgu</source>
+        <extracomment>&apos;I accept %1&apos;s %2terms of use%3 and %4privacy policy%5&apos; : where %1 is the vendor name and other %n are internal keywords that encapsulate links.</extracomment>
+        <translation>J&apos;accepte %2les conditions d&apos;utilisation%3 et %4la politique de confidentialité%5 de %1</translation>
     </message>
 </context>
 <context>
@@ -509,6 +519,14 @@ URL du serveur non configurée.</translation>
         <extracomment>&quot;%1 have nothing received&quot; Little message to indicate the state of a message</extracomment>
         <translation>%1 n&apos;a encore rien reçu</translation>
         <extra-Context>%1 is someone. The state is that the message hasn&apos;t been delivered.</extra-Context>
+    </message>
+</context>
+<context>
+    <name>ChatForwardMessage</name>
+    <message>
+        <source>Forwarded</source>
+        <extracomment>&apos;Forwarded&apos; : Header on a message that contains a forward.</extracomment>
+        <translation>Transféré</translation>
     </message>
 </context>
 <context>
@@ -1563,6 +1581,14 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
         <extracomment>&apos;Ephemeral messages have been updated: %1&apos; : Little message to show on the event when ephemeral has been updated. %1 is a date time</extracomment>
         <translation>Délai d’expiration des messages : %1</translation>
     </message>
+    <message numerus="yes">
+        <source>unreadMessageNotice</source>
+        <extracomment>&apos;%1 unread messages&apos; : Little message to show on an event where unread messages begin.</extracomment>
+        <translation>
+            <numerusform>%1 message non lu</numerusform>
+            <numerusform>%1 messages non lus</numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>Notifier</name>
@@ -1618,7 +1644,7 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>conversationDevicesTitle</source>
         <extracomment>&apos;Conversation&apos;s devices&apos; : Title of window that show all devices</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Liste des appareils</translation>
     </message>
 </context>
 <context>
@@ -1918,7 +1944,7 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>chatNotificationsEnabledLabel</source>
         <extracomment>&apos;Enable notifications&apos;: settings label for enabling notifications.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Activer les notifications</translation>
     </message>
 </context>
 <context>
@@ -2271,6 +2297,11 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>assistantSupportsPhoneNumbersLabel</source>
         <translation>Supporter les numéros de tél.</translation>
+    </message>
+    <message>
+        <source>defaultDeviceNameLabel</source>
+        <extracomment>&apos;Device Name&apos; : Label for setting the device name.</extracomment>
+        <translation>Nom de l&apos;appareil</translation>
     </message>
 </context>
 <context>
@@ -2830,6 +2861,7 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <name>UseOtherSipAccount</name>
     <message>
         <source>confirmAction</source>
+        <extracomment>&apos;Use&apos; : Popup confirmation for a form</extracomment>
         <translation>UTILISER</translation>
     </message>
     <message>
@@ -2859,6 +2891,26 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>addOtherSipAccountError</source>
         <translation>Impossible d&apos;ajouter ce compte.</translation>
+    </message>
+    <message>
+        <source>understandAction</source>
+        <extracomment>&apos;I understand&apos; : Popup confirmation for a warning</extracomment>
+        <translation>J&apos;ai compris</translation>
+    </message>
+    <message>
+        <source>warningFeatures</source>
+        <extracomment>&apos;Some features require a Linphone account, such as group messaging or ephemeral messaging.&apos; : Warning text about features.</extracomment>
+        <translation>Certaines fonctionnalités avancées comme les messages de groupe ou les messages éphémères nécessitent un compte Linphone.</translation>
+    </message>
+    <message>
+        <source>warningThirdParty</source>
+        <extracomment>&apos;These features are hidden when you register with a third party SIP account.&apos; : Warning text for using third party account.</extracomment>
+        <translation>Elles seront masquées dans l&apos;application si vous configurez un compte SIP tiers.</translation>
+    </message>
+    <message>
+        <source>warningContact</source>
+        <extracomment>&apos;To enable it in a commercial project, please contact us.&apos; : Warning text for contacting about enabling features.</extracomment>
+        <translation>Si vous souhaitez les activer pour un projet professionnel, contactez-nous.</translation>
     </message>
 </context>
 <context>
