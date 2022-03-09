@@ -23,7 +23,7 @@ variables:
 # Docker image version
   ARCHLINUX_IMAGE_VERSION: latestupdated
   CENTOS_7_QT_IMAGE_VERSION: 20211012_add_qtwebview
-  DEBIAN_9_QT_IMAGE_VERSION: 20211027_update_qt_5.12.12
+  DEBIAN_9_QT_IMAGE_VERSION: 20220218_add_webview
   DEBIAN_10_IMAGE_VERSION: 20210217_python3
   UBUNTU_ROLLING_IMAGE_VERSION: 20211012_add_qtwebview
 
@@ -41,8 +41,8 @@ include:
   #- '.gitlab-ci-files/job-linux-desktop-debian8.yml'   #Removed as there is 5.10 and not at least 5.12
   - '.gitlab-ci-files/job-linux-desktop-debian9.yml'
 ##  - '.gitlab-ci-files/job-linux-desktop-debian10.yml'
-  - '.gitlab-ci-files/job-linux-desktop-ubuntu-rolling.yml'
-  - '.gitlab-ci-files/job-linux-desktop-archlinux-latest.yml'
+#  - '.gitlab-ci-files/job-linux-desktop-ubuntu-rolling.yml'	#Removed as there is no QtWebengine in image
+#  - '.gitlab-ci-files/job-linux-desktop-archlinux-latest.yml'	#Removed as there is no QtWebengine in image
 #  - '.gitlab-ci-files/job-linux-desktop-centos7.yml'	#QtWebengine cannot be build (support for C++14 is not found in configuration)
   - '.gitlab-ci-files/job-windows-desktop.yml'
   - '.gitlab-ci-files/job-macosx-desktop.yml'

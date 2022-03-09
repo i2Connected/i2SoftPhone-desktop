@@ -96,12 +96,13 @@ if( WIN32)
 endif()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)#useful for config.h
 
-set(QT5_PACKAGES Core Gui Quick Widgets QuickControls2 Svg LinguistTools Concurrent Network Test WebView)
+set(QT5_PACKAGES Core Gui Quick Widgets QuickControls2 Svg LinguistTools Concurrent Network Test WebView WebEngine WebEngineCore)
 if (UNIX AND NOT APPLE)
 	list(APPEND QT5_PACKAGES DBus)
 endif ()
 set(QT5_PACKAGES_OPTIONAL TextToSpeech)
 set(CMAKE_AUTOMOC ON)
+
 
 find_package(Qt5 COMPONENTS ${QT5_PACKAGES} REQUIRED)
 find_package(Qt5 COMPONENTS ${QT5_PACKAGES_OPTIONAL} QUIET)
@@ -554,7 +555,10 @@ foreach (package ${QT5_PACKAGES})
 	# `qt5_create_translation` is provided from `LinguistTools` package.
 	# But the `Qt5::LinguistTools` lib does not exist. Remove it.
 	if (NOT (${package} STREQUAL LinguistTools))
-		list(APPEND LIBRARIES ${Qt5${package}_LIBRARIES})
+	#	list(APPEND LIBRARIES ${Qt5${package}_LIBRARIES})
+		target_link_libraries(${APP_LIBRARY} Qt5::${package})
+		target_link_libraries(${APP_PLUGIN} Qt5::${package})
+		target_link_libraries(${TARGET_NAME} Qt5::${package})
 	endif ()
 endforeach ()
 
