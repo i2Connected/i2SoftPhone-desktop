@@ -75,18 +75,68 @@ const QString AutoStartSettingsFilePath(
 // -----------------------------------------------------------------------------
 
 #ifdef Q_OS_LINUX
-static inline bool autoStartEnabled () {
-	return QDir(AutoStartDirectory).exists() && QFile(AutoStartDirectory + EXECUTABLE_NAME ".desktop").exists();
+
+const QString getAutoStartPathFromBinaryPath(){
+
+	const QString binPath(QCoreApplication::applicationFilePath());
+
+	// Check if installation is done via Flatpak, AppImage, or classic package
+	// in order to rewrite a correct exec path for autostart
+	QString exec;
+	qDebug() << "binpath=" << binPath;
+	if (binPath.startsWith("/app")) { //Flatpak
+		exec = QStringLiteral("flatpak run " APPLICATION_ID);
+		qDebug() << "exec path autostart flatpak=" << exec;
+	}
+	else if (binPath.startsWith("/tmp/.mount")) { //Appimage
+		exec = QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));
+		qDebug() << "exec path autostart appimage=" << exec;
+	}
+	else { //classic package
+		exec = binPath;
+		qDebug() << "exec path autostart classic package=" << exec;
+	}
+
+	return exec;
+
+}
+
+static bool autoStartEnabled () {
+	const QString confPath(AutoStartDirectory + EXECUTABLE_NAME ".desktop");
+	QFile file(confPath);
+	if (!file.open(QFile::ReadOnly)) {
+		qWarning() << "Unable to open autostart file in read only: `" << confPath << "`.";
+		return false;
+	}
+
+	// Check if installation is done via Flatpak, AppImage, or classic package
+	// in order to check if there is a correct exec path for autostart
+
+	QString exec = getAutoStartPathFromBinaryPath();
+
+	QTextStream in(&file);
+	QString autoStartConf = in.readAll();
+
+	bool isCurrentAutoStartValid = true;
+
+	int index = -1;
+	// is the Exec part of the autostart ini file not corresponding to our executable (old desktop entry with wrong version in filename) ?
+	// indexOff returns -1 if substring is not found
+	if (autoStartConf.indexOf(QString("Exex=" + exec)) < 0) {
+		isCurrentAutoStartValid = false;
+	}
+
+	return QDir(AutoStartDirectory).exists() && QFile(AutoStartDirectory + EXECUTABLE_NAME ".desktop").exists() && isCurrentAutoStartValid;
 }
 #elif defined(Q_OS_MACOS)
 static inline QString getMacOsBundlePath () {
 	QDir dir(QCoreApplication::applicationDirPath());
 	if (dir.dirName() != QLatin1String("MacOS"))
 		return QString();
-	
+
 	dir.cdUp();
 	dir.cdUp();
-	
+
 	QString path(dir.path());
 	if (path.length() > 0 && path.right(1) == "/")
 		path.chop(1);
@@ -103,14 +153,14 @@ static inline bool autoStartEnabled () {
 		qInfo() << QStringLiteral("Application is not installed. Autostart unavailable.");
 		return false;
 	}
-	
+
 	QProcess process;
 	process.start(OsascriptExecutable, { "-e", "tell application \"System Events\" to get the name of every login item" });
 	if (!process.waitForFinished()) {
 		qWarning() << QStringLiteral("Unable to execute properly: `%1` (%2).").arg(OsascriptExecutable).arg(process.errorString());
 		return false;
 	}
-	
+
 	// TODO: Move in utils?
 	const QByteArray buf(process.readAll());
 	for (const char *p = buf.data(), *word = p, *end = p + buf.length(); p <= end; ++p) {
@@ -129,7 +179,7 @@ static inline bool autoStartEnabled () {
 				break;
 		}
 	}
-	
+
 	return false;
 }
 #else
@@ -192,43 +242,43 @@ bool App::setFetchConfig (QCommandLineParser *parser) {
 
 
 App::App (int &argc, char *argv[]) : SingleApplication(argc, argv, true, Mode::User | Mode::ExcludeAppPath | Mode::ExcludeAppVersion) {
-	
+
 	connect(this, SIGNAL(applicationStateChanged(Qt::ApplicationState)), this, SLOT(stateChanged(Qt::ApplicationState)));
-	
+
 	setWindowIcon(QIcon(Constants::WindowIconPath));
-	
+
 	createParser();
 	mParser->process(*this);
-	
+
 	// Initialize logger.
 	shared_ptr<linphone::Config> config = Utils::getConfigIfExists (QString::fromStdString(getConfigPathIfExists(*mParser)));
 	Logger::init(config);
 	if (mParser->isSet("verbose"))
 		Logger::getInstance()->setVerbose(true);
-	
+
 	// List available locales.
 	for (const auto &locale : QDir(Constants::LanguagePath).entryList())
 		mAvailableLocales << QLocale(locale);
-	
+
 	// Init locale.
 	mTranslator = new DefaultTranslator(this);
 	mDefaultTranslator = new DefaultTranslator(this);
 	initLocale(config);
-	
+
 	if (mParser->isSet("help")) {
 		mParser->showHelp();
 	}
-	
+
 	if (mParser->isSet("cli-help")) {
 		Cli::showHelp();
 		::exit(EXIT_SUCCESS);
 	}
-	
+
 	if (mParser->isSet("version"))
 		mParser->showVersion();
-	
+
 	mAutoStart = autoStartEnabled();
-	
+
 	qInfo() << QStringLiteral("Starting " APPLICATION_NAME " (bin: " EXECUTABLE_NAME ")");
 	qInfo() << QStringLiteral("Use locale: %1").arg(mLocale);
 }
@@ -270,20 +320,20 @@ void App::processArguments(QHash<QString,QString> args){
 
 static QQuickWindow *createSubWindow (QQmlApplicationEngine *engine, const char *path) {
 	qInfo() << QStringLiteral("Creating subwindow: `%1`.").arg(path);
-	
+
 	QQmlComponent component(engine, QUrl(path));
 	if (component.isError()) {
 		qWarning() << component.errors();
 		abort();
 	}
 	qInfo() << QStringLiteral("Subwindow status: `%1`.").arg(component.status());
-	
+
 	QObject *object = component.create();
 	Q_ASSERT(object);
-	
+
 	QQmlEngine::setObjectOwnership(object, QQmlEngine::CppOwnership);
 	object->setParent(engine);
-	
+
 	return qobject_cast<QQuickWindow *>(object);
 }
 
@@ -294,16 +344,16 @@ void App::initContentApp () {
 	shared_ptr<linphone::Config> config;
 	bool mustBeIconified = false;
 	bool needRestart = true;
-	
+
 	// Destroy qml components and linphone core if necessary.
 	if (mEngine) {
 		needRestart = false;
 		setFetchConfig(mParser);
 		setOpened(false);
 		qInfo() << QStringLiteral("Restarting app...");
-		
+
 		delete mEngine;
-		
+
 		mNotifier = nullptr;
 		//
 		CoreManager::uninit();
@@ -322,35 +372,35 @@ void App::initContentApp () {
 		// Update and download codecs.
 		VideoCodecsModel::updateCodecs();
 		VideoCodecsModel::downloadUpdatableCodecs(this);
-		
+
 		// Don't quit if last window is closed!!!
 		setQuitOnLastWindowClosed(false);
-		
+
 		// Deal with received messages and CLI.
 		QObject::connect(this, &App::receivedMessage, this, [](int, const QByteArray &byteArray) {
 			QString command(byteArray);
 			qInfo() << QStringLiteral("Received command from other application: `%1`.").arg(command);
 			Cli::executeCommand(command);
 		});
-		
+
 #ifndef Q_OS_MACOS
 		mustBeIconified = mParser->isSet("iconified");
 #endif // ifndef Q_OS_MACOS
 		mColorListModel = new ColorListModel();
 		mImageListModel = new ImageListModel();
 	}
-	
+
 	// Change colors if necessary.
 	mColorListModel->useConfig(config);
 	mImageListModel->useConfig(config);
-	
+
 	// Init core.
 	CoreManager::init(this, Utils::coreStringToAppString(configPath));
-	
-	
+
+
 	// Init engine content.
 	mEngine = new QQmlApplicationEngine();
-	
+
 	// Provide `+custom` folders for custom components and `5.9` for old components.
 	{
 		QStringList selectors("custom");
@@ -360,18 +410,18 @@ void App::initContentApp () {
 		(new QQmlFileSelector(mEngine, mEngine))->setExtraSelectors(selectors);
 	}
 	qInfo() << QStringLiteral("Activated selectors:") << QQmlFileSelector::get(mEngine)->selector()->allSelectors();
-	
+
 	// Set modules paths.
 	mEngine->addImportPath(":/ui/modules");
 	mEngine->addImportPath(":/ui/scripts");
 	mEngine->addImportPath(":/ui/views");
-	
+
 	// Provide avatars/thumbnails providers.
 	mEngine->addImageProvider(AvatarProvider::ProviderId, new AvatarProvider());
 	mEngine->addImageProvider(ImageProvider::ProviderId, new ImageProvider());
 	mEngine->addImageProvider(ExternalImageProvider::ProviderId, new ExternalImageProvider());
 	mEngine->addImageProvider(ThumbnailProvider::ProviderId, new ThumbnailProvider());
-	
+
 	mEngine->rootContext()->setContextProperty("applicationName", APPLICATION_NAME);
 
 #ifdef APPLICATION_URL
@@ -379,7 +429,7 @@ void App::initContentApp () {
 #else
 	mEngine->rootContext()->setContextProperty("applicationUrl", "");
 #endif
-	
+
 #ifdef APPLICATION_VENDOR
 	mEngine->rootContext()->setContextProperty("applicationVendor", APPLICATION_VENDOR);
 #else
@@ -393,21 +443,21 @@ void App::initContentApp () {
 	mEngine->rootContext()->setContextProperty("copyrightRangeDate", COPYRIGHT_RANGE_DATE);
 	mEngine->rootContext()->setContextProperty("Colors", mColorListModel->getQmlData());
 	mEngine->rootContext()->setContextProperty("Images", mImageListModel->getQmlData());
-	
+
 	registerTypes();
 	registerSharedTypes();
 	registerToolTypes();
 	registerSharedToolTypes();
-	
+
 	// Enable notifications.
 	mNotifier = new Notifier(mEngine);
-	
+
 	// Load main view.
 	qInfo() << QStringLiteral("Loading main view...");
 	mEngine->load(QUrl(Constants::QmlViewMainWindow));
 	if (mEngine->rootObjects().isEmpty())
 		qFatal("Unable to open main window.");
-	
+
 	QObject::connect(
 				CoreManager::getInstance(),
 				&CoreManager::coreManagerInitialized, CoreManager::getInstance(),
@@ -416,7 +466,7 @@ void App::initContentApp () {
 			openAppAfterInit(mustBeIconified);
 	}
 	);
-	
+
 	// Execute command argument if needed.
 	const QString commandArgument = getCommandArgument();
 	if (!commandArgument.isEmpty()) {
@@ -445,10 +495,10 @@ bool App::event (QEvent *event) {
 			sendMessage(url.toLocal8Bit(), -1);
 			::exit(EXIT_SUCCESS);
 		}
-		
+
 		Cli::executeCommand(url);
 	}
-	
+
 	return SingleApplication::event(event);
 }
 
@@ -461,7 +511,7 @@ QQuickWindow *App::getCallsWindow () const {
 				SettingsModel::UiSection, "disable_calls_window", 0
 				))
 		return nullptr;
-	
+
 	return mCallsWindow;
 }
 
@@ -501,7 +551,7 @@ void App::stateChanged(Qt::ApplicationState pState) {
 
 void App::createParser () {
 	delete mParser;
-	
+
 	mParser = new QCommandLineParser();
 	mParser->setApplicationDescription(tr("applicationDescription"));
 	mParser->addPositionalArgument("command", tr("commandLineDescription").replace("%1", APPLICATION_NAME), "[command]");
@@ -596,7 +646,7 @@ static inline void registerSharedToolType (const char *name) {
 
 void App::registerTypes () {
 	qInfo() << QStringLiteral("Registering types...");
-	
+
 	qRegisterMetaType<shared_ptr<linphone::ProxyConfig>>();
 	qRegisterMetaType<ChatRoomModel::EntryType>();
 	qRegisterMetaType<shared_ptr<linphone::SearchResult>>();
@@ -610,7 +660,7 @@ void App::registerTypes () {
 	qRegisterMetaType<std::shared_ptr<ChatCallModel>>();
 	//qRegisterMetaType<std::shared_ptr<ChatEvent>>();
 	LinphoneEnums::registerMetaTypes();
-	
+
 	registerType<AssistantModel>("AssistantModel");
 	registerType<AuthenticationNotifier>("AuthenticationNotifier");
 	registerType<CallsListProxyModel>("CallsListProxyModel");
@@ -630,8 +680,8 @@ void App::registerTypes () {
 	registerType<SipAddressesProxyModel>("SipAddressesProxyModel");
 	registerType<SearchSipAddressesModel>("SearchSipAddressesModel");
 	registerType<SearchSipAddressesProxyModel>("SearchSipAddressesProxyModel");
-	
-	
+
+
 	registerType<ColorProxyModel>("ColorProxyModel");
 	registerType<ImageColorsProxyModel>("ImageColorsProxyModel");
 	registerType<ImageProxyModel>("ImageProxyModel");
@@ -639,15 +689,15 @@ void App::registerTypes () {
 	registerType<ParticipantProxyModel>("ParticipantProxyModel");
 	registerType<SoundPlayer>("SoundPlayer");
 	registerType<TelephoneNumbersModel>("TelephoneNumbersModel");
-	
+
 	registerSingletonType<AudioCodecsModel>("AudioCodecsModel");
 	registerSingletonType<OwnPresenceModel>("OwnPresenceModel");
 	registerSingletonType<Presence>("Presence");
 	//registerSingletonType<TimelineModel>("TimelineModel");
 	registerSingletonType<UrlHandlers>("UrlHandlers");
 	registerSingletonType<VideoCodecsModel>("VideoCodecsModel");
-	
-	
+
+
 	registerUncreatableType<CallModel>("CallModel");
 	registerUncreatableType<ChatCallModel>("ChatCallModel");
 	registerUncreatableType<ChatMessageModel>("ChatMessageModel");
@@ -664,7 +714,7 @@ void App::registerTypes () {
 	registerUncreatableType<LdapModel>("LdapModel");
 	registerUncreatableType<RecorderModel>("RecorderModel");
 	registerUncreatableType<SearchResultModel>("SearchResultModel");
-	registerUncreatableType<SipAddressObserver>("SipAddressObserver");	
+	registerUncreatableType<SipAddressObserver>("SipAddressObserver");
 	registerUncreatableType<VcardModel>("VcardModel");
 	registerUncreatableType<TimelineModel>("TimelineModel");
 	registerUncreatableType<TunnelModel>("TunnelModel");
@@ -677,35 +727,35 @@ void App::registerTypes () {
 	registerUncreatableType<ParticipantDeviceProxyModel>("ParticipantDeviceProxyModel");
 	registerUncreatableType<ParticipantImdnStateModel>("ParticipantImdnStateModel");
 	registerUncreatableType<ParticipantImdnStateListModel>("ParticipantImdnStateListModel");
-	
-	
-	
+
+
+
 	qmlRegisterUncreatableMetaObject(LinphoneEnums::staticMetaObject, "LinphoneEnums", 1, 0, "LinphoneEnums", "Only enums");
 }
 
 void App::registerSharedTypes () {
 	qInfo() << QStringLiteral("Registering shared types...");
-	
+
 	registerSharedSingletonType<App, &App::getInstance>("App");
 	registerSharedSingletonType<CoreManager, &CoreManager::getInstance>("CoreManager");
 	registerSharedSingletonType<SettingsModel, &CoreManager::getSettingsModel>("SettingsModel");
 	registerSharedSingletonType<AccountSettingsModel, &CoreManager::getAccountSettingsModel>("AccountSettingsModel");
-	registerSharedSingletonType<SipAddressesModel, &CoreManager::getSipAddressesModel>("SipAddressesModel");  
+	registerSharedSingletonType<SipAddressesModel, &CoreManager::getSipAddressesModel>("SipAddressesModel");
 	registerSharedSingletonType<CallsListModel, &CoreManager::getCallsListModel>("CallsListModel");
 	registerSharedSingletonType<ContactsListModel, &CoreManager::getContactsListModel>("ContactsListModel");
 	registerSharedSingletonType<ContactsImporterListModel, &CoreManager::getContactsImporterListModel>("ContactsImporterListModel");
 	registerSharedSingletonType<LdapListModel, &CoreManager::getLdapListModel>("LdapListModel");
 	registerSharedSingletonType<TimelineListModel, &CoreManager::getTimelineListModel>("TimelineListModel");
 	registerSharedSingletonType<RecorderManager, &CoreManager::getRecorderManager>("RecorderManager");
-	
+
 	//qmlRegisterSingletonType<ColorListModel>(Constants::MainQmlUri, 1, 0, "ColorList", mColorListModel);
-	
+
 	//registerSharedSingletonType<ColorListModel, &App::getColorListModel>("ColorCpp");
 }
 
 void App::registerToolTypes () {
 	qInfo() << QStringLiteral("Registering tool types...");
-	
+
 	registerToolType<Clipboard>("Clipboard");
 	registerToolType<DesktopTools>("DesktopTools");
 	registerToolType<TextToSpeech>("TextToSpeech");
@@ -717,7 +767,7 @@ void App::registerToolTypes () {
 
 void App::registerSharedToolTypes () {
 	qInfo() << QStringLiteral("Registering shared tool types...");
-	
+
 	registerSharedToolType<ColorListModel,App,  &App::getColorListModel>("ColorsList");
 }
 
@@ -726,18 +776,18 @@ void App::registerSharedToolTypes () {
 void App::setTrayIcon () {
 	QQuickWindow *root = getMainWindow();
 	QSystemTrayIcon* systemTrayIcon = (mSystemTrayIcon?mSystemTrayIcon : new QSystemTrayIcon(nullptr));// Workaround : QSystemTrayIcon cannot be deleted because of setContextMenu (indirectly)
-		
+
 	// trayIcon: Right click actions.
 	QAction *settingsAction = new QAction(tr("settings"), root);
 	root->connect(settingsAction, &QAction::triggered, root, [this] {
 		App::smartShowWindow(getSettingsWindow());
 	});
-	
+
 	QAction *updateCheckAction = new QAction(tr("checkForUpdates"), root);
 	root->connect(updateCheckAction, &QAction::triggered, root, [this] {
 		checkForUpdates(true);
 	});
-	
+
 	QAction *aboutAction = new QAction(tr("about"), root);
 	root->connect(aboutAction, &QAction::triggered, root, [root] {
 		App::smartShowWindow(root);
@@ -746,15 +796,15 @@ void App::setTrayIcon () {
 					Q_ARG(QVariant, QUrl(Constants::AboutPath)), Q_ARG(QVariant, QVariant()), Q_ARG(QVariant, QVariant())
 					);
 	});
-	
+
 	QAction *restoreAction = new QAction(tr("restore"), root);
 	root->connect(restoreAction, &QAction::triggered, root, [root] {
 		smartShowWindow(root);
 	});
-	
+
 	QAction *quitAction = new QAction(tr("quit"), root);
 	root->connect(quitAction, &QAction::triggered, this, &App::quit);
-	
+
 	// trayIcon: Left click actions.
 	static QMenu *menu = new QMenu();// Static : Workaround about a bug with setContextMenu where it cannot be called more than once.
 	root->connect(systemTrayIcon, &QSystemTrayIcon::activated, [root](
@@ -792,27 +842,27 @@ void App::setTrayIcon () {
 void App::initLocale (const shared_ptr<linphone::Config> &config) {
 	// Try to use preferred locale.
 	QString locale;
-	
+
 	// Use english. This default translator is used if there are no found translations in others loads
 	mLocale = Constants::DefaultLocale;
 	if (!installLocale(*this, *mDefaultTranslator, QLocale(mLocale)))
 		qFatal("Unable to install default translator.");
-	
+
 	if (config)
 		locale = Utils::coreStringToAppString(config->getString(SettingsModel::UiSection, "locale", ""));
-	
+
 	if (!locale.isEmpty() && installLocale(*this, *mTranslator, QLocale(locale))) {
 		mLocale = locale;
 		return;
 	}
-	
+
 	// Try to use system locale.
 	QLocale sysLocale = QLocale::system();
 	if (installLocale(*this, *mTranslator, sysLocale)) {
 		mLocale = sysLocale.name();
 		return;
 	}
-	
+
 }
 
 QString App::getConfigLocale () const {
@@ -827,7 +877,7 @@ void App::setConfigLocale (const QString &locale) {
 	CoreManager::getInstance()->getCore()->getConfig()->setString(
 				SettingsModel::UiSection, "locale", Utils::appStringToCoreString(locale)
 				);
-	
+
 	emit configLocaleChanged(locale);
 }
 
@@ -842,35 +892,35 @@ QString App::getLocale () const {
 void App::setAutoStart (bool enabled) {
 	if (enabled == mAutoStart)
 		return;
-	
+
 	QDir dir(AutoStartDirectory);
 	if (!dir.exists() && !dir.mkpath(AutoStartDirectory)) {
 		qWarning() << QStringLiteral("Unable to build autostart dir path: `%1`.").arg(AutoStartDirectory);
 		return;
 	}
-	
+
 	const QString confPath(AutoStartDirectory + EXECUTABLE_NAME ".desktop");
 	qInfo() << QStringLiteral("Updating `%1`...").arg(confPath);
 	QFile file(confPath);
-	
+
 	if (!enabled) {
 		if (file.exists() && !file.remove()) {
 			qWarning() << QLatin1String("Unable to remove autostart file: `" EXECUTABLE_NAME ".desktop`.");
 			return;
 		}
-		
+
 		mAutoStart = enabled;
 		emit autoStartChanged(enabled);
 		return;
 	}
-	
+
 	if (!file.open(QFile::WriteOnly)) {
 		qWarning() << "Unable to open autostart file: `" EXECUTABLE_NAME ".desktop`.";
 		return;
 	}
-	
+
 	const QString binPath(applicationFilePath());
-	
+
 	// Check if installation is done via Flatpak, AppImage, or classic package
 	// in order to rewrite a correct exec path for autostart
 	QString exec;
@@ -887,7 +937,7 @@ void App::setAutoStart (bool enabled) {
 		exec = binPath;
 		qDebug() << "exec path autostart set classic package=" << exec;
 	}
-	
+
 	QTextStream(&file) << QString(
 							  "[Desktop Entry]\n"
     "Name=" APPLICATION_NAME "\n"
@@ -899,7 +949,7 @@ void App::setAutoStart (bool enabled) {
     "Categories=Network;Telephony;\n"
     "MimeType=x-scheme-handler/sip-" EXECUTABLE_NAME ";x-scheme-handler/sip;x-scheme-handler/sips-" EXECUTABLE_NAME ";x-scheme-handler/sips;x-scheme-handler/tel;x-scheme-handler/callto;\n"
   );
-	
+
 	mAutoStart = enabled;
 	emit autoStartChanged(enabled);
 }
@@ -909,12 +959,12 @@ void App::setAutoStart (bool enabled) {
 void App::setAutoStart (bool enabled) {
 	if (enabled == mAutoStart)
 		return;
-	
+
 	if (getMacOsBundlePath().isEmpty()) {
 		qWarning() << QStringLiteral("Application is not installed. Unable to change autostart state.");
 		return;
 	}
-	
+
 	if (enabled)
 		QProcess::execute(OsascriptExecutable, {
 							  "-e", "tell application \"System Events\" to make login item at end with properties"
@@ -924,7 +974,7 @@ void App::setAutoStart (bool enabled) {
 		QProcess::execute(OsascriptExecutable, {
 							  "-e", "tell application \"System Events\" to delete login item \"" + getMacOsBundleName() + "\""
 						  });
-	
+
 	mAutoStart = enabled;
 	emit autoStartChanged(enabled);
 }
@@ -934,13 +984,13 @@ void App::setAutoStart (bool enabled) {
 void App::setAutoStart (bool enabled) {
 	if (enabled == mAutoStart)
 		return;
-	
+
 	QSettings settings(AutoStartSettingsFilePath, QSettings::NativeFormat);
 	if (enabled)
 		settings.setValue(EXECUTABLE_NAME, QDir::toNativeSeparators(applicationFilePath()));
 	else
 		settings.remove(EXECUTABLE_NAME);
-	
+
 	mAutoStart = enabled;
 	emit autoStartChanged(enabled);
 }
@@ -962,9 +1012,9 @@ void App::openAppAfterInit (bool mustBeIconified) {
 			core->setNatPolicy(core->getNatPolicy());
 		}
 	});
-	
+
 	QQuickWindow *mainWindow = getMainWindow();
-	
+
 #ifndef __APPLE__
 	// Enable TrayIconSystem.
 	if (!QSystemTrayIcon::isSystemTrayAvailable())
@@ -972,21 +1022,21 @@ void App::openAppAfterInit (bool mustBeIconified) {
 	else
 		setTrayIcon();
 #endif // ifndef __APPLE__
-	
+
 	// Display Assistant if it does not exist proxy config.
 	if (coreManager->getCore()->getAccountList().empty())
 		QMetaObject::invokeMethod(mainWindow, "setView", Q_ARG(QVariant, Constants::AssistantViewName), Q_ARG(QVariant, QString("")), Q_ARG(QVariant, QString("")));
-	
+
 #ifdef ENABLE_UPDATE_CHECK
 	QTimer *timer = new QTimer(mEngine);
 	timer->setInterval(Constants::VersionUpdateCheckInterval);
-	
+
 	QObject::connect(timer, &QTimer::timeout, this, &App::checkForUpdate);
 	timer->start();
-	
+
 	checkForUpdates();
 #endif // ifdef ENABLE_UPDATE_CHECK
-	
+
 	if(setFetchConfig(mParser))
 		restart();
 	else{
