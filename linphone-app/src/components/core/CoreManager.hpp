@@ -56,6 +56,7 @@ class CoreManager : public QObject {
 	Q_PROPERTY(QString version READ getVersion CONSTANT)
 	Q_PROPERTY(QString downloadUrl READ getDownloadUrl CONSTANT)
 	Q_PROPERTY(int eventCount READ getEventCount NOTIFY eventCountChanged)
+	Q_PROPERTY(int callLogsCount READ getCallLogsCount NOTIFY callLogsCountChanged)
 	
 public:
 	bool started () const {
@@ -162,10 +163,12 @@ public:
 	
 	Q_INVOKABLE void forceRefreshRegisters ();
 	void updateUnreadMessageCount();
+	void stateChanged(Qt::ApplicationState pState);
 	
 	Q_INVOKABLE void sendLogs () const;
 	Q_INVOKABLE void cleanLogs () const;
 	
+	int getCallLogsCount() const;
 	int getMissedCallCount(const QString &peerAddress, const QString &localAddress) const;// Get missed call count from a chat (useful for showing bubbles on Timelines)
 	int getMissedCallCountFromLocal(const QString &localAddress) const;// Get missed call count from a chat (useful for showing bubbles on Timelines)
 	
@@ -193,6 +196,7 @@ signals:
 	void logsUploaded (const QString &url);
 	
 	void eventCountChanged ();
+	void callLogsCountChanged();
 	
 private:
 	CoreManager (QObject *parent, const QString &configPath);

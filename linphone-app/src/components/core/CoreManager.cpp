@@ -76,6 +76,8 @@ CoreManager::CoreManager (QObject *parent, const QString &configPath) :
 	QObject::connect(coreHandlers, &CoreHandlers::coreStarted, this, &CoreManager::initCoreManager, Qt::QueuedConnection);
 	QObject::connect(coreHandlers, &CoreHandlers::coreStopped, this, &CoreManager::stopIterate, Qt::QueuedConnection);
 	QObject::connect(coreHandlers, &CoreHandlers::logsUploadStateChanged, this, &CoreManager::handleLogsUploadStateChanged);
+	QObject::connect(coreHandlers, &CoreHandlers::callLogUpdated, this, &CoreManager::callLogsCountChanged);
+	
 	QTimer::singleShot(10, [this, configPath](){// Delay the creation in order to have the CoreManager instance set before
 		createLinphoneCore(configPath);
 	});
@@ -177,6 +179,15 @@ void CoreManager::forceRefreshRegisters () {
 }
 void CoreManager::updateUnreadMessageCount(){
 	mEventCountNotifier->updateUnreadMessageCount();
+}
+
+void CoreManager::stateChanged(Qt::ApplicationState pState){
+	if(mCbsTimer){
+		if(pState == Qt::ApplicationActive)
+			mCbsTimer->setInterval(	Constants::CbsCallInterval);
+		else
+			mCbsTimer->setInterval(	Constants::CbsCallInterval * 10);
+	}	
 }
 // -----------------------------------------------------------------------------
 
@@ -353,6 +364,9 @@ QString CoreManager::getVersion () const {
 
 int CoreManager::getEventCount () const {
 	return mEventCountNotifier ? mEventCountNotifier->getEventCount() : 0;
+}
+int CoreManager::getCallLogsCount() const{
+	return mCore->getCallLogs().size();
 }
 int CoreManager::getMissedCallCount(const QString &peerAddress, const QString &localAddress)const{
 	return mEventCountNotifier ? mEventCountNotifier->getMissedCallCount(peerAddress, localAddress) : 0;
