@@ -282,10 +282,9 @@ ColumnLayout  {
 						onClicked: CallsListModel.launchChat(chatRoomModel.participants.addressesToString, 1)
 						Icon{
 								icon:'secure_level_1'
-								iconSize:15
-								anchors.right:parent.right
+								iconSize: parent.height/2
 								anchors.top:parent.top
-								anchors.topMargin: -3
+								anchors.horizontalCenter: parent.right
 						}
 					}
 					
@@ -554,7 +553,7 @@ ColumnLayout  {
 	
 	Connections {
 		target: AccountSettingsModel
-		onAccountSettingsUpdated: {
+		onSipAddressChanged: {
 			if (conversation.localAddress !== AccountSettingsModel.sipAddress) {
 				window.setView('Home')
 			}

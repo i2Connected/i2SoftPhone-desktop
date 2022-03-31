@@ -183,9 +183,10 @@ Item {
 			return defaultColor
 	}
 	// ---------------------------------------------------------------------------
-	
-	height: iconHeight || iconSize || parent.iconSize || parent.height
-	width: iconWidth || iconSize || parent.iconSize || parent.width
+	property int fitHeight: iconHeight || iconSize || parent.iconSize || parent.height
+	property int fitWidth: iconWidth || iconSize || parent.iconSize || parent.width
+	height: fitHeight
+	width: fitWidth
 	
 	Button {
 		id: button
@@ -255,40 +256,27 @@ Item {
 			visible: !isCustom
 		}
 		
-		
 		OpacityMask{
 			anchors.fill: foregroundColor
 			source: foregroundColor
 			maskSource: icon
 			visible: isCustom
-			MouseArea{
-				anchors.fill:parent
-				hoverEnabled: true
-				acceptedButtons: Qt.NoButton
-				cursorShape: containsMouse ? Qt.PointingHandCursor : Qt.ArrowCursor
-			}
 		}
 	 
-     
 		OpacityMask{
 			id: mask
 			anchors.fill: foregroundHiddenPartColor
 			source: foregroundHiddenPartColor
 			maskSource: icon
 			visible: isCustom && percentageDisplayed != 100
-			/*
-			layer {
-				enabled: true
-				effect: ColorOverlay {
-					color: "#80FFFFFF"
-				}
-			}*/
-			MouseArea{
-				anchors.fill:parent
-				hoverEnabled: true
-				acceptedButtons: Qt.NoButton
-				cursorShape: containsMouse ? Qt.PointingHandCursor : Qt.ArrowCursor
-			}
+			
+		}
+		
+		MouseArea{
+			anchors.fill:parent
+			hoverEnabled: true
+			acceptedButtons: Qt.NoButton
+			cursorShape: containsMouse ? Qt.PointingHandCursor : Qt.ArrowCursor
 		}
 		TooltipArea {
 			id:tooltip
