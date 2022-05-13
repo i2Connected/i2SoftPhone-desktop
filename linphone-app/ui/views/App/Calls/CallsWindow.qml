@@ -17,7 +17,9 @@ Window {
 	// ---------------------------------------------------------------------------
 	
 	// `{}` is a workaround to avoid `TypeError: Cannot read property...` when calls list is empty
-	readonly property var call: ( calls.selectedCall?calls.selectedCall:{
+	readonly property CallModel call: calls.selectedCall
+	/*
+	?calls.selectedCall:{
 														  callError: '',
 														  isOutgoing: true,
 														  recording: false,
@@ -29,8 +31,11 @@ Window {
 														  videoEnabled: false, 
 														  chatRoomModel:null
 													  });
+													  */
+	property ConferenceInfoModel conferenceInfoModel
 	
 	readonly property bool chatIsOpened: !rightPaned.isClosed()
+	readonly property bool callsIsOpened: !mainPaned.isClosed()
 	
 	
 	// ---------------------------------------------------------------------------
@@ -43,15 +48,14 @@ Window {
 		rightPaned.close()
 	}
 	
-	
-	function conferenceManagerResult(exitValue){
+	function endOfProcess(exitValue){
 		window.detachVirtualWindow();
 		if(exitValue == 0 && calls.count == 0)
 			close();
 	}
 	
 	function openConferenceManager (params) {
-		Logic.openConferenceManager(params, conferenceManagerResult)
+		Logic.openConferenceManager(params, endOfProcess)
 	}
 	
 	function setHeight (height) {
@@ -67,13 +71,13 @@ Window {
 	title: qsTr('callsTitle')
 	
 	// ---------------------------------------------------------------------------
-	
 	onClosing: Logic.handleClosing(close)
 	onDetachedVirtualWindow: Logic.tryToCloseWindow()
 	
 	// ---------------------------------------------------------------------------
 	
 	Paned {
+		id: mainPaned
 		anchors.fill: parent
 		defaultChildAWidth: CallsWindowStyle.callsList.defaultWidth
 		maximumLeftLimit: CallsWindowStyle.callsList.maximumWidth
@@ -84,6 +88,7 @@ Window {
 		// -------------------------------------------------------------------------
 		
 		childA: Rectangle {
+			id: leftPaned
 			anchors.fill: parent
 			color: CallsWindowStyle.callsList.color
 			
@@ -138,6 +143,16 @@ Window {
 							}
 						}
 					}
+					ActionButton {
+						anchors.right: parent.right
+						anchors.rightMargin: 15
+						anchors.verticalCenter: parent.verticalCenter
+						isCustom: true
+						backgroundRadius: 4
+						colorSet: CallsWindowStyle.callsList.closeButton
+						
+						onClicked: mainPaned.close()
+					}
 				}
 				
 				Calls {
@@ -146,7 +161,7 @@ Window {
 					Layout.fillHeight: true
 					Layout.fillWidth: true
 					
-					conferenceModel: ConferenceModel {}
+					conferenceModel: ConferenceProxyModel {}
 					model: CallsListProxyModel {}
 				}
 			}
@@ -234,12 +249,36 @@ Window {
 				}
 			}
 			
+			Component {
+				id: waitingRoom
+				WaitingRoom{
+					conferenceInfoModel: window.conferenceInfoModel
+					onCancel: endOfProcess(0)
+					enabled: window.visible
+				}
+			}
+			Component {
+				id: videoConference
+				VideoConference {
+					callModel: window.call
+					enabled: window.visible
+					listCallsOpened: window.callsIsOpened
+					onOpenListCallsRequest: mainPaned.open()
+				}
+			}
+			
 			// -----------------------------------------------------------------------
 			
 			childA: Loader {
+				id: middlePane
 				anchors.fill: parent
-				sourceComponent: Logic.getContent()
-				onSourceComponentChanged: {rightPaned.childAItem.update()}// Force update when loading a new Content. It's just to be sure
+				sourceComponent: Logic.getContent(window.call, window.conferenceInfoModel)
+				onSourceComponentChanged: {
+					if( sourceComponent == waitingRoom)
+						mainPaned.close()
+					rightPaned.childAItem.update()
+				}// Force update when loading a new Content. It's just to be sure
+				active: window.call || window.conferenceInfoModel
 			}
 			
 			childB: Loader {
@@ -258,6 +297,7 @@ Window {
 		target: CallsListModel
 		onCallTransferAsked: Logic.handleCallTransferAsked(callModel)
 		onCallAttendedTransferAsked: Logic.handleCallAttendedTransferAsked(callModel)
+		onCallConferenceAsked: Logic.openWaitingRoom(conferenceInfoModel)
 		onRowsRemoved: Logic.tryToCloseWindow()
 	}
 }

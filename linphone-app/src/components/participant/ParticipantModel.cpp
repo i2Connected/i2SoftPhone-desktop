@@ -37,7 +37,7 @@ ParticipantModel::ParticipantModel (shared_ptr<linphone::Participant> linphonePa
 	mAdminStatus = false;
 	if(mParticipant){
 		mAdminStatus = mParticipant->isAdmin();
-		mParticipantDevices = std::make_shared<ParticipantDeviceListModel>(mParticipant);
+		mParticipantDevices = QSharedPointer<ParticipantDeviceListModel>::create(mParticipant);
 		connect(this, &ParticipantModel::deviceSecurityLevelChanged, mParticipantDevices.get(), &ParticipantDeviceListModel::securityLevelChanged);
 	}
 }
@@ -45,7 +45,7 @@ ParticipantModel::ParticipantModel (shared_ptr<linphone::Participant> linphonePa
 // -----------------------------------------------------------------------------
 
 ContactModel *ParticipantModel::getContactModel() const{
-	return CoreManager::getInstance()->getContactsListModel()->findContactModelFromSipAddress(getSipAddress());
+	return CoreManager::getInstance()->getContactsListModel()->findContactModelFromSipAddress(getSipAddress()).get();
 }
 
 int ParticipantModel::getSecurityLevel() const{
@@ -54,7 +54,7 @@ int ParticipantModel::getSecurityLevel() const{
 
 int ParticipantModel::getDeviceCount(){
 	int count = (mParticipant ? mParticipant->getDevices().size() : 0);
-	if(mParticipant && count != mParticipantDevices->count()){
+	if(mParticipant && count != mParticipantDevices->getCount()){
 		mParticipantDevices->updateDevices(mParticipant);
 	}
 	return count;
@@ -65,7 +65,7 @@ bool ParticipantModel::getInviting() const{
 }
 
 bool ParticipantModel::isMe() const{
-	return CoreManager::getInstance()->getAccountSettingsModel()->getUsedSipAddress()->weakEqual(Utils::interpretUrl(getSipAddress()));
+	return Utils::isMe(getSipAddress());
 }
 
 QString ParticipantModel::getSipAddress() const{
@@ -76,7 +76,6 @@ QDateTime ParticipantModel::getCreationTime() const{
     return (mParticipant ? QDateTime::fromSecsSinceEpoch(mParticipant->getCreationTime()) : QDateTime::currentDateTime());
 }
 
-//std::list<std::shared_ptr<linphone::ParticipantDevice>> ParticipantModel::getDevices() const;
 bool ParticipantModel::getAdminStatus() const{
     return (mParticipant ? mParticipant->isAdmin() : mAdminStatus);
 }
@@ -108,7 +107,7 @@ void ParticipantModel::setParticipant(std::shared_ptr<linphone::Participant> par
 	mParticipant = participant;
 	if(mParticipant){
 		mAdminStatus = mParticipant->isAdmin();
-		mParticipantDevices = std::make_shared<ParticipantDeviceListModel>(mParticipant);
+		mParticipantDevices = QSharedPointer<ParticipantDeviceListModel>::create(mParticipant);
 		connect(this, &ParticipantModel::deviceSecurityLevelChanged, mParticipantDevices.get(), &ParticipantDeviceListModel::securityLevelChanged);
 	}
 	emit invitingChanged();
@@ -132,7 +131,7 @@ ParticipantDeviceProxyModel * ParticipantModel::getProxyDevices(){
 	return devices;
 }
 
-std::shared_ptr<ParticipantDeviceListModel> ParticipantModel::getParticipantDevices(){
+QSharedPointer<ParticipantDeviceListModel> ParticipantModel::getParticipantDevices(){
 	return mParticipantDevices;
 }
 

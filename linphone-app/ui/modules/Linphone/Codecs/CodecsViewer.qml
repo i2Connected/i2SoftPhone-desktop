@@ -92,11 +92,7 @@ Column {
       cursorShape: Qt.ArrowCursor
 
       property bool held: false
-
-      anchors {
-        left: parent.left
-        right: parent.right
-      }
+		width: view.width
 
       drag {
         axis: Drag.YAxis
@@ -119,7 +115,7 @@ Column {
       Rectangle {
         id: content
 
-        readonly property bool isDownloadable: Boolean($codec.downloadUrl)
+        readonly property bool isDownloadable: Boolean($modelData.downloadUrl)
 
         Drag.active: dragArea.held
         Drag.source: dragArea
@@ -145,23 +141,23 @@ Column {
 
           CodecAttribute {
             Layout.preferredWidth: CodecsViewerStyle.column.mimeWidth
-            text: $codec.mime
+            text: $modelData.mime
           }
 
           CodecAttribute {
             Layout.preferredWidth: CodecsViewerStyle.column.encoderDescriptionWidth
-            text: $codec.encoderDescription || ''
+            text: $modelData.encoderDescription || ''
           }
 
           CodecAttribute {
             Layout.preferredWidth: CodecsViewerStyle.column.clockRateWidth
-            text: $codec.clockRate || ''
+            text: $modelData.clockRate || ''
           }
 
           NumericField {
             Layout.preferredWidth: CodecsViewerStyle.column.bitrateWidth
-            readOnly: content.isDownloadable || !$codec.isVbr
-            text: $codec.bitrate || ''
+            readOnly: content.isDownloadable || !$modelData.isVbr
+            text: $modelData.bitrate || ''
 
             onEditingFinished: view.model.setBitrate(index, text)
           }
@@ -169,7 +165,7 @@ Column {
           TextField {
             Layout.preferredWidth: CodecsViewerStyle.column.recvFmtpWidth
             readOnly: content.isDownloadable
-            text: $codec.recvFmtp || ''
+            text: $modelData.recvFmtp || ''
 
             onEditingFinished: view.model.setRecvFmtp(index, text)
           }
@@ -177,10 +173,10 @@ Column {
           Switch {
             Layout.fillWidth: true
 
-            checked: Boolean($codec.enabled)
+            checked: Boolean($modelData.enabled)
 
             onClicked: !checked && content.isDownloadable
-              ? downloadRequested($codec)
+              ? downloadRequested($modelData)
               : view.model.enableCodec(index, !checked)
           }
         }

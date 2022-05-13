@@ -118,6 +118,7 @@ Item {
 				anchors.topMargin: 3
 				anchors.leftMargin: 5
 				interactive: false
+				clip: false
 				
 				function updateWidth(){
 					var maxWidth = 0
@@ -141,10 +142,8 @@ Item {
 				//height: contentHeight
 				
 				delegate: ChatContent{
-					contentModel: modelData
+					contentModel: $modelData
 					textColor: ChatReplyMessageStyle.replyArea.foregroundColor
-					textFont.pointSize: Units.dp * (customFont.pointSize + ChatReplyMessageStyle.replyArea.pointSizeOffset)
-					textFont.weight: Font.Light
 					onFitWidthChanged:{
 						replyMessage.updateWidth()			
 					}

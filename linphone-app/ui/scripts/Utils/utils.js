@@ -41,8 +41,16 @@ var SCHEME_REGEX = new RegExp('^[^:]+:')
 // QML helpers.
 // =============================================================================
 
-function buildDialogUri (component) {
+function buildCommonDialogUri (component) {
   return 'qrc:/ui/modules/Common/Dialog/' + component + '.qml'
+}
+
+function buildLinphoneDialogUri (component) {
+  return 'qrc:/ui/modules/Linphone/Dialog/' + component + '.qml'
+}
+
+function buildAppDialogUri (component) {
+  return 'qrc:/ui/views/App/Dialog/' + component + '.qml'
 }
 
 // -----------------------------------------------------------------------------
@@ -513,6 +521,14 @@ function formatElapsedTime (seconds) {
 	return (h === 0 ? '' : h + ':') + m + ':' + s
 }
 
+function buildDate(date, time){
+	var dateTime = new Date()
+	dateTime.setFullYear(date.getFullYear(), date.getMonth(), date.getDate())
+	dateTime.setHours(time.getHours())
+	dateTime.setMinutes(time.getMinutes())
+	dateTime.setSeconds(time.getSeconds())
+	return dateTime
+}
 // -----------------------------------------------------------------------------
 
 function formatSize (size) {
@@ -692,4 +708,43 @@ function write (fileName, text) {
   var request = new XMLHttpRequest()
   request.open('PUT', getUriFromSystemPath(fileName), false)
   request.send(text)
+}
+
+function computeAvatarSize (container, maxSize) {
+  var height = container.height
+  var width = container.width
+
+  var size = height < maxSize && height > 0 ? height : maxSize
+  return size < width ? size : width
+}
+
+// -----------------------------------------------------------------------------
+
+function openCodecOnlineInstallerDialog (window, codecInfo, cb) {
+  var VideoCodecsModel = Linphone.VideoCodecsModel
+  window.attachVirtualWindow(buildLinphoneDialogUri('ConfirmDialog'), {
+    descriptionText: qsTr('downloadCodecDescription')
+      .replace('%1', codecInfo.mime)
+      .replace('%2', codecInfo.encoderDescription)
+  }, function (status) {
+    if (status) {
+      window.attachVirtualWindow(buildCommonDialogUri('OnlineInstallerDialog'), {
+        downloadUrl: codecInfo.downloadUrl,
+        extract: true,
+        installFolder: VideoCodecsModel.codecsFolder,
+        installName: codecInfo.installName,
+        mime: codecInfo.mime
+      }, function (status) {
+        if (status) {
+          VideoCodecsModel.reload()
+        }
+        if (cb) {
+          cb(window)
+        }
+      })
+    }
+    else if (cb) {
+      cb(window)
+    }
+  })
 }

@@ -27,8 +27,11 @@
 #include <QObject>
 #include <QDateTime>
 #include <QString>
+#include <QSharedPointer>
 
 #include "components/chat-events/ChatMessageModel.hpp"
+class ChatMessageModel;
+class ConferenceInfoModel;
 
 class ContentModel : public QObject{
 	Q_OBJECT
@@ -44,6 +47,7 @@ public:
 	Q_PROPERTY(bool wasDownloaded MEMBER mWasDownloaded WRITE setWasDownloaded NOTIFY wasDownloadedChanged)
 	Q_PROPERTY(QString filePath READ getFilePath CONSTANT)
 	Q_PROPERTY(ChatMessageModel * chatMessageModel READ getChatMessageModel CONSTANT)
+	Q_PROPERTY(ConferenceInfoModel * conferenceInfoModel READ getConferenceInfoModel CONSTANT)
 	Q_PROPERTY(QString text READ getUtf8Text CONSTANT)
 	
 	std::shared_ptr<linphone::Content> getContent()const;
@@ -54,6 +58,7 @@ public:
 	QString getThumbnail() const;
 	QString getFilePath() const;
 	QString getUtf8Text() const;
+	ConferenceInfoModel * getConferenceInfoModel();//Create a conference Info if not set
 	
 	void setFileOffset(quint64 fileOffset);
 	void setThumbnail(const QString& data);
@@ -93,7 +98,8 @@ private:
 	std::shared_ptr<linphone::Content> mContent;
 	ChatMessageModel* mChatMessageModel;
 	ChatMessageModel::AppDataManager mAppData;	// Used if there is no Chat Message model set.
+	QSharedPointer<ConferenceInfoModel> mConferenceInfoModel;
 };
-Q_DECLARE_METATYPE(std::shared_ptr<ContentModel>)
+Q_DECLARE_METATYPE(QSharedPointer<ContentModel>)
 
 #endif

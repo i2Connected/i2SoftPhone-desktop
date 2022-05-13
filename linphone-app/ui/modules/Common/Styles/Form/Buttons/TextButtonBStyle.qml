@@ -1,4 +1,4 @@
-// TextButtonBStyle
+// TextButtonBStyle (Primary)
 pragma Singleton
 import QtQml 2.2
 import ColorsList 1.0

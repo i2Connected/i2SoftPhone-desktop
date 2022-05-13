@@ -34,7 +34,7 @@ TextEdit {
 	height: fitHeight
 	width: parent.width
 	visible: contentModel && contentModel.isText()
-	clip: true
+	clip: false
 	padding: ChatStyle.entry.message.padding
 	textMargin: 0
 	readOnly: true
@@ -53,7 +53,6 @@ TextEdit {
 	textFormat: Text.RichText // To supports links and imgs.
 	wrapMode: TextEdit.Wrap
 	
-	//onCursorRectangleChanged: if(!readOnly) Logic.ensureVisible(cursorRectangle)
 	onLinkActivated: Qt.openUrlExternally(link)
 	onSelectedTextChanged:{
 							if(selectedText != '') lastTextSelected = selectedText

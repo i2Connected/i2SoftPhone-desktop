@@ -69,7 +69,7 @@ enum EventLogType {
 	EventLogTypeConferenceParticipantUnsetAdmin = int(linphone::EventLog::Type::ConferenceParticipantUnsetAdmin),
 	EventLogTypeConferenceParticipantDeviceAdded = int(linphone::EventLog::Type::ConferenceParticipantDeviceAdded),
 	EventLogTypeConferenceParticipantDeviceRemoved = int(linphone::EventLog::Type::ConferenceParticipantDeviceRemoved),
-	//EventLogTypeConferenceParticipantDeviceMediaChanged = int(linphone::EventLog::Type::ConferenceParticipantDeviceMediaChanged),
+	EventLogTypeConferenceParticipantDeviceMediaAvailabilityChanged = int(linphone::EventLog::Type::ConferenceParticipantDeviceMediaAvailabilityChanged),
 	EventLogTypeConferenceSubjectChanged= int(linphone::EventLog::Type::ConferenceSubjectChanged),
 	EventLogTypeConferenceAvailableMediaChanged = int(linphone::EventLog::Type::ConferenceAvailableMediaChanged),
 	EventLogTypeConferenceSecurityEvent = int(linphone::EventLog::Type::ConferenceSecurityEvent),
@@ -111,6 +111,15 @@ Q_ENUM_NS(CallStatus)
 
 linphone::Call::Status toLinphone(const LinphoneEnums::CallStatus& capability);
 LinphoneEnums::CallStatus fromLinphone(const linphone::Call::Status& capability);
+
+enum ConferenceLayout {
+	ConferenceLayoutGrid = int(linphone::ConferenceLayout::Grid),
+	ConferenceLayoutActiveSpeaker = int(linphone::ConferenceLayout::ActiveSpeaker),
+};
+Q_ENUM_NS(ConferenceLayout)
+
+linphone::ConferenceLayout toLinphone(const LinphoneEnums::ConferenceLayout& layout);
+LinphoneEnums::ConferenceLayout fromLinphone(const linphone::ConferenceLayout& layout);
 
 enum TunnelMode {
 		TunnelModeDisable = int(linphone::Tunnel::Mode::Disable),

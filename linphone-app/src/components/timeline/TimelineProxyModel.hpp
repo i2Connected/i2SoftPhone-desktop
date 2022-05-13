@@ -49,14 +49,11 @@ public:
 	
 	Q_PROPERTY(int filterFlags MEMBER mFilterFlags WRITE setFilterFlags NOTIFY filterFlagsChanged)
 	Q_PROPERTY(QString filterText MEMBER mFilterText WRITE setFilterText NOTIFY filterTextChanged)
-	Q_PROPERTY(int count READ getCount NOTIFY countChanged)
+	Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
 		
-	int getCount() const;
-	
 	Q_INVOKABLE void unselectAll();
 	Q_INVOKABLE void setFilterFlags(const int& filterFlags);
 	Q_INVOKABLE void setFilterText(const QString& text);
-	//Q_INVOKABLE TimelineModel * getTimeline();
 	
 signals:
 	void countChanged();
@@ -77,9 +74,6 @@ protected:
 private:
 	int mFilterFlags = 0;
 	QString mFilterText;
-	
-	//std::shared_ptr<ChatRoomModel> mCurrentChatRoomModel;
-	
 };
 
 #endif // TIMELINE_PROXY_MODEL_H_

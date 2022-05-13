@@ -220,7 +220,7 @@ void CoreHandlers::onMessageReceived (
 		
 		// 2. Notify with Notification popup.
 		const App *app = App::getInstance();
-		if (coreManager->getSettingsModel()->getChatNotificationsEnabled() && (!app->hasFocus() || !chatRoom->getLocalAddress()->weakEqual(coreManager->getAccountSettingsModel()->getUsedSipAddress())))
+		if (coreManager->getSettingsModel()->getChatNotificationsEnabled() && (!app->hasFocus() || !Utils::isMe(chatRoom->getLocalAddress())))
 			app->getNotifier()->notifyReceivedMessage(message);
 		
 		// 3. Notify with sound.
@@ -322,4 +322,9 @@ void CoreHandlers::onEcCalibrationResult(
 		int delayMs
 		) {
 	emit ecCalibrationResult(status, delayMs);
+}
+
+//------------------------------				 CONFERENCE INFO
+void CoreHandlers::onConferenceInfoReceived(const std::shared_ptr<linphone::Core> & core, const std::shared_ptr<const linphone::ConferenceInfo> & conferenceInfo) {
+	qDebug() << "onConferenceInfoReceived (not implemented)";
 }

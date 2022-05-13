@@ -3,7 +3,6 @@ import QtQuick.Layouts 1.3
 
 import Common 1.0
 import Linphone 1.0
-//import LinphoneUtils 1.0
 import LinphoneEnums 1.0
 
 import App.Styles 1.0
@@ -403,7 +402,6 @@ DialogPlus {
 					textFormat: Text.RichText
 					//: 'Required' : Word relative to a star to explain that it is a requirement (Field form)
 					text : '<span style="color:red">*</span> '+qsTr('requiredField')
-					//font.weight: Font.DemiBold
 					color: NewChatRoomStyle.requiredColor
 					font.pointSize: Units.dp * 8
 				}

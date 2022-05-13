@@ -14,8 +14,10 @@ singleton CheckBoxTextStyle         1.0 Form/CheckBoxTextStyle.qml
 singleton ComboBoxStyle             1.0 Form/ComboBoxStyle.qml
 singleton DroppableTextAreaStyle    1.0 Form/DroppableTextAreaStyle.qml
 singleton ListFormStyle             1.0 Form/ListFormStyle.qml
+singleton RadioButtonStyle          1.0 Form/RadioButtonStyle.qml
 singleton SearchBoxStyle            1.0 Form/SearchBoxStyle.qml
 singleton SliderStyle               1.0 Form/SliderStyle.qml
+singleton StackViewStyle            1.0 Form/StackViewStyle.qml
 singleton SwitchStyle               1.0 Form/SwitchStyle.qml
 singleton CommonItemDelegateStyle   1.0 Form/CommonItemDelegateStyle.qml
 singleton TransparentTextInputStyle 1.0 Form/TransparentTextInputStyle.qml
@@ -26,6 +28,7 @@ singleton FileChooserButtonStyle    1.0 Form/Buttons/FileChooserButtonStyle.qml
 singleton SmallButtonStyle          1.0 Form/Buttons/SmallButtonStyle.qml
 singleton TextButtonAStyle          1.0 Form/Buttons/TextButtonAStyle.qml
 singleton TextButtonBStyle          1.0 Form/Buttons/TextButtonBStyle.qml
+singleton TextButtonCStyle          1.0 Form/Buttons/TextButtonCStyle.qml
 
 singleton NumericFieldStyle         1.0 Form/Fields/NumericFieldStyle.qml
 singleton TextAreaFieldStyle        1.0 Form/Fields/TextAreaFieldStyle.qml
@@ -50,7 +53,11 @@ singleton MenuItemStyle             1.0 Menus/MenuItemStyle.qml
 singleton MenuStyle                 1.0 Menus/MenuStyle.qml
 
 singleton ForceScrollBarStyle       1.0 Misc/ForceScrollBarStyle.qml
+singleton MessageBannerStyle        1.0 Misc/MessageBannerStyle.qml
 singleton PanedStyle                1.0 Misc/PanedStyle.qml
+
+singleton DatePickerStyle           1.0 Picker/DatePickerStyle.qml
+singleton TimePickerStyle           1.0 Picker/TimePickerStyle.qml
 
 singleton PopupStyle                1.0 Popup/PopupStyle.qml
 

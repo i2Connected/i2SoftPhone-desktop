@@ -30,7 +30,7 @@
 
 // =============================================================================
 
-ParticipantDeviceProxyModel::ParticipantDeviceProxyModel (QObject *parent) : QSortFilterProxyModel(parent){
+ParticipantDeviceProxyModel::ParticipantDeviceProxyModel (QObject *parent) : SortFilterProxyModel(parent){
 }
 
 bool ParticipantDeviceProxyModel::filterAcceptsRow (
@@ -39,9 +39,10 @@ bool ParticipantDeviceProxyModel::filterAcceptsRow (
 ) const {
 	Q_UNUSED(sourceRow)
 	Q_UNUSED(sourceParent)
-  //const QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
-  //const ParticipantDeviceModel *device = index.data().value<ParticipantDeviceModel *>();
-	return true;
+	auto listModel = qobject_cast<ParticipantDeviceListModel*>(sourceModel());
+	const QModelIndex index = listModel->index(sourceRow, 0, sourceParent);
+	const ParticipantDeviceModel *device = index.data().value<ParticipantDeviceModel *>();
+	return device && (isShowMe() || !device->isMe());
 }
 
 bool ParticipantDeviceProxyModel::lessThan (const QModelIndex &left, const QModelIndex &right) const {
@@ -52,6 +53,46 @@ bool ParticipantDeviceProxyModel::lessThan (const QModelIndex &left, const QMode
 }
 //---------------------------------------------------------------------------------
 
+
+ParticipantDeviceModel *ParticipantDeviceProxyModel::getAt(int row){
+	QModelIndex sourceIndex = mapToSource(this->index(row, 0));
+	return sourceModel()->data(sourceIndex).value<ParticipantDeviceModel *>();
+}
+
+CallModel * ParticipantDeviceProxyModel::getCallModel() const{
+	return mCallModel;
+}
+
+bool ParticipantDeviceProxyModel::isShowMe() const{
+	return mShowMe;
+}
+	
+void ParticipantDeviceProxyModel::setCallModel(CallModel * callModel){
+	setFilterType(1);
+	mCallModel = callModel;
+	auto sourceModel = new ParticipantDeviceListModel(mCallModel);
+	connect(sourceModel, &ParticipantDeviceListModel::countChanged, this, &ParticipantDeviceProxyModel::onCountChanged);
+	connect(sourceModel, &ParticipantDeviceListModel::participantSpeaking, this, &ParticipantDeviceProxyModel::participantSpeaking);
+	setSourceModel(sourceModel);
+	emit countChanged();
+}
+
 void ParticipantDeviceProxyModel::setParticipant(ParticipantModel * participant){
-	setSourceModel(participant->getParticipantDevices().get());
+	setFilterType(0);
+	auto sourceModel = participant->getParticipantDevices().get();
+	connect(sourceModel, &ParticipantDeviceListModel::countChanged, this, &ParticipantDeviceProxyModel::countChanged);
+	connect(sourceModel, &ParticipantDeviceListModel::participantSpeaking, this, &ParticipantDeviceProxyModel::participantSpeaking);
+	setSourceModel(sourceModel);
+	emit countChanged();
+}
+
+void ParticipantDeviceProxyModel::setShowMe(const bool& show){
+	if( mShowMe != show) {
+		mShowMe = show;
+		emit showMeChanged();
+		invalidate();
+	}
+}
+
+void ParticipantDeviceProxyModel::onCountChanged(){
 }

@@ -5,13 +5,13 @@ import QtQuick.Layouts 1.3
 import Common 1.0
 import Common.Styles 1.0
 import Linphone 1.0
-import LinphoneUtils 1.0
 import Utils 1.0
 import UtilsCpp 1.0
 
 import App.Styles 1.0
 
 import 'Incall.js' as Logic
+import 'qrc:/ui/scripts/Utils/utils.js' as Utils
 
 // =============================================================================
 
@@ -26,13 +26,15 @@ Rectangle {
 	property bool cameraIsReady : false
 	property bool previewIsReady : false
 	
-	property var call
+	property CallModel call
 	
 	property var _sipAddressObserver: SipAddressesModel.getSipAddressObserver(call.fullPeerAddress, call.fullLocalAddress)
 	
 	property bool isFullScreen: false	// Use this variable to test if we are in fullscreen. Do not test _fullscreen : we need to clean memory before having the window (see .js file)
 	property var _fullscreen: null
 	on_FullscreenChanged: if( !_fullscreen) isFullScreen = false
+	
+	Component.onDestruction: _sipAddressObserver=null// Need to set it to null because of not calling destructor if not.
 	// ---------------------------------------------------------------------------
 	
 	color: CallStyle.backgroundColor
@@ -45,7 +47,7 @@ Rectangle {
 		
 		onCameraFirstFrameReceived: Logic.handleCameraFirstFrameReceived(width, height)
 		onStatusChanged: Logic.handleStatusChanged (status)
-		onVideoRequested: Logic.handleVideoRequested()
+		onVideoRequested: Logic.handleVideoRequested(call)
 	}
 	
 	ColumnLayout {
@@ -107,6 +109,7 @@ Rectangle {
 						
 						call: incall.call
 						width: container.width
+						height: container.height
 						
 						relativeTo: callQuality
 						relativeY: CallStyle.header.stats.relativeY
@@ -141,7 +144,7 @@ Rectangle {
 				
 				anchors.centerIn: parent
 				horizontalTextAlignment: Text.AlignHCenter
-				sipAddress: _sipAddressObserver.peerAddress
+				sipAddress: _sipAddressObserver && _sipAddressObserver.peerAddress
 				username: UtilsCpp.getDisplayName(sipAddress)
 				
 				height: parent.height
@@ -191,23 +194,17 @@ Rectangle {
 					
 					isCustom: true
 					backgroundRadius: 90
-					colorSet: incall.call.recording ? CallStyle.buttons.recordOn : CallStyle.buttons.recordOff
+					colorSet: CallStyle.buttons.record
 					visible: SettingsModel.callRecorderEnabled
+					toggled: incall.call.recording
 					
 					onClicked: {
 						var call = incall.call
-						return !incall.call.recording
+						return !toggled
 								? call.startRecording()
 								: call.stopRecording()
 					}
-					
-					onVisibleChanged: {
-						if (!visible) {
-							call.stopRecording()
-						}
-					}
-					
-					tooltipText: !incall.call.recording
+					tooltipText: !toggled
 							  ? qsTr('startRecordingLabel')
 							  : qsTr('stopRecordingLabel')
 				}
@@ -218,7 +215,7 @@ Rectangle {
 					colorSet: CallStyle.buttons.fullscreen
 					visible: incall.call.videoEnabled
 					
-					onClicked: Logic.showFullscreen(contactDescription.mapToGlobal(0,0))
+					onClicked: Logic.showFullscreen(window, incall, 'IncallFullscreenWindow.qml', contactDescription.mapToGlobal(0,0))
 				}
 			}
 		}
@@ -239,7 +236,7 @@ Rectangle {
 				
 				IncallAvatar {
 					call: incall.call
-					height: Logic.computeAvatarSize(CallStyle.container.avatar.maxSize)
+					height: Utils.computeAvatarSize(container, CallStyle.container.avatar.maxSize)
 					width: height
 				}
 			}

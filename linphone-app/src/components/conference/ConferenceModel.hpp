@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 Belledonne Communications SARL.
+ * Copyright (c) 2021 Belledonne Communications SARL.
  *
  * This file is part of linphone-desktop
  * (see https://www.linphone.org).
@@ -21,59 +21,80 @@
 #ifndef CONFERENCE_MODEL_H_
 #define CONFERENCE_MODEL_H_
 
-#include <QSortFilterProxyModel>
 
+#include <linphone++/linphone.hh>
 // =============================================================================
+#include <QObject>
+#include <QDateTime>
+#include <QString>
 
-class CallModel;
+#include "components/participant/ParticipantModel.hpp"
 
-class ConferenceModel : public QSortFilterProxyModel {
-	Q_OBJECT;
-	
-	Q_PROPERTY(int count READ getCount NOTIFY countChanged);
-	
-	Q_PROPERTY(bool microMuted READ getMicroMuted WRITE setMicroMuted NOTIFY microMutedChanged);
-	Q_PROPERTY(float microVu READ getMicroVu CONSTANT);
-	
-	Q_PROPERTY(bool recording READ getRecording NOTIFY recordingChanged);
-	Q_PROPERTY(bool isInConf READ isInConference NOTIFY conferenceChanged);
-	
+class ConferenceListener;
+class ParticipantListModel;
+
+class ConferenceModel : public QObject{
+	Q_OBJECT
 public:
-	ConferenceModel (QObject *parent = Q_NULLPTR);
+
+	Q_PROPERTY(QString subject READ getSubject NOTIFY subjectChanged)
+	Q_PROPERTY(QDateTime startDate READ getStartDate CONSTANT)
+	Q_PROPERTY(ParticipantListModel* participants READ getParticipantListModel CONSTANT)
+	Q_PROPERTY(ParticipantModel* localParticipant READ getLocalParticipant NOTIFY localParticipantChanged)
+
+
+	static QSharedPointer<ConferenceModel> create(std::shared_ptr<linphone::Conference> chatRoom, QObject *parent = Q_NULLPTR);
+	ConferenceModel(std::shared_ptr<linphone::Conference> content, QObject *parent = Q_NULLPTR);
+	virtual ~ConferenceModel();
+	bool updateLocalParticipant();	// true if changed
 	
-protected:
-	bool filterAcceptsRow (int sourceRow, const QModelIndex &sourceParent) const override;
+	std::shared_ptr<linphone::Conference> getConference()const;
 	
-	Q_INVOKABLE void terminate ();
-	
-	Q_INVOKABLE void startRecording ();
-	Q_INVOKABLE void stopRecording ();
-	
-	Q_INVOKABLE void join ();
-	Q_INVOKABLE void leave ();
+	QString getSubject() const;
+	QDateTime getStartDate() const;
+	Q_INVOKABLE qint64 getElapsedSeconds() const;
+	Q_INVOKABLE ParticipantModel* getLocalParticipant() const;
+	ParticipantListModel* getParticipantListModel() const;
+	std::list<std::shared_ptr<linphone::Participant>> getParticipantList() const;	// SDK exclude me. We want to get ALL participants.
+
+	virtual void onParticipantAdded(const std::shared_ptr<const linphone::Participant> & participant);
+	virtual void onParticipantRemoved(const std::shared_ptr<const linphone::Participant> & participant);
+	virtual void onParticipantAdminStatusChanged(const std::shared_ptr<const linphone::Participant> & participant);
+	virtual void onParticipantDeviceAdded(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice);
+	virtual void onParticipantDeviceRemoved(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice);
+	virtual void onParticipantDeviceLeft(const std::shared_ptr<const linphone::ParticipantDevice> & device);
+	virtual void onParticipantDeviceJoined(const std::shared_ptr<const linphone::ParticipantDevice> & device);
+	virtual void onParticipantDeviceMediaCapabilityChanged(const std::shared_ptr<const linphone::ParticipantDevice> & device);
+	virtual void onParticipantDeviceMediaAvailabilityChanged(const std::shared_ptr<const linphone::ParticipantDevice> & device);
+	virtual void onParticipantDeviceIsSpeakingChanged(const std::shared_ptr<const linphone::ParticipantDevice> & device, bool isSpeaking);
+	virtual void onConferenceStateChanged(linphone::Conference::State newState);
+	virtual void onSubjectChanged(const std::string& subject);
+//---------------------------------------------------------------------------
 	
 signals:
-	void countChanged (int count);
-	
-	void microMutedChanged (bool status);
-	void recordingChanged (bool status);
-	void conferenceChanged ();
-	
-private:
-	int getCount () const {
-		return rowCount();
-	}
-	
-	bool getMicroMuted () const;
-	void setMicroMuted (bool status);
-	float getMicroVu () const;
-	
-	bool isInConference () const;
-	
-	bool getRecording () const;
-	
-	bool mRecording = false;
-	QString mLastRecordFile;
-};
+	void localParticipantChanged();
+	void participantAdded(const std::shared_ptr<const linphone::Participant> & participant);
+	void participantRemoved(const std::shared_ptr<const linphone::Participant> & participant);
+	void participantAdminStatusChanged(const std::shared_ptr<const linphone::Participant> & participant);
+	void participantDeviceAdded(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice);
+	void participantDeviceRemoved(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice);
+	void participantDeviceLeft(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice);
+	void participantDeviceJoined(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice);
+	void participantDeviceMediaCapabilityChanged(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice);
+	void participantDeviceMediaAvailabilityChanged(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice);
+	void participantDeviceIsSpeakingChanged(const std::shared_ptr<const linphone::ParticipantDevice> & device, bool isSpeaking);
+	void conferenceStateChanged(linphone::Conference::State newState);
+	void subjectChanged();
 
-#endif // CONFERENCE_MODEL_H_
+private:
+	void connectTo(ConferenceListener * listener);
+	
+	std::shared_ptr<linphone::Conference> mConference;
+	std::shared_ptr<ConferenceListener> mConferenceListener;
+
+	QSharedPointer<ParticipantModel> mLocalParticipant;
+	QSharedPointer<ParticipantListModel> mParticipantListModel;
+};
+Q_DECLARE_METATYPE(QSharedPointer<ConferenceModel>)
+
+#endif

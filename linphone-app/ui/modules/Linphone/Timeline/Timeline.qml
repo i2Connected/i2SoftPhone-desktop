@@ -27,7 +27,6 @@ Rectangle {
 	
 	// ---------------------------------------------------------------------------
 	
-	//signal entrySelected (string entry)
 	signal entrySelected (TimelineModel entry)
 	signal entryClicked(TimelineModel entry)
 	signal showHistoryRequest()
@@ -64,7 +63,6 @@ Rectangle {
 			Layout.alignment: Qt.AlignTop
 			color: showHistory.containsMouse?TimelineStyle.legend.backgroundColor.hovered:TimelineStyle.legend.backgroundColor.normal
 			visible: showHistoryButton || showFiltersButtons
-			//visible:view.count > 0 || timeline.isFilterVisible || timeline.model.filterFlags > 0 || CoreManager.eventCount > 0
 			
 			MouseArea{// no more showing history
 				id:showHistory
@@ -363,7 +361,7 @@ Rectangle {
 				
 				Contact {
 					id: contactView
-					property bool isSelected: modelData != undefined && modelData.selected	//view.currentIndex === index
+					property bool isSelected: $modelData != undefined && $modelData.selected	//view.currentIndex === index
 					
 					anchors.fill: parent
 					color: isSelected
@@ -374,7 +372,7 @@ Rectangle {
 								 : TimelineStyle.contact.backgroundColor.b
 								 )
 					displayUnreadMessageCount: SettingsModel.standardChatEnabled || SettingsModel.secureChatEnabled
-					entry: modelData.chatRoomModel
+					entry: $modelData.chatRoomModel
 					sipAddressColor: isSelected
 									 ? TimelineStyle.contact.sipAddress.color.selected
 									 : TimelineStyle.contact.sipAddress.color.normal
@@ -383,18 +381,18 @@ Rectangle {
 								   : TimelineStyle.contact.username.color.normal
 					TooltipArea {	
 						id: contactTooltip						
-						text: UtilsCpp.toDateTimeString(modelData.chatRoomModel.lastUpdateTime)
+						text: UtilsCpp.toDateTimeString($modelData.chatRoomModel.lastUpdateTime)
 						isClickable: true
 					}
 					Icon{
 						icon: TimelineStyle.ephemeralTimer.icon
 						iconSize: TimelineStyle.ephemeralTimer.iconSize
-						overwriteColor:  modelData && modelData.selected ? TimelineStyle.ephemeralTimer.selectedTimerColor : TimelineStyle.ephemeralTimer.timerColor
+						overwriteColor:  $modelData && $modelData.selected ? TimelineStyle.ephemeralTimer.selectedTimerColor : TimelineStyle.ephemeralTimer.timerColor
 						anchors.right:parent.right
 						anchors.bottom:parent.bottom
 						anchors.bottomMargin: 7
 						anchors.rightMargin: 7
-						visible: modelData.chatRoomModel.ephemeralEnabled
+						visible: $modelData.chatRoomModel.ephemeralEnabled
 					}
 				}
 				
@@ -405,11 +403,10 @@ Rectangle {
 					preventStealing: false
 					onClicked: {
 						if(mouse.button == Qt.LeftButton){
-							//if(modelData.selected || !view.updateSelectionModels)// Update selection
-							timeline.entryClicked(modelData)
+							timeline.entryClicked($modelData)
 							if(view){
 								if(view.updateSelectionModels)
-									modelData.selected = true
+									$modelData.selected = true
 								view.currentIndex = index;
 							}
 						}else{
@@ -419,8 +416,9 @@ Rectangle {
 				}
 				
 				Connections{
-					target:modelData
+					target:$modelData
 					onSelectedChanged:{
+						gc()
 						if(view.updateSelectionModels && selected) {
 							view.currentIndex = index;
 						}

@@ -6,46 +6,54 @@ module Linphone
 
 # Components -------------------------------------------------------------------
 
-AccountStatus       1.0 Account/AccountStatus.qml
+AccountStatus                 1.0 Account/AccountStatus.qml
 
-CardBlock           1.0 Blocks/CardBlock.qml
-RequestBlock        1.0 Blocks/RequestBlock.qml
+CardBlock                     1.0 Blocks/CardBlock.qml
+RequestBlock                  1.0 Blocks/RequestBlock.qml
 
-Calls               1.0 Calls/Calls.qml
-CallStatistics      1.0 Calls/CallStatistics.qml
+Calls                         1.0 Calls/Calls.qml
+CallStatistics                1.0 Calls/CallStatistics.qml
+IncallAvatar                  1.0 Calls/IncallAvatar.qml
 
-Chat                1.0 Chat/Chat.qml
-ChatAudioMessage    1.0 Chat/ChatAudioMessage.qml
-ChatAudioPreview    1.0 Chat/ChatAudioPreview.qml
-ChatMessagePreview  1.0 Chat/ChatMessagePreview.qml
-ChatForwardMessage  1.0 Chat/ChatForwardMessage.qml
-ChatReplyMessage    1.0 Chat/ChatReplyMessage.qml
-ChatReplyPreview    1.0 Chat/ChatReplyPreview.qml
+CameraItem                    1.0 Camera/CameraItem.qml
+CameraView                    1.0 Camera/CameraView.qml
 
-CodecsViewer        1.0 Codecs/CodecsViewer.qml
+Chat                          1.0 Chat/Chat.qml
+ChatAudioMessage              1.0 Chat/ChatAudioMessage.qml
+ChatAudioPreview              1.0 Chat/ChatAudioPreview.qml
+ChatCalendarMessage           1.0 Chat/ChatCalendarMessage.qml
+ChatMessagePreview            1.0 Chat/ChatMessagePreview.qml
+ChatForwardMessage            1.0 Chat/ChatForwardMessage.qml
+ChatReplyMessage              1.0 Chat/ChatReplyMessage.qml
+ChatReplyPreview              1.0 Chat/ChatReplyPreview.qml
 
-Avatar              1.0 Contact/Avatar.qml
-Contact             1.0 Contact/Contact.qml
-ContactDescription  1.0 Contact/ContactDescription.qml
+CodecsViewer                  1.0 Codecs/CodecsViewer.qml
 
-SipAddressDialog    1.0 Dialog/SipAddressDialog.qml
+Avatar                        1.0 Contact/Avatar.qml
+Contact                       1.0 Contact/Contact.qml
+ContactDescription            1.0 Contact/ContactDescription.qml
 
-FileView            1.0 File/FileView.qml
+SipAddressDialog              1.0 Dialog/SipAddressDialog.qml
+MultimediaParametersDialog    1.0 Dialog/MultimediaParametersDialog.qml
 
-History             1.0 History/History.qml
+FileView                      1.0 File/FileView.qml
 
-SipAddressesMenu    1.0 Menus/SipAddressesMenu.qml
+History                       1.0 History/History.qml
 
-MessageCounter      1.0 Misc/MessageCounter.qml
+SipAddressesMenu              1.0 Menus/SipAddressesMenu.qml
+VideoConferenceMenu           1.0 Menus/VideoConferenceMenu.qml
 
-PresenceLevel       1.0 Presence/PresenceLevel.qml
+MessageCounter                1.0 Misc/MessageCounter.qml
 
-SmartSearchBar      1.0 SmartSearchBar/SmartSearchBar.qml
+PresenceLevel                 1.0 Presence/PresenceLevel.qml
 
-TelKeypad           1.0 TelKeypad/TelKeypad.qml
+SmartSearchBar                1.0 SmartSearchBar/SmartSearchBar.qml
 
-Timeline            1.0 Timeline/Timeline.qml
+TelKeypad                     1.0 TelKeypad/TelKeypad.qml
 
-SipAddressesView    1.0 View/SipAddressesView.qml
+Timeline                      1.0 Timeline/Timeline.qml
 
-ParticipantsView    1.0 View/ParticipantsView.qml
+ParticipantsListView          1.0 View/ParticipantsListView.qml
+ParticipantsView              1.0 View/ParticipantsView.qml
+SipAddressesView              1.0 View/SipAddressesView.qml
+

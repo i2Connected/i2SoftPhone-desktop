@@ -3,7 +3,6 @@ import QtQuick.Layouts 1.3
 
 import Common 1.0
 import Linphone 1.0
-//import LinphoneUtils 1.0
 import LinphoneEnums 1.0
 
 import App.Styles 1.0
@@ -44,7 +43,6 @@ DialogPlus {
 			}
 		}
 	]
-	flat : true
 	showCloseCross: true
 	//: "Group information" : Popup title.
 	//~ This popup display data about the current chat room
@@ -127,7 +125,6 @@ DialogPlus {
 					Layout.preferredHeight: implicitHeight
 					Layout.rightMargin: InfoChatRoomStyle.results.header.rightMargin
 					Layout.alignment: Qt.AlignRight | Qt.AlignBottom
-					//Layout.topMargin: InfoChatRoomStyle.results.topMargin
 					//: 'Admin' : Admin(istrator)
 					//~ one word for admin status
 					text : qsTr('adminStatus')
@@ -143,7 +140,6 @@ DialogPlus {
 					id: participantView
 					Layout.fillHeight: true
 					Layout.fillWidth: true
-					//anchors.fill: parent
 					
 					showContactAddress:false
 					showSwitch : dialog.adminMode

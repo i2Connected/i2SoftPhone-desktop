@@ -24,17 +24,20 @@
 #include <QSortFilterProxyModel>
 #include "components/participant/ParticipantModel.hpp"
 #include "components/chat-room/ChatRoomModel.hpp"
+#include "app/proxyModel/ProxyListModel.hpp"
+
+class ConferenceModel;
 
 // =============================================================================
 
-class ParticipantListModel : public QAbstractListModel {
+class ParticipantListModel : public ProxyListModel {
   Q_OBJECT
 public:	
 	ParticipantListModel (ChatRoomModel * chatRoomModel, QObject *parent = Q_NULLPTR);
+	ParticipantListModel (ConferenceModel * conferenceModel, QObject *parent = Q_NULLPTR);
 	virtual ~ParticipantListModel();
 	
 	Q_PROPERTY(ChatRoomModel* chatRoomModel READ getChatRoomModel CONSTANT)
-	Q_PROPERTY(int count READ getCount NOTIFY countChanged)
 	Q_PROPERTY(QString addressesToString READ addressesToString NOTIFY participantsChanged)
 	Q_PROPERTY(QString displayNamesToString READ displayNamesToString NOTIFY participantsChanged)
 	Q_PROPERTY(QString usernamesToString READ usernamesToString NOTIFY participantsChanged)
@@ -42,20 +45,19 @@ public:
     void reset();
 	void update();
 	void selectAll(const bool& selected);
-	ParticipantModel * getAt(const int& index);
-	const std::shared_ptr<ParticipantModel> getParticipant(const std::shared_ptr<const linphone::Address>& address) const;
+	const QSharedPointer<ParticipantModel> getParticipant(const std::shared_ptr<const linphone::Address>& address) const;
+	const QSharedPointer<ParticipantModel> getParticipant(const std::shared_ptr<const linphone::Participant>& participant) const;
   
-	int rowCount (const QModelIndex &index = QModelIndex()) const override;
-  
-	QHash<int, QByteArray> roleNames () const override;
-	QVariant data (const QModelIndex &index, int role = Qt::DisplayRole) const override;
-  
-	void add (std::shared_ptr<ParticipantModel> participant);
+	void add (QSharedPointer<ParticipantModel> participant);
+	void add(const std::shared_ptr<const linphone::Participant> & participant);
+	void add(const std::shared_ptr<const linphone::Address> & participantAddress);
 	void updateParticipants();	// Update list from Chat Room
+
 // Remove a chatroom
 	Q_INVOKABLE void remove (ParticipantModel *importer);
 	Q_INVOKABLE ChatRoomModel* getChatRoomModel() const;
-	int getCount() const;
+	Q_INVOKABLE ConferenceModel* getConferenceModel() const;
+	std::list<std::shared_ptr<linphone::Address>> getParticipants()const;
 	
 	Q_INVOKABLE QString addressesToString()const;	
 	Q_INVOKABLE QString displayNamesToString()const;
@@ -63,33 +65,34 @@ public:
 	
 	bool contains(const QString& address) const;
 	
-	
-	
 public slots:
 	void setAdminStatus(const std::shared_ptr<linphone::Participant> participant, const bool& isAdmin);
 
-	void onSecurityEvent(const std::shared_ptr<linphone::ChatRoom> & chatRoom, const std::shared_ptr<const linphone::EventLog> & eventLog);
-	void onConferenceJoined(const std::shared_ptr<linphone::ChatRoom> & chatRoom, const std::shared_ptr<const linphone::EventLog> & eventLog);
-	void onParticipantAdded(const std::shared_ptr<linphone::ChatRoom> & chatRoom, const std::shared_ptr<const linphone::EventLog> & eventLog);
-	void onParticipantRemoved(const std::shared_ptr<linphone::ChatRoom> & chatRoom, const std::shared_ptr<const linphone::EventLog> & eventLog);
-	void onParticipantAdminStatusChanged(const std::shared_ptr<linphone::ChatRoom> & chatRoom, const std::shared_ptr<const linphone::EventLog> & eventLog);
-	void onParticipantDeviceAdded(const std::shared_ptr<linphone::ChatRoom> & chatRoom, const std::shared_ptr<const linphone::EventLog> & eventLog);
-	void onParticipantDeviceRemoved(const std::shared_ptr<linphone::ChatRoom> & chatRoom, const std::shared_ptr<const linphone::EventLog> & eventLog);
-	void onParticipantRegistrationSubscriptionRequested(const std::shared_ptr<linphone::ChatRoom> & chatRoom, const std::shared_ptr<const linphone::Address> & participantAddress);
-	void onParticipantRegistrationUnsubscriptionRequested(const std::shared_ptr<linphone::ChatRoom> & chatRoom, const std::shared_ptr<const linphone::Address> & participantAddress);
+	void onSecurityEvent(const std::shared_ptr<const linphone::EventLog> & eventLog);
+	void onConferenceJoined();
+	void onParticipantAdded(const std::shared_ptr<const linphone::Participant> & participant);
+	void onParticipantAdded(const std::shared_ptr<const linphone::EventLog> & eventLog);
+	void onParticipantAdded(const std::shared_ptr<const linphone::Address>& address);
+	void onParticipantRemoved(const std::shared_ptr<const linphone::Participant> & participant);
+	void onParticipantRemoved(const std::shared_ptr<const linphone::EventLog> & eventLog);
+	void onParticipantRemoved(const std::shared_ptr<const linphone::Address>& address);
+	void onParticipantAdminStatusChanged(const std::shared_ptr<const linphone::Participant> & participant);
+	void onParticipantAdminStatusChanged(const std::shared_ptr<const linphone::EventLog> & eventLog);
+	void onParticipantAdminStatusChanged(const std::shared_ptr<const linphone::Address>& address );
+	void onParticipantDeviceAdded(const std::shared_ptr<const linphone::EventLog> & eventLog);
+	void onParticipantDeviceRemoved(const std::shared_ptr<const linphone::EventLog> & eventLog);
+	void onParticipantRegistrationSubscriptionRequested(const std::shared_ptr<const linphone::Address> & participantAddress);
+	void onParticipantRegistrationUnsubscriptionRequested(const std::shared_ptr<const linphone::Address> & participantAddress);
+	void onStateChanged();
 	
 signals:
 	void securityLevelChanged();
 	void deviceSecurityLevelChanged(std::shared_ptr<const linphone::Address> device);
 	void participantsChanged();
-	void countChanged();
 
 private:
-	bool removeRow (int row, const QModelIndex &parent = QModelIndex());
-	bool removeRows (int row, int count, const QModelIndex &parent = QModelIndex()) override;
-	
-	QList<std::shared_ptr<ParticipantModel>> mParticipants;
-	ChatRoomModel* mChatRoomModel;
+	ChatRoomModel* mChatRoomModel = nullptr;
+	ConferenceModel *mConferenceModel = nullptr;
 };
-Q_DECLARE_METATYPE(std::shared_ptr<ParticipantListModel>);
+Q_DECLARE_METATYPE(QSharedPointer<ParticipantListModel>);
 #endif // PARTICIPANT_LIST_MODEL_H_

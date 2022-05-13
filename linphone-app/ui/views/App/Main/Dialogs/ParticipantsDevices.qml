@@ -5,7 +5,6 @@ import Common 1.0
 import Linphone 1.0
 import Utils 1.0
 import UtilsCpp 1.0
-import LinphoneUtils 1.0
 import LinphoneEnums 1.0
 
 import App.Styles 1.0
@@ -19,7 +18,6 @@ import '../Conversation.js' as Logic
 DialogPlus {
 	id:dialog
 	buttons: []
-	flat : true
 	//: 'Conversation's devices' : Title of window that show all devices
 	title: qsTr('conversationDevicesTitle')
 	showCloseCross:true
@@ -50,8 +48,8 @@ DialogPlus {
 				ColumnLayout{
 				id:mainHeader
 				property var window : ListView.view.window
-				property int securityLevel : modelData.securityLevel
-				property string addressToCall : modelData.sipAddress
+				property int securityLevel : $modelData.securityLevel
+				property string addressToCall : $modelData.sipAddress
 						
 				width: parent ? parent.width : undefined
 				spacing: 0
@@ -66,19 +64,19 @@ DialogPlus {
 						Layout.preferredHeight: 32
 						Layout.preferredWidth: 32
 						Layout.leftMargin: 14
-						username: modelData?(modelData.contactModel ? modelData.contactModel.vcard.username
-																	:modelData.username?modelData.username:
-																						 UtilsCpp.getDisplayName(modelData.sipAddress)
+						username: $modelData?($modelData.contactModel ? $modelData.contactModel.vcard.username
+																	:$modelData.username?$modelData.username:
+																						 UtilsCpp.getDisplayName($modelData.sipAddress)
 											 ):''
 						Icon{
-							property int securityLevel : modelData.securityLevel
+							property int securityLevel : $modelData.securityLevel
 							anchors.top:parent.top
 							anchors.horizontalCenter: parent.right
-							visible: modelData && securityLevel !== 1
-							icon: modelData?(securityLevel === 2?'secure_level_1': securityLevel===3? 'secure_level_2' : 'secure_level_unsafe'):'secure_level_unsafe'
+							visible: $modelData && securityLevel !== 1
+							icon: $modelData?(securityLevel === 2?'secure_level_1': securityLevel===3? 'secure_level_2' : 'secure_level_unsafe'):'secure_level_unsafe'
 							iconSize: parent.height/2
 							Timer{// Workaround : no security events are send when device's security change.
-									onTriggered: parent.securityLevel = modelData.securityLevel
+									onTriggered: parent.securityLevel = $modelData.securityLevel
 									repeat:true
 									running:true
 									interval:500
@@ -113,21 +111,21 @@ DialogPlus {
 						Layout.preferredWidth: iconSize
 						Layout.leftMargin: isCustom ? 9 : 14
 						Layout.rightMargin: isCustom ? 9 : 14
-						property int securityLevel : modelData.securityLevel
+						property int securityLevel : $modelData.securityLevel
 						property bool participantsDevicesVisible: participantDevices.visible
 						function setColorSet(){
 							if(isCustom)
 								colorSet = participantsDevicesVisible ? ParticipantsDevicesStyle.expanded : ParticipantsDevicesStyle.collapsed
 							iconSize = colorSet.iconSize
 						}
-						onSecurityLevelChanged: if( modelData.deviceCount == 0){
+						onSecurityLevelChanged: if( $modelData.deviceCount == 0){
 							icon = securityLevel === 2?'secure_level_1': 
 																  (securityLevel===3? 'secure_level_2' : 'secure_level_unsafe')
 							iconSize = 20
 						}
 						onParticipantsDevicesVisibleChanged: setColorSet()
 						visible:true
-						useStates: modelData.deviceCount > 0
+						useStates: $modelData.deviceCount > 0
 						isCustom: useStates
 						onIsCustomChanged: setColorSet()
 						onClicked: participantDevices.visible = !participantDevices.visible
@@ -149,7 +147,8 @@ DialogPlus {
 					Layout.preferredHeight: item.height * count
 					
 					interactive: false
-					model: modelData.getProxyDevices()
+					model: $modelData.getProxyDevices()
+					Component.onDestruction: {model=null}// Need to set it to null because of not calling destructor if not.
 					
 					delegate: Rectangle{
 						id:mainRectangle
@@ -172,7 +171,7 @@ DialogPlus {
 								verticalAlignment: Text.AlignVCenter
 								wrapMode: Text.WordWrap
 								
-								text:modelData.name
+								text: modelData.name
 								
 								MouseArea{
 									anchors.fill:parent
@@ -193,7 +192,7 @@ DialogPlus {
 								icon: securityLevel === 2?'secure_level_1': securityLevel===3? 'secure_level_2' : 'secure_level_unsafe'
 								iconSize:20
 								Timer{// Workaround : no security events are send when device's security change.
-									onTriggered: parent.securityLevel = modelData.securityLevel
+									onTriggered: parent.securityLevel = $modelData.securityLevel
 									repeat:true
 									running:true
 									interval:500

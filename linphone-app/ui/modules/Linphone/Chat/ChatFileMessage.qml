@@ -4,12 +4,12 @@ import QtQuick.Layouts 1.3
 
 import Common 1.0
 import Linphone 1.0
-import LinphoneUtils 1.0
 import LinphoneEnums 1.0
 import Linphone.Styles 1.0
 import Utils 1.0
 import Units 1.0
 import ColorsList 1.0
+import UtilsCpp 1.0
 
 // =============================================================================
 // TODO : into Loader
@@ -19,15 +19,19 @@ Row {
 	property ChatMessageModel chatMessageModel: contentModel && contentModel.chatMessageModel
 	property ContentModel contentModel
 	property bool isOutgoing : chatMessageModel && ( chatMessageModel.isOutgoing  || chatMessageModel.state == LinphoneEnums.ChatMessageStateIdle);
-	property int fitWidth: visible ? Math.max(fileName.implicitWidth + 5 + thumbnailProvider.width + 3*ChatStyle.entry.message.file.margins
+	property int fitWidth: visible ? Math.max( (fileName.visible ? fileName.implicitWidth : 0)
+												 + thumbnailProvider.width + 3*ChatStyle.entry.message.file.margins
 											  , Math.max(ChatStyle.entry.message.file.width, ChatStyle.entry.message.outgoing.areaSize)) : 0
 	property int fitHeight: visible ? rectangle.height : 0
+	
+	property bool isAnimatedImage : mainRow.contentModel && mainRow.contentModel.wasDownloaded && UtilsCpp.isAnimatedImage(mainRow.contentModel.filePath)
+	property bool haveThumbnail: mainRow.contentModel && mainRow.contentModel.thumbnail
 	
 	signal copyAllDone()
 	signal copySelectionDone()
 	signal forwardClicked()
 	height: fitHeight
-	visible: contentModel && (contentModel.isFile() || contentModel.isFileTransfer()) && !contentModel.isVoiceRecording()
+	visible: contentModel && !contentModel.isIcalendar() && (contentModel.isFile() || contentModel.isFileTransfer()) && !contentModel.isVoiceRecording()
 	// ---------------------------------------------------------------------------
 	// File message.
 	// ---------------------------------------------------------------------------
@@ -52,7 +56,7 @@ Row {
 				property string thumbnail :  mainRow.contentModel ? mainRow.contentModel.thumbnail : ''
 				color: 'transparent'
 				
-				height: ChatStyle.entry.message.file.height
+				height: mainRow.isAnimatedImage ? ChatStyle.entry.message.file.heightbetter : ChatStyle.entry.message.file.height
 				width: mainRow.width
 				
 				radius: ChatStyle.entry.message.radius
@@ -75,11 +79,32 @@ Row {
 						
 						Image {
 							id: thumbnailImageSource
+							property real scaleAnimatorTo : ChatStyle.entry.message.file.animation.thumbnailTo
 							mipmap: SettingsModel.mipmapEnabled
 							source: mainRow.contentModel.thumbnail
 							fillMode: Image.PreserveAspectFit
-							sourceSize.width: 100
-							sourceSize.height: 100
+							Loader{
+								anchors.fill: parent
+								sourceComponent: Image{// Better quality on zoom
+									mipmap: SettingsModel.mipmapEnabled
+									source:'file:/'+mainRow.contentModel.filePath
+									fillMode: Image.PreserveAspectFit
+									visible: status == Image.Ready
+								}
+								asynchronous: true
+								active: thumbnailProvider.state == 'hovered'
+							}
+						}
+					}
+					Component {
+						id: animatedImage
+						
+						AnimatedImage {
+							id: animatedImageSource
+							property real scaleAnimatorTo : ChatStyle.entry.message.file.animation.to
+							mipmap: SettingsModel.mipmapEnabled
+							source: 'file:/'+mainRow.contentModel.filePath
+							fillMode: Image.PreserveAspectFit
 						}
 					}
 					
@@ -87,6 +112,7 @@ Row {
 						id: extension
 						
 						Rectangle {
+							property real scaleAnimatorTo : ChatStyle.entry.message.file.animation.to
 							color: ChatStyle.entry.message.file.extension.background.color
 							
 							Text {
@@ -106,9 +132,14 @@ Row {
 						id: thumbnailProvider
 						
 						Layout.fillHeight: true
-						Layout.preferredWidth: parent.height
+						Layout.preferredWidth: parent.height*4/3
 						
-						sourceComponent: (mainRow.contentModel ? (mainRow.contentModel.thumbnail ? thumbnailImage : extension ): undefined)
+						
+						
+						sourceComponent: (mainRow.contentModel ? 
+							(mainRow.isAnimatedImage ? animatedImage
+							:  (mainRow.haveThumbnail ? thumbnailImage : extension )
+							) : undefined)
 						
 						ScaleAnimator {
 							id: thumbnailProviderAnimator
@@ -136,7 +167,7 @@ Row {
 										}
 										
 										thumbnailProvider.z = Constants.zPopup
-										thumbnailProviderAnimator.to = ChatStyle.entry.message.file.animation.to
+										thumbnailProviderAnimator.to = thumbnailProvider.item.scaleAnimatorTo
 										thumbnailProviderAnimator.running = true
 									}
 								}
@@ -187,14 +218,15 @@ Row {
 								}
 								
 								text: (mainRow.contentModel ? mainRow.contentModel.name : '')
-								width: parent.width
+								width: visible ? parent.width : 0
+								visible: mainRow.contentModel && !mainRow.isAnimatedImage && !mainRow.haveThumbnail
 							}
 							
 							ProgressBar {
 								id: progressBar
 								
 								height: ChatStyle.entry.message.file.status.bar.height
-								width: parent.width
+								width: visible ? parent.width : 0
 								
 								to: (mainRow.contentModel ? mainRow.contentModel.fileSize : 0)
 								value: mainRow.contentModel ? mainRow.contentModel.fileOffset || to : to
@@ -258,9 +290,6 @@ Row {
 					
 					anchors.fill: parent
 					visible: true
-					//downloadButton.visible || ((rectangle.isUploaded || rectangle.isRead) && !isOutgoing) || isOutgoing
-					//onVisibleChanged: console.log("Mouse of "+mainRow.contentModel.name+" / "+downloadButton.visible
-						//				+"/"+rectangle.isUploaded +"/"+rectangle.isRead)
 					
 					onClicked: {
 						if (Utils.pointIsInItem(this, thumbnailProvider, mouse)) {

@@ -21,8 +21,8 @@ Rectangle {
 	property alias proxyModel: chat.model	// ChatRoomProxyModel
 	property alias tryingToLoadMoreEntries : chat.tryToLoadMoreEntries
 	
-	property string noticeBannerText : ''	// When set, show a banner with text and hide after some time
-	onNoticeBannerTextChanged: if(noticeBannerText!='') messageBlock.state = "showed"
+	property alias noticeBannerText : messageBlock.noticeBannerText	// When set, show a banner with text and hide after some time
+	
 	
 	// ---------------------------------------------------------------------------
 	
@@ -31,6 +31,7 @@ Rectangle {
 	// ---------------------------------------------------------------------------
 	
 	color: ChatStyle.color
+	clip: true
 	
 	function positionViewAtIndex(index){
 		chat.bindToEnd = false
@@ -76,7 +77,7 @@ Rectangle {
 			
 			Layout.fillHeight: true
 			Layout.fillWidth: true
-			
+			clip: false
 			highlightFollowsCurrentItem: false
 			// Use moving event => this is a user action.
 			onIsMovingChanged:{
@@ -122,7 +123,7 @@ Rectangle {
 				Item {
 					implicitHeight: container.height + ChatStyle.sectionHeading.bottomMargin
 					width: parent.width
-					
+					clip: false
 					Borders {
 						id: container
 						
@@ -188,6 +189,7 @@ Rectangle {
 				
 				color: ChatStyle.color
 				implicitHeight: layout.height + ChatStyle.entry.bottomMargin
+				clip: false
 				
 				// ---------------------------------------------------------------------
 				
@@ -198,6 +200,7 @@ Rectangle {
 					hoverEnabled: true
 					implicitHeight: layout.height
 					width: parent.width + parent.anchors.rightMargin
+					clip: false
 					acceptedButtons: Qt.NoButton
 					ColumnLayout{
 						id: layout
@@ -264,6 +267,7 @@ Rectangle {
 								property int remainingIndex : loaderIndex % ((chat.remainingLoadersCount) / chat.syncLoaderBatch) != 0	// Check loader index to remaining loader.
 								onRemainingIndexChanged: if( remainingIndex == 0 && asynchronous) asynchronous = false
 								asynchronous: true
+								z:1
 							
 								onStatusChanged:	if( status == Loader.Ready) {
 														remainingIndex = -1	// overwrite to remove signal changed. That way, there is no more binding loops.
@@ -315,6 +319,7 @@ Rectangle {
 			footer: Item{
 				implicitHeight: composersItem.implicitHeight
 				width: parent.width
+				clip: false
 				Text {
 					id: composersItem
 					property var composers : container.proxyModel.chatRoomModel ? container.proxyModel.chatRoomModel.composers : undefined
@@ -376,70 +381,18 @@ Rectangle {
 			Layout.fillWidth: true
 			Layout.preferredHeight: textAreaBorders.height + chatMessagePreview.height+messageBlock.height
 			color: ChatStyle.sendArea.backgroundBorder.color
-			clip: true
 			ColumnLayout{
 				anchors.fill: parent				
 				spacing: 0
-				Rectangle{
+				MessageBanner{
 					id: messageBlock
 					onHeightChanged: height = Layout.preferredHeight
-					Layout.preferredHeight: visible && opacity > 0 ? 32 : 0
 					Layout.fillWidth: true
+					Layout.preferredHeight: fitHeight
 					Layout.leftMargin: ChatStyle.entry.leftMargin
 					Layout.rightMargin: ChatStyle.entry.rightMargin
-					color: ChatStyle.messageBanner.color
-					radius: 10
-					state: "hidden"
-					Timer{
-						id: hideNoticeBanner
-						interval: 4000
-						repeat: false
-						onTriggered: messageBlock.state = "hidden"
-					}
-					RowLayout{
-						anchors.centerIn: parent
-						spacing: 5
-						Icon{
-							icon: ChatStyle.copyTextIcon
-							overwriteColor: ChatStyle.messageBanner.textColor
-							iconSize: 20
-						}
-						Text{
-							Layout.fillHeight: true
-							Layout.fillWidth: true
-							text: container.noticeBannerText
-							font {
-								pointSize: ChatStyle.messageBanner.pointSize
-							}
-							color: ChatStyle.messageBanner.textColor
-						}
-					}
-					states: [
-						State {
-							name: "hidden"
-							PropertyChanges { target: messageBlock; opacity: 0 }
-						},
-						State {
-							name: "showed"
-							PropertyChanges { target: messageBlock; opacity: 1 }
-						}
-					]
-					transitions: [
-						Transition {
-							from: "*"; to: "showed"
-							SequentialAnimation{
-								NumberAnimation{ properties: "opacity"; easing.type: Easing.OutBounce; duration: 500 }
-								ScriptAction{ script: hideNoticeBanner.start()}	
-							}
-						},
-						Transition {
-							SequentialAnimation{
-								NumberAnimation{ properties: "opacity"; duration: 1000 }
-								ScriptAction{ script: container.noticeBannerText = '' }
-							}
-						}
-					]
-				}// MessageBlock
+					noticeBannerText: ''
+				}
 				ChatMessagePreview{
 						id: chatMessagePreview
 						Layout.fillWidth: true
@@ -488,7 +441,6 @@ Rectangle {
 							if(proxyModel.chatRoomModel) {
 								proxyModel.sendMessage(text)
 							}else{
-								console.log("Peer : " +proxyModel.peerAddress+ "/"+chat.model.peerAddress)
 								proxyModel.chatRoomModel = CallsListModel.createChat(proxyModel.peerAddress)
 								proxyModel.sendMessage(text)
 							}

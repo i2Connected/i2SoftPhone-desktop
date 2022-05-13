@@ -83,11 +83,6 @@ QtObject {
 			property color foregroundPressedColor : ColorsList.addImageColor(sectionName+'_'+replyPreviewObject.name+'_'+name+'_f_p', icon, 'l_p_b_fg').color
 		}
 	}
-	property QtObject messageBanner: QtObject {
-		property color color: ColorsList.add(sectionName+'_message_banner', '', 'Background of message banner', '#9ecd1d').color
-		property color textColor: ColorsList.add(sectionName+'_message_banner_text', 'q', 'Text of message banner').color
-		property int pointSize: Units.dp * 9
-	}
 	property QtObject ephemeralTimer: QtObject{
 		property string icon: 'timer_custom'
 		property int iconSize : 25
@@ -187,11 +182,12 @@ QtObject {
 			}
 			
 			property QtObject file: QtObject {
-				property int height: 64
+				property int height: 80
+				property int heightbetter: 200
 				property int iconSize: 18
 				property int margins: 8
 				property int spacing: 8
-				property int width: 250
+				property int width: 100
 				property QtObject download: QtObject{
 					property string icon: 'download_custom'
 					property int iconSize: 30
@@ -200,8 +196,9 @@ QtObject {
 				}
 				
 				property QtObject animation: QtObject {
-					property int duration: 200
-					property real to: 1.5
+					property int duration: 300
+					property real to: 1.7
+					property real thumbnailTo: 2
 				}
 				
 				property QtObject extension: QtObject {

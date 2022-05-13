@@ -27,10 +27,12 @@ ColumnLayout  {
 	property var _contact
 	property var _vcard
 	
+	
+	
 	// ---------------------------------------------------------------------------
 	
 	spacing: 0
-	
+	Component.onDestruction: {_vcard=null}// Need to set it to null because of not calling destructor if not.
 	Component.onCompleted:{
 		var sipAddress = contactEdit.sipAddress
 		var contact = contactEdit._contact = SipAddressesModel.mapSipAddressToContact(
@@ -239,7 +241,6 @@ ColumnLayout  {
 		sipAddresses: _contact ? _contact.vcard.sipAddresses : [ contactEdit.sipAddress ]
 		
 		function vewConversation(chatRoomModel){
-			console.log("Load conversation from contact edit")
 			window.setView('Conversation', {
 								chatRoomModel:chatRoomModel
 							}, function(){

@@ -21,7 +21,6 @@ ScrollableListView {
 	
 	property string genSipAddress
 	
-	// Optional parameters.chatRoomModel.isMeAdmin
 	property string headerButtonDescription
 	property string headerButtonIcon
 	property var headerButtonAction
@@ -127,8 +126,8 @@ ScrollableListView {
 																					   })
 									Icon{
 										visible: modelData.secure>0 &&
-											(sipAddressesView.actions[index].secureIconVisibleHandler ? sipAddressesView.actions[index].secureIconVisibleHandler({sipAddres:$sipAddress}) : true)
-										icon:modelData.secure === 2?'secure_level_2':'secure_level_1'
+											(sipAddressesView.actions[index].secureIconVisibleHandler ? sipAddressesView.actions[index].secureIconVisibleHandler({sipAddres:$modelData}) : true)
+										icon: modelData.secure === 2?'secure_level_2':'secure_level_1'
 										iconSize:parent.height/2
 										anchors.top:parent.top
 										anchors.horizontalCenter: parent.right
@@ -186,7 +185,7 @@ ScrollableListView {
 						}
 						
 						icon: sipAddressesView.headerButtonIcon
-						iconSize: SipAddressesViewStyle.header.iconSize
+						iconSize: parent.height
 						
 						visible: icon.length > 0
 					}
@@ -237,11 +236,23 @@ ScrollableListView {
 					Layout.fillHeight: true
 					Layout.fillWidth: true
 					showContactAddress: sipAddressesView.showContactAddress
+					function getStatus(){
+						var count = 0;
+						var txt = ''
+						if( $modelData.adminStatus) {
 					//: '(Admin)' : One word for Admin(istrator)
 					//~ Context Little Header in one word for a column in participant
-					statusText : showAdminStatus && modelData.adminStatus ? qsTr('participantsAdminHeader') : ''
+							txt += qsTr('participantsAdminHeader')
+							++count
+						}
+						if( $modelData.isMe)
+						//: 'Me' : One word for myself.
+							txt += (count++ > 0 ? ' - ' : '') + qsTr('participantsMe')
+						return txt
+					}
+					statusText : showAdminStatus ? getStatus()  : ''
 					
-					entry:  modelData
+					entry:  $modelData
 					
 					onAvatarClicked: sipAddressesView.entryClicked(parent.entry, index, contactView)
 					
@@ -250,7 +261,7 @@ ScrollableListView {
 						anchors.horizontalCenter: parent.horizontalCenter
 						width:15
 						height:15
-						running: sipAddressesView.showInvitingIndicator && modelData.inviting
+						running: sipAddressesView.showInvitingIndicator && $modelData.inviting
 					}
 				}
 				
@@ -266,15 +277,14 @@ ScrollableListView {
 					Switch{
 						anchors.verticalCenter: parent.verticalCenter
 						width:50
-						//Layout.preferredWidth: 50
 						indicatorStyle: SwitchStyle.aux
 						
 						visible: sipAddressesView.showSwitch
 						
 						enabled:true
-						checked: modelData.adminStatus
+						checked: $modelData.adminStatus
 						onClicked: {
-							modelData.adminStatus = !checked
+							$modelData.adminStatus = !checked
 						}
 					}
 					
@@ -286,15 +296,15 @@ ScrollableListView {
 							backgroundRadius: 90
 							colorSet: modelData.colorSet
 							anchors.verticalCenter: parent.verticalCenter
-							tooltipText:modelData.tooltipText?modelData.tooltipText:''
+							tooltipText: modelData.tooltipText? modelData.tooltipText:''
 							visible: sipAddressesView.actions[index].visible
 							onClicked: {
 								sipAddressesView.actions[index].handler(contactView.entry)
 							}
 							Icon{
 								visible: modelData.secure>0 &&
-									(sipAddressesView.actions[index].secureIconVisibleHandler ? sipAddressesView.actions[index].secureIconVisibleHandler({sipAddres:$sipAddress}) : true)
-								icon:modelData.secure === 2?'secure_level_2':'secure_level_1'
+									(sipAddressesView.actions[index].secureIconVisibleHandler ? sipAddressesView.actions[index].secureIconVisibleHandler({sipAddres:$modelData}) : true)
+								icon: modelData.secure === 2?'secure_level_2':'secure_level_1'
 								iconSize: parent.height/2
 								anchors.top:parent.top
 								anchors.horizontalCenter: parent.right

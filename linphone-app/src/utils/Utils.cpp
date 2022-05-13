@@ -31,6 +31,7 @@
 #include "components/contacts/ContactsListModel.hpp"
 #include "components/contact/ContactModel.hpp"
 #include "components/contact/VcardModel.hpp"
+#include "components/settings/AccountSettingsModel.hpp"
 #include "components/settings/SettingsModel.hpp"
 #include "app/paths/Paths.hpp"
 
@@ -68,6 +69,10 @@ bool Utils::hasCapability(const QString& address, const LinphoneEnums::FriendCap
 		return contact->hasCapability(capability);
 	else
 		return false;
+}
+
+QDateTime Utils::addMinutes(QDateTime date, const int& min){
+	return date.addSecs(min*60);
 }
 
 QString Utils::toDateTimeString(QDateTime date){
@@ -480,7 +485,7 @@ QString Utils::getDisplayName(const std::shared_ptr<const linphone::Address>& ad
 		std::shared_ptr<linphone::Address> cleanAddress = address->clone();
 		cleanAddress->clean();
 		QString qtAddress = Utils::coreStringToAppString(cleanAddress->asStringUriOnly());
-		ContactModel * model = CoreManager::getInstance()->getContactsListModel()->findContactModelFromSipAddress(qtAddress);
+		auto model = CoreManager::getInstance()->getContactsListModel()->findContactModelFromSipAddress(qtAddress);
 		if(model && model->getVcardModel())
 			displayName = model->getVcardModel()->getUsername();
 		else{
@@ -513,4 +518,20 @@ QString Utils::computeUserAgent(const std::shared_ptr<linphone::Config>& config)
 					.arg(SettingsModel::getDeviceName(config))
 					.arg(QSysInfo::prettyProductName())
 					.arg(qVersion());
+}
+
+bool Utils::isMe(const QString& address){
+	return !address.isEmpty() ? CoreManager::getInstance()->getAccountSettingsModel()->getUsedSipAddress()->weakEqual(Utils::interpretUrl(address)) : false;
+}
+
+bool Utils::isMe(const std::shared_ptr<const linphone::Address>& address){
+	return address ? CoreManager::getInstance()->getAccountSettingsModel()->getUsedSipAddress()->weakEqual(address) : false;
+}
+
+bool Utils::isAnimatedImage(const QString& path){
+	QFileInfo info(path);
+	if( !info.exists())
+		return false;
+	QImageReader reader(path);
+	return reader.supportsAnimation() && reader.imageCount() > 1;
 }

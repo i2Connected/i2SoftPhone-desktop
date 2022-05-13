@@ -32,7 +32,7 @@ class QMutex;
 class CoreHandlers :
 		public QObject,
 		public linphone::CoreListener {
-	Q_OBJECT;
+	Q_OBJECT
 	
 public:
 	CoreHandlers (CoreManager *coreManager);
@@ -60,7 +60,6 @@ signals:
 	void setLastRemoteProvisioningState(const linphone::ConfiguringState &state);
 	
 private:
-	
 	// ---------------------------------------------------------------------------
 	// Linphone callbacks.
 	// ---------------------------------------------------------------------------
@@ -160,8 +159,6 @@ private:
 			const std::shared_ptr<linphone::Friend> &linphoneFriend
 			) override;
 	
-	//void onRegistrationStateChanged (
-	
 	void onTransferStateChanged (
 			const std::shared_ptr<linphone::Core> &core,
 			const std::shared_ptr<linphone::Call> &call,
@@ -181,7 +178,8 @@ private:
 			int delayMs
 			) override;
 	
-	// ---------------------------------------------------------------------------
+	// Conference Info
+	virtual void onConferenceInfoReceived(const std::shared_ptr<linphone::Core> & core, const std::shared_ptr<const linphone::ConferenceInfo> & conferenceInfo) override;
 };
 
 #endif // CORE_HANDLERS_H_

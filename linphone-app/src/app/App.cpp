@@ -235,12 +235,19 @@ App::App (int &argc, char *argv[]) : SingleApplication(argc, argv, true, Mode::U
 
 App::~App () {
 	qInfo() << QStringLiteral("Destroying app...");
-	if( mEngine )
-		mEngine->deleteLater();// Let to Qt the time to delete its data
+}
+
+void App::stop(){
+	qInfo() << QStringLiteral("Stopping app...");
+	if( mEngine ){
+		delete mEngine;
+		processEvents(QEventLoop::AllEvents);
+	}
+	CoreManager::uninit();
+	processEvents(QEventLoop::AllEvents);	// Process all needed events on engine deletion.
 	if( mParser)
 		delete mParser;
 }
-
 // -----------------------------------------------------------------------------
 
 QStringList App::cleanParserKeys(QCommandLineParser * parser, QStringList keys){
@@ -343,13 +350,16 @@ void App::initContentApp () {
 	// Change colors if necessary.
 	mColorListModel->useConfig(config);
 	mImageListModel->useConfig(config);
+// There is no more database for callback. Setting it in the configuration before starting the core will do migration.
+// When the migration is done by SDK, further migrations on call logs will do nothing. It is safe to use .
+	config->setString("storage", "call_logs_db_uri", Paths::getCallHistoryFilePath());
 	
 	// Init core.
 	CoreManager::init(this, Utils::coreStringToAppString(configPath));
 	
 	
 	// Init engine content.
-	mEngine = new QQmlApplicationEngine();
+	mEngine = new QQmlApplicationEngine(this);
 	
 	// Provide `+custom` folders for custom components and `5.9` for old components.
 	{
@@ -401,7 +411,6 @@ void App::initContentApp () {
 	
 	// Enable notifications.
 	mNotifier = new Notifier(mEngine);
-	
 	// Load main view.
 	qInfo() << QStringLiteral("Loading main view...");
 	mEngine->load(QUrl(Constants::QmlViewMainWindow));
@@ -604,13 +613,14 @@ void App::registerTypes () {
 	qRegisterMetaType<ChatRoomModel::EntryType>();
 	qRegisterMetaType<shared_ptr<linphone::SearchResult>>();
 	qRegisterMetaType<std::list<std::shared_ptr<linphone::SearchResult> > >();
-	qRegisterMetaType<std::shared_ptr<ChatMessageModel>>();
-	qRegisterMetaType<std::shared_ptr<ChatRoomModel>>();
-	qRegisterMetaType<std::shared_ptr<ParticipantListModel>>();
-	qRegisterMetaType<std::shared_ptr<ParticipantDeviceModel>>();
-	qRegisterMetaType<std::shared_ptr<ChatMessageModel>>();
-	qRegisterMetaType<std::shared_ptr<ChatNoticeModel>>();
-	qRegisterMetaType<std::shared_ptr<ChatCallModel>>();
+	qRegisterMetaType<QSharedPointer<ChatMessageModel>>();
+	qRegisterMetaType<QSharedPointer<ChatRoomModel>>();
+	qRegisterMetaType<QSharedPointer<ParticipantListModel>>();
+	qRegisterMetaType<QSharedPointer<ParticipantDeviceModel>>();
+	qRegisterMetaType<QSharedPointer<ChatMessageModel>>();
+	qRegisterMetaType<QSharedPointer<ChatNoticeModel>>();
+	qRegisterMetaType<QSharedPointer<ChatCallModel>>();
+	qRegisterMetaType<QSharedPointer<ConferenceInfoModel>>();
 	//qRegisterMetaType<std::shared_ptr<ChatEvent>>();
 	LinphoneEnums::registerMetaTypes();
 	
@@ -618,10 +628,11 @@ void App::registerTypes () {
 	registerType<AuthenticationNotifier>("AuthenticationNotifier");
 	registerType<CallsListProxyModel>("CallsListProxyModel");
 	registerType<Camera>("Camera");
-	registerType<CameraPreview>("CameraPreview");
 	registerType<ChatRoomProxyModel>("ChatRoomProxyModel");
 	registerType<ConferenceHelperModel>("ConferenceHelperModel");
-	registerType<ConferenceModel>("ConferenceModel");
+	registerType<ConferenceProxyModel>("ConferenceProxyModel");
+	registerType<ConferenceInfoModel>("ConferenceInfoModel");
+	registerType<ConferenceInfoProxyModel>("ConferenceInfoProxyModel");
 	registerType<ContactsListProxyModel>("ContactsListProxyModel");
 	registerType<ContactsImporterListProxyModel>("ContactsImporterListProxyModel");
 	registerType<ContentProxyModel>("ContentProxyModel");
@@ -633,13 +644,14 @@ void App::registerTypes () {
 	registerType<SipAddressesProxyModel>("SipAddressesProxyModel");
 	registerType<SearchSipAddressesModel>("SearchSipAddressesModel");
 	registerType<SearchSipAddressesProxyModel>("SearchSipAddressesProxyModel");
-	
+	registerType<TimeZoneProxyModel>("TimeZoneProxyModel");
 	
 	registerType<ColorProxyModel>("ColorProxyModel");
 	registerType<ImageColorsProxyModel>("ImageColorsProxyModel");
 	registerType<ImageProxyModel>("ImageProxyModel");
 	registerType<TimelineProxyModel>("TimelineProxyModel");
 	registerType<ParticipantProxyModel>("ParticipantProxyModel");
+	registerType<ParticipantDeviceProxyModel>("ParticipantDeviceProxyModel");
 	registerType<SoundPlayer>("SoundPlayer");
 	registerType<TelephoneNumbersModel>("TelephoneNumbersModel");
 	
@@ -659,6 +671,7 @@ void App::registerTypes () {
 	registerUncreatableType<ColorModel>("ColorModel");
 	registerUncreatableType<ImageModel>("ImageModel");
 	registerUncreatableType<ConferenceHelperModel::ConferenceAddModel>("ConferenceAddModel");
+	registerUncreatableType<ConferenceModel>("ConferenceModel");
 	registerUncreatableType<ContactModel>("ContactModel");
 	registerUncreatableType<ContactsImporterModel>("ContactsImporterModel");
 	registerUncreatableType<ContentModel>("ContentModel");
@@ -677,7 +690,6 @@ void App::registerTypes () {
 	registerUncreatableType<ParticipantListModel>("ParticipantListModel");
 	registerUncreatableType<ParticipantDeviceModel>("ParticipantDeviceModel");
 	registerUncreatableType<ParticipantDeviceListModel>("ParticipantDeviceListModel");
-	registerUncreatableType<ParticipantDeviceProxyModel>("ParticipantDeviceProxyModel");
 	registerUncreatableType<ParticipantImdnStateModel>("ParticipantImdnStateModel");
 	registerUncreatableType<ParticipantImdnStateListModel>("ParticipantImdnStateListModel");
 	
@@ -955,6 +967,7 @@ void App::setAutoStart (bool enabled) {
 void App::openAppAfterInit (bool mustBeIconified) {
 	qInfo() << QStringLiteral("Open " APPLICATION_NAME " app.");
 	auto coreManager = CoreManager::getInstance();
+	coreManager->getSettingsModel()->updateCameraMode();
 	// Create other windows.
 	mCallsWindow = createSubWindow(mEngine, Constants::QmlViewCallsWindow);
 	mSettingsWindow = createSubWindow(mEngine, Constants::QmlViewSettingsWindow);
@@ -1047,6 +1060,6 @@ void App::checkForUpdate() {
 void App::checkForUpdates(bool force) {
 	if(force || CoreManager::getInstance()->getSettingsModel()->isCheckForUpdateEnabled())
 		CoreManager::getInstance()->getCore()->checkForUpdate(
-					Utils::appStringToCoreString(getStrippedApplicationVersion())
+					Utils::appStringToCoreString(applicationVersion())
 					);
 }

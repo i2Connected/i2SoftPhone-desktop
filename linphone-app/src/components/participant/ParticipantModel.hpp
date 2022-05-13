@@ -27,6 +27,7 @@
 #include <QObject>
 #include <QDateTime>
 #include <QString>
+#include <QSharedPointer>
 
 class ContactModel;
 class ParticipantDeviceProxyModel;
@@ -41,6 +42,7 @@ public:
 	Q_PROPERTY(ContactModel *contactModel READ getContactModel CONSTANT)
 	Q_PROPERTY(QString sipAddress READ getSipAddress WRITE setSipAddress NOTIFY sipAddressChanged)
 	Q_PROPERTY(bool adminStatus READ getAdminStatus WRITE setAdminStatus NOTIFY adminStatusChanged)
+	Q_PROPERTY(bool isMe READ isMe CONSTANT)
     Q_PROPERTY(QDateTime creationTime READ getCreationTime CONSTANT)
     Q_PROPERTY(bool focus READ isFocus CONSTANT)
 	Q_PROPERTY(int securityLevel READ getSecurityLevel NOTIFY securityLevelChanged)
@@ -51,7 +53,6 @@ public:
 	ContactModel *getContactModel() const;
     QString getSipAddress() const;
     QDateTime getCreationTime() const;
-    //std::list<std::shared_ptr<linphone::ParticipantDevice>> getDevices() const;
     bool getAdminStatus() const;
     bool isFocus() const;
 	int getSecurityLevel() const;
@@ -66,9 +67,7 @@ public:
 	
 	std::shared_ptr<linphone::Participant>  getParticipant();
 	Q_INVOKABLE ParticipantDeviceProxyModel * getProxyDevices();
-	std::shared_ptr<ParticipantDeviceListModel> getParticipantDevices();
-    //linphone::ChatRoomSecurityLevel getSecurityLevel() const;
-    //std::shared_ptr<linphone::ParticipantDevice> findDevice(const std::shared_ptr<const linphone::Address> & address) const;
+	QSharedPointer<ParticipantDeviceListModel> getParticipantDevices();
 	
 	void startInvitation(const int& secondes = 30);	// Start a timer to remove the model if the invitation didn't ended after some time
 	
@@ -89,20 +88,16 @@ signals:
 	
 	void invitationTimeout(ParticipantModel* model);
 	
-//    void contactUpdated ();
-
-
 private:
 
     std::shared_ptr<linphone::Participant> mParticipant;
-	std::shared_ptr<ParticipantDeviceListModel> mParticipantDevices;
+	QSharedPointer<ParticipantDeviceListModel> mParticipantDevices;
 	
 // Variables when Linphone Participant has not been created
 	QString mSipAddress;
 	bool mAdminStatus;
 };
 
-//Q_DECLARE_METATYPE(ParticipantModel *);
-Q_DECLARE_METATYPE(std::shared_ptr<ParticipantModel>);
+Q_DECLARE_METATYPE(QSharedPointer<ParticipantModel>);
 
 #endif // PARTICIPANT_MODEL_H_

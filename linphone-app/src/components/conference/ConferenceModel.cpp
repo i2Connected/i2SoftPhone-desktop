@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 Belledonne Communications SARL.
+ * Copyright (c) 2021 Belledonne Communications SARL.
  *
  * This file is part of linphone-desktop
  * (see https://www.linphone.org).
@@ -18,131 +18,163 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QDateTime>
-#include <QtDebug>
+#include "ConferenceModel.hpp"
+#include "ConferenceListener.hpp"
+
+#include <QQmlApplicationEngine>
+#include <QDesktopServices>
+#include <QImageReader>
+#include <QMessageBox>
 
 #include "app/App.hpp"
-#include "components/call/CallModel.hpp"
-#include "components/calls/CallsListModel.hpp"
-#include "components/core/CoreHandlers.hpp"
-#include "components/core/CoreManager.hpp"
-#include "components/notifier/Notifier.hpp"
-#include "components/settings/SettingsModel.hpp"
-#include "utils/MediastreamerUtils.hpp"
-#include "utils/Utils.hpp"
+#include "app/paths/Paths.hpp"
+#include "app/providers/ThumbnailProvider.hpp"
 
-#include "ConferenceModel.hpp"
+
+#include "utils/QExifImageHeader.hpp"
+#include "utils/Utils.hpp"
+#include "utils/Constants.hpp"
+#include "components/Components.hpp"
+
+void ConferenceModel::connectTo(ConferenceListener * listener){
+	connect(listener, &ConferenceListener::participantAdded, this, &ConferenceModel::onParticipantAdded);
+	connect(listener, &ConferenceListener::participantRemoved, this, &ConferenceModel::onParticipantRemoved);
+	connect(listener, &ConferenceListener::participantAdminStatusChanged, this, &ConferenceModel::onParticipantAdminStatusChanged);
+	connect(listener, &ConferenceListener::participantDeviceAdded, this, &ConferenceModel::onParticipantDeviceAdded);
+	connect(listener, &ConferenceListener::participantDeviceRemoved, this, &ConferenceModel::onParticipantDeviceRemoved);
+	connect(listener, &ConferenceListener::participantDeviceLeft, this, &ConferenceModel::onParticipantDeviceLeft);
+	connect(listener, &ConferenceListener::participantDeviceJoined, this, &ConferenceModel::onParticipantDeviceJoined);
+	connect(listener, &ConferenceListener::participantDeviceMediaCapabilityChanged, this, &ConferenceModel::onParticipantDeviceMediaCapabilityChanged);
+	connect(listener, &ConferenceListener::participantDeviceMediaAvailabilityChanged, this, &ConferenceModel::onParticipantDeviceMediaAvailabilityChanged);
+	connect(listener, &ConferenceListener::participantDeviceIsSpeakingChanged, this, &ConferenceModel::onParticipantDeviceIsSpeakingChanged);
+	connect(listener, &ConferenceListener::conferenceStateChanged, this, &ConferenceModel::onConferenceStateChanged);
+	connect(listener, &ConferenceListener::subjectChanged, this, &ConferenceModel::onSubjectChanged);
+}
 
 // =============================================================================
 
-using namespace std;
-
-ConferenceModel::ConferenceModel (QObject *parent) : QSortFilterProxyModel(parent) {
-  QObject::connect(this, &ConferenceModel::rowsRemoved, [this] { // Warning : called before model remove its items
-    emit countChanged(rowCount());
-  });
-  QObject::connect(this, &ConferenceModel::rowsInserted, [this] {
-    emit countChanged(rowCount());
-  });
-  setSourceModel(CoreManager::getInstance()->getCallsListModel());
-  emit conferenceChanged();
-
-  QObject::connect(
-    CoreManager::getInstance()->getHandlers().get(), &CoreHandlers::callStateChanged,
-    this, [this] { emit conferenceChanged(); });
-}
-// Show all paraticpants thar should be, will be or are still in conference
-bool ConferenceModel::filterAcceptsRow (int sourceRow, const QModelIndex &sourceParent) const {
-  const QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
-  const CallModel *callModel = index.data().value<CallModel *>();
-  return callModel->getCall()->getParams()->getLocalConferenceMode() || callModel->getCall()->getCurrentParams()->getLocalConferenceMode();
-}
-// -----------------------------------------------------------------------------
-
-void ConferenceModel::terminate () {
-  shared_ptr<linphone::Core> core = CoreManager::getInstance()->getCore();
-  core->terminateConference();
-
-  for (const auto &call : core->getCalls()) {
-    if (call->getParams()->getLocalConferenceMode())// Terminate all call where participants are or will be in conference
-      call->terminate();
-  }
+QSharedPointer<ConferenceModel> ConferenceModel::create(std::shared_ptr<linphone::Conference> conference, QObject *parent){
+	return QSharedPointer<ConferenceModel>::create(conference, parent);
 }
 
-// -----------------------------------------------------------------------------
-
-void ConferenceModel::startRecording () {
-  if (mRecording)
-    return;
-
-  qInfo() << QStringLiteral("Start recording conference:") << this;
-
-  CoreManager *coreManager = CoreManager::getInstance();
-  mLastRecordFile = 
-      QStringLiteral("%1%2.mkv")
-        .arg(coreManager->getSettingsModel()->getSavedCallsFolder())
-        .arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh-mm-ss"));
-  coreManager->getCore()->startConferenceRecording(Utils::appStringToCoreString(mLastRecordFile) );
-  mRecording = true;
-
-  emit recordingChanged(true);
+ConferenceModel::ConferenceModel (std::shared_ptr<linphone::Conference> conference, QObject *parent) : QObject(parent) {
+	App::getInstance()->getEngine()->setObjectOwnership(this, QQmlEngine::CppOwnership);// Avoid QML to destroy it when passing by Q_INVOKABLE
+	mConference = conference;
+	mParticipantListModel = QSharedPointer<ParticipantListModel>::create(this);
+	mConferenceListener = std::make_shared<ConferenceListener>();
+	connectTo(mConferenceListener.get());
+	mConference->addListener(mConferenceListener);
 }
 
-void ConferenceModel::stopRecording () {
-  if (!mRecording)
-    return;
-
-  qInfo() << QStringLiteral("Stop recording conference:") << this;
-
-  mRecording = false;
-  
-  CoreManager::getInstance()->getCore()->stopConferenceRecording();
-  App::getInstance()->getNotifier()->notifyRecordingCompleted(mLastRecordFile);
-
-  emit recordingChanged(false);
+ConferenceModel::~ConferenceModel(){
+	mConference->removeListener(mConferenceListener);
 }
 
-// -----------------------------------------------------------------------------
-
-bool ConferenceModel::getMicroMuted () const {
-  return !CoreManager::getInstance()->getCore()->micEnabled();
+bool ConferenceModel::updateLocalParticipant(){
+	bool changed = false;
+	// First try to use findParticipant
+	auto localParticipant = mConference->findParticipant(mConference->getCall()->getCallLog()->getLocalAddress());
+	// Me is not in participants, use Me().
+	if( !localParticipant)
+		localParticipant = mConference->getMe();
+	if( localParticipant){
+		mLocalParticipant = QSharedPointer<ParticipantModel>::create(localParticipant);
+		qDebug() << "Is Admin: " << localParticipant->isAdmin() << " " << mLocalParticipant->getAdminStatus();
+		changed = true;
+	}
+	return changed;
 }
 
-void ConferenceModel::setMicroMuted (bool status) {
-  shared_ptr<linphone::Core> core = CoreManager::getInstance()->getCore();
-
-  if (status == core->micEnabled()) {
-    core->enableMic(!status);
-    emit microMutedChanged(status);
-  }
+std::shared_ptr<linphone::Conference> ConferenceModel::getConference()const{
+	return mConference;
 }
 
-// -----------------------------------------------------------------------------
-
-bool ConferenceModel::getRecording () const {
-  return mRecording;
+QString ConferenceModel::getSubject() const{
+	return QString::fromStdString(mConference->getSubject());
 }
 
-// -----------------------------------------------------------------------------
-
-float ConferenceModel::getMicroVu () const {
-  return MediastreamerUtils::computeVu(
-    CoreManager::getInstance()->getCore()->getConferenceLocalInputVolume()
-  );
+QDateTime ConferenceModel::getStartDate() const{
+	return QDateTime::fromSecsSinceEpoch(mConference->getStartTime());
 }
 
-// -----------------------------------------------------------------------------
-
-void ConferenceModel::leave () {
-  CoreManager::getInstance()->getCore()->leaveConference();
-  emit conferenceChanged();
+qint64 ConferenceModel::getElapsedSeconds() const {
+	return getStartDate().secsTo(QDateTime::currentDateTime());
 }
 
-void ConferenceModel::join () {
-  CoreManager::getInstance()->getCore()->enterConference();
-  emit conferenceChanged();
+ParticipantModel* ConferenceModel::getLocalParticipant() const{
+	if( mLocalParticipant) {
+		qDebug() << "LocalParticipant admin : " << mLocalParticipant->getAdminStatus() << " " << (mLocalParticipant->getParticipant() ? mLocalParticipant->getParticipant()->isAdmin() : -1);
+	}else
+		qDebug() << "No LocalParticipant";
+	return mLocalParticipant.get();
 }
 
-bool ConferenceModel::isInConference () const {
-  return CoreManager::getInstance()->getCore()->isInConference();
+ParticipantListModel* ConferenceModel::getParticipantListModel() const{
+	return mParticipantListModel.get();
 }
+
+std::list<std::shared_ptr<linphone::Participant>> ConferenceModel::getParticipantList()const{
+	auto participantList = mConference->getParticipantList();
+	auto me = mConference->getMe();
+	if( me )
+		participantList.push_front(me);
+	return participantList;
+}
+//-----------------------------------------------------------------------------------------------------------------------
+//												LINPHONE LISTENERS
+//-----------------------------------------------------------------------------------------------------------------------
+void ConferenceModel::onParticipantAdded(const std::shared_ptr<const linphone::Participant> & participant){
+	qDebug() << "Added call, participant count: " << getParticipantList().size();
+	if(!mLocalParticipant){
+		if(updateLocalParticipant())
+			emit localParticipantChanged();
+	}
+	emit participantAdded(participant);
+}
+void ConferenceModel::onParticipantRemoved(const std::shared_ptr<const linphone::Participant> & participant){
+	qDebug() << "Me devices : " << mConference->getMe()->getDevices().size();
+	emit participantRemoved(participant);
+}
+void ConferenceModel::onParticipantAdminStatusChanged(const std::shared_ptr<const linphone::Participant> & participant){
+	qDebug() << "onParticipantAdminStatusChanged: " << participant->getAddress()->asString().c_str();
+	if(participant == mLocalParticipant->getParticipant())
+		emit mLocalParticipant->adminStatusChanged();
+	emit participantAdminStatusChanged(participant);
+}
+
+void ConferenceModel::onParticipantDeviceAdded(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice){
+	qDebug() << "Me devices : " << mConference->getMe()->getDevices().size();
+	emit participantDeviceAdded(participantDevice);
+}
+void ConferenceModel::onParticipantDeviceRemoved(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice){
+	qDebug() << "Me devices : " << mConference->getMe()->getDevices().size();
+	emit participantDeviceRemoved(participantDevice);
+}
+void ConferenceModel::onParticipantDeviceLeft(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice){
+	qDebug() << "Me devices : " << mConference->getMe()->getDevices().size();
+	emit participantDeviceLeft(participantDevice);
+}
+void ConferenceModel::onParticipantDeviceJoined(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice){
+	qDebug() << "Me devices : " << mConference->getMe()->getDevices().size();
+	emit participantDeviceJoined(participantDevice);
+}
+void ConferenceModel::onParticipantDeviceMediaCapabilityChanged(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice){
+	qDebug() << "ConferenceModel::onParticipantDeviceMediaCapabilityChanged: "  << (int)participantDevice->getStreamCapability(linphone::StreamType::Video) << ". Me devices : " << mConference->getMe()->getDevices().size();
+	emit participantDeviceMediaCapabilityChanged(participantDevice);
+}
+void ConferenceModel::onParticipantDeviceMediaAvailabilityChanged(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice){
+	qDebug() << "ConferenceModel::onParticipantDeviceMediaAvailabilityChanged: "  << (int)participantDevice->getStreamAvailability(linphone::StreamType::Video) << ". Me devices : " << mConference->getMe()->getDevices().size();
+	emit participantDeviceMediaAvailabilityChanged(participantDevice);
+}
+void ConferenceModel::onParticipantDeviceIsSpeakingChanged(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice, bool isSpeaking){
+	emit participantDeviceIsSpeakingChanged(participantDevice, isSpeaking);
+}
+void ConferenceModel::onConferenceStateChanged(linphone::Conference::State newState){
+	emit conferenceStateChanged(newState);
+}
+void ConferenceModel::onSubjectChanged(const std::string& string){
+	emit subjectChanged();
+}
+	
+	
+//-----------------------------------------------------------------------------------------------------------------------	

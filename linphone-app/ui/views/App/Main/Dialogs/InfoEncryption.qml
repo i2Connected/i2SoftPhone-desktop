@@ -3,7 +3,6 @@ import QtQuick.Layouts 1.3
 
 import Common 1.0
 import Linphone 1.0
-//import LinphoneUtils 1.0
 import LinphoneEnums 1.0
 
 import App.Styles 1.0
@@ -39,7 +38,6 @@ DialogPlus {
 			}
 		}
 	]
-	flat : true
 	//: 'End-to-end encrypted' Popup title about encryption information.
 	title: qsTr('infoEncryptionTitle')
 	showCloseCross:false

@@ -51,12 +51,15 @@ Loader{
 				//: "%1 have nothing received" Little message to indicate the state of a message
 				//~ Context %1 is someone. The state is that the message hasn't been delivered.
 				return qsTr('deliveryNotDelivered').arg(displayName)
-			else return ''
+			else
+				//: "Error while sending to %1" Little message to indicate the state of a message
+				//~ Context %1 is someone. The state is that the message hasn't been delivered because of an error.
+				return qsTr('deliveryError').arg(displayName)
 		}
 		delegate:Text{
 			height: ChatStyle.composingText.height-5
 			width: GridView.width
-			text: deliveryLayout.getText(modelData.state, modelData.displayName, UtilsCpp.toDateTimeString(modelData.stateChangeTime))
+			text: deliveryLayout.getText($modelData.state, $modelData.displayName, UtilsCpp.toDateTimeString($modelData.stateChangeTime))
 			color: ChatStyle.entry.event.text.color
 			font.pointSize: Units.dp * 8
 			elide: Text.ElideMiddle

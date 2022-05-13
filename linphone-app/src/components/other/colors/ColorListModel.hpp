@@ -25,14 +25,15 @@
 #include <QObject>
 #include <QDateTime>
 #include <QString>
-#include <QAbstractListModel>
 #include <memory> 
 #include <QQmlPropertyMap>
+#include <QSharedPointer>
 
 #include "ColorModel.hpp"
+#include "app/proxyModel/ProxyListModel.hpp"
 
 #define ADD_COLOR(COLOR, VALUE, DESCRIPTION) \
-	color = std::make_shared<ColorModel>(COLOR, VALUE, DESCRIPTION); \
+	color = QSharedPointer<ColorModel>::create(COLOR, VALUE, DESCRIPTION); \
 	add(color);
 
 #define ADD_COLOR_WITH_LINK(COLOR, VALUE, DESCRIPTION, LINK) \
@@ -40,17 +41,17 @@
 	
 // Alpha is in percent.
 #define ADD_COLOR_WITH_ALPHA(COLOR, ALPHA, DESCRIPTION) \
-	color = std::make_shared<ColorModel>(COLOR + QString::number(ALPHA), mData[COLOR].value<ColorModel*>()->getColor().name(), DESCRIPTION); \
+	color = QSharedPointer<ColorModel>::create(COLOR + QString::number(ALPHA), mData[COLOR].value<ColorModel*>()->getColor().name(), DESCRIPTION); \
 	color->setAlpha(ALPHA * 255 / 100); \
 	add(color);
 	
 	
 class ColorModel;
 
-class ColorListModel : public QAbstractListModel {
+class ColorListModel : public ProxyListModel {
 	Q_OBJECT
 	void init() {
-		std::shared_ptr<ColorModel> color;
+		QSharedPointer<ColorModel> color;
 		ADD_COLOR("a", "transparent", "Generic transparent color.")
 		// Primary color for hovered items.
 		ADD_COLOR("b", "#D64D00", "Primary color for hovered items.")
@@ -86,6 +87,7 @@ class ColorListModel : public QAbstractListModel {
 		
 		ADD_COLOR("s", "#96be64", "Security")
 		
+		
 		ADD_COLOR("t", "#C2C2C2", "Title Header")
 		ADD_COLOR("u", "#D2D2D2", "Menu border (message)")
 		ADD_COLOR("v", "#E7E7E7", "Menu pressed (message)")
@@ -111,6 +113,16 @@ class ColorListModel : public QAbstractListModel {
 		ADD_COLOR("event_neutral", "#424242", "Event colors that are neutral")
 		ADD_COLOR("event_in", "#96C11F", "Event colors that are incoming")
 		ADD_COLOR("event_out", "#18A7AF", "Event colors that are outgoing")
+		
+		ADD_COLOR("conference_entry_bg", "#D0D8DE", "Conferences : Background entry")
+		ADD_COLOR("conference_out_avatar_bg", "#A1A1A1", "Conferences: Background avatar")
+		ADD_COLOR("conference_bg", "#798791", "Conferences: Background")
+		
+		ADD_COLOR("validation", "#96C11F", "Background for validation on buttons")
+		ADD_COLOR("validation_h", "#7B9D1B", "Hovered background for validation on buttons")
+		
+		ADD_COLOR("readonly_fg", "#B1B1B1", "Chat text area Readonly foreground")
+		
 
 // Standard actions
 //
@@ -212,11 +224,13 @@ class ColorListModel : public QAbstractListModel {
 		ADD_COLOR("me_d_b_inv_bg", "transparent", "[M] Menu disabled button : inverse background")
 		ADD_COLOR("me_h_b_inv_bg", "transparent", "[M] Menu hovered button : inverse background")
 		ADD_COLOR("me_p_b_inv_bg", "transparent", "[M] Menu pressed button : inverse background")
+		ADD_COLOR("me_c_b_inv_bg", "#FF5E00", "[M] Menu checked button : inverse background")
 		
 		ADD_COLOR("me_n_b_inv_fg", "white", "[M] Menu normal button : inverse foreground")
 		ADD_COLOR("me_d_b_inv_fg", "#80FFFFFF", "[M] Menu disabled button : inverse foreground")
 		ADD_COLOR("me_h_b_inv_fg", "#B0FFFFFF", "[M] Menu hovered button : inverse foreground")
-		ADD_COLOR("me_p_b_inv_fg", "white", "[M] Menu pressed button : inverse foreground")		
+		ADD_COLOR("me_p_b_inv_fg", "white", "[M] Menu pressed button : inverse foreground")
+		ADD_COLOR("me_c_b_inv_fg", "white", "[M] Menu checked button : inverse foreground")
 //-------------------------------------	
 // Wave Play
 		ADD_COLOR_WITH_LINK("w_n_b_bg", "", "[M] Wave play normal button : background", "ma_n_b_bg")
@@ -302,11 +316,8 @@ public:
 	ColorListModel (QObject *parent = nullptr);
 	void initKeywords();
 	
-	int rowCount (const QModelIndex &index = QModelIndex()) const override;
-	
 	virtual QHash<int, QByteArray> roleNames () const override;
 	virtual QVariant data (const QModelIndex &index, int role = Qt::DisplayRole) const override;
-	ColorModel *getAt(const int& index);
 	
 	void useConfig (const std::shared_ptr<linphone::Config> &config);
 	
@@ -340,12 +351,8 @@ signals:
 	void colorChanged();
 	
 private:
-	void add(std::shared_ptr<ColorModel> imdn);
-	bool removeRow (int row, const QModelIndex &parent = QModelIndex());
-	virtual bool removeRows (int row, int count, const QModelIndex &parent = QModelIndex()) override;
+	void add(QSharedPointer<ColorModel> imdn);
 	QString buildDescription(QString description);	// return a description from id by splitting '_'
-	
-	QList<std::shared_ptr<ColorModel>> mList;
 	
 	QStringList getColorNames () const;
 	
@@ -357,6 +364,6 @@ private:
 	
 };
 #undef ADD_COLOR
-Q_DECLARE_METATYPE(std::shared_ptr<ColorListModel>)
+Q_DECLARE_METATYPE(QSharedPointer<ColorListModel>)
 
 #endif 

@@ -62,7 +62,7 @@ if( "${CURRENT_YEAR}" STREQUAL "${APPLICATION_START_LICENCE}")
 else()
 	set(COPYRIGHT_RANGE_DATE "${APPLICATION_START_LICENCE}-${CURRENT_YEAR}")
 endif()
-
+set(APPLICATION_SEMVER ${FULL_VERSION})
 if(WIN32)
 	set(EXECUTABLE_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 	set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_DIR} )
@@ -88,6 +88,21 @@ if(ENABLE_BUILD_VERBOSE)
 	message("LINPHONECXX : ${LINPHONECXX_INCLUDE_DIRS} => ${LINPHONECXX_LIBRARIES}")
 endif()
 # Build configuration
+
+#############################
+#Sanitizer
+if(ENABLE_SANITIZER)
+	set(sanitize_flags "-fsanitize=address,undefined -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+	set(sanitize_linker_flags "-fsanitize=address,undefined")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${sanitize_flags}")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${sanitize_flags}")
+	
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${sanitize_linker_flags}")
+	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${sanitize_linker_flags}")
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${sanitize_linker_flags}")
+endif()
+#############################
+
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -DQT_NO_DEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG" )
@@ -97,7 +112,7 @@ if( WIN32)
 endif()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)#useful for config.h
 
-set(QT5_PACKAGES Core Gui Quick Widgets QuickControls2 Svg LinguistTools Concurrent Network Test)
+set(QT5_PACKAGES Core Gui Quick Widgets QuickControls2 Svg LinguistTools Concurrent Network Test Qml)
 if(ENABLE_APP_WEBVIEW)
 	list(APPEND QT5_PACKAGES WebView WebEngine WebEngineCore)
 	add_definitions(-DENABLE_WEBVIEW)
@@ -105,7 +120,7 @@ endif()
 if (UNIX AND NOT APPLE)
 	list(APPEND QT5_PACKAGES DBus)
 endif ()
-set(QT5_PACKAGES_OPTIONAL TextToSpeech)
+set(QT5_PACKAGES_OPTIONAL TextToSpeech QmlModels)
 set(CMAKE_AUTOMOC ON)
 
 
@@ -126,6 +141,10 @@ set(SOURCES
 	src/app/providers/ImageProvider.cpp
 	src/app/providers/ExternalImageProvider.cpp
 	src/app/providers/ThumbnailProvider.cpp
+	src/app/proxyModel/ProxyListModel.cpp
+	src/app/proxyModel/SortFilterProxyModel.cpp
+	#src/app/proxyModel/ProxyMapModel.cpp
+	#src/app/proxyModel/ProxyModel.cpp
 	src/app/translator/DefaultTranslator.cpp
 	src/components/assistant/AssistantModel.cpp
 	src/components/authentication/AuthenticationNotifier.cpp
@@ -133,21 +152,30 @@ set(SOURCES
 	src/components/calls/CallsListModel.cpp
 	src/components/calls/CallsListProxyModel.cpp
 	src/components/camera/Camera.cpp
-	src/components/camera/CameraPreview.cpp
+	src/components/camera/CameraDummy.cpp
 	src/components/chat/ChatModel.cpp
 	src/components/chat-events/ChatCallModel.cpp
 	src/components/chat-events/ChatEvent.cpp
+	src/components/chat-events/ChatMessageListener.cpp
 	src/components/chat-events/ChatMessageModel.cpp
 	src/components/chat-events/ChatNoticeModel.cpp
+	src/components/chat-room/ChatRoomListener.cpp
 	src/components/chat-room/ChatRoomModel.cpp
-	src/components/chat-room/ChatRoomListModel.cpp
 	src/components/chat-room/ChatRoomProxyModel.cpp
 	src/components/codecs/AbstractCodecsModel.cpp
 	src/components/codecs/AudioCodecsModel.cpp
 	src/components/codecs/VideoCodecsModel.cpp
 	src/components/conference/ConferenceAddModel.cpp
 	src/components/conference/ConferenceHelperModel.cpp
+	src/components/conference/ConferenceListener.cpp
 	src/components/conference/ConferenceModel.cpp
+	src/components/conference/ConferenceProxyModel.cpp
+	src/components/conferenceInfo/ConferenceInfoModel.cpp
+	src/components/conferenceInfo/ConferenceInfoMapModel.cpp
+	src/components/conferenceInfo/ConferenceInfoProxyListModel.cpp
+	src/components/conferenceInfo/ConferenceInfoProxyModel.cpp
+	src/components/conferenceScheduler/ConferenceScheduler.cpp
+	src/components/conferenceScheduler/ConferenceSchedulerListener.cpp
 	src/components/contact/ContactModel.cpp
 	src/components/contact/VcardModel.cpp
 	src/components/contacts/ContactsImporterModel.cpp
@@ -179,10 +207,14 @@ set(SOURCES
 	src/components/other/images/ImageListModel.cpp
 	src/components/other/images/ImageProxyModel.cpp
 	src/components/other/text-to-speech/TextToSpeech.cpp
+	src/components/other/timeZone/TimeZoneModel.cpp
+	src/components/other/timeZone/TimeZoneListModel.cpp
+	src/components/other/timeZone/TimeZoneProxyModel.cpp
 	src/components/other/units/Units.cpp
 	src/components/participant/ParticipantModel.cpp
 	src/components/participant/ParticipantListModel.cpp
 	src/components/participant/ParticipantProxyModel.cpp
+	src/components/participant/ParticipantDeviceListener.cpp
 	src/components/participant/ParticipantDeviceModel.cpp
 	src/components/participant/ParticipantDeviceListModel.cpp
 	src/components/participant/ParticipantDeviceProxyModel.cpp
@@ -193,7 +225,7 @@ set(SOURCES
 	src/components/presence/Presence.cpp
 	src/components/recorder/RecorderManager.cpp
 	src/components/recorder/RecorderModel.cpp
-	src/components/search/SearchHandler.cpp
+	src/components/search/SearchListener.cpp
 	src/components/search/SearchResultModel.cpp
 	src/components/search/SearchSipAddressesModel.cpp
 	src/components/search/SearchSipAddressesProxyModel.cpp
@@ -236,6 +268,14 @@ set(HEADERS
 	src/app/providers/ImageProvider.hpp
 	src/app/providers/ExternalImageProvider.hpp
 	src/app/providers/ThumbnailProvider.hpp
+	src/app/proxyModel/ProxyAbstractListModel.hpp
+	src/app/proxyModel/ProxyAbstractMapModel.hpp
+	src/app/proxyModel/ProxyAbstractObject.hpp
+	src/app/proxyModel/ProxyListModel.hpp
+	src/app/proxyModel/SortFilterAbstractProxyModel.hpp
+	src/app/proxyModel/SortFilterProxyModel.hpp
+	#src/app/proxyModel/ProxyMapModel.hpp
+	#src/app/proxyModel/ProxyModel.hpp
 	src/app/single-application/SingleApplication.hpp
 	src/app/translator/DefaultTranslator.hpp
 	src/components/assistant/AssistantModel.hpp
@@ -244,14 +284,15 @@ set(HEADERS
 	src/components/calls/CallsListModel.hpp
 	src/components/calls/CallsListProxyModel.hpp
 	src/components/camera/Camera.hpp
-	src/components/camera/CameraPreview.hpp
+	src/components/camera/CameraDummy.hpp
 	src/components/chat/ChatModel.hpp
 	src/components/chat-events/ChatCallModel.hpp
 	src/components/chat-events/ChatEvent.hpp
+	src/components/chat-events/ChatMessageListener.hpp
 	src/components/chat-events/ChatMessageModel.hpp
 	src/components/chat-events/ChatNoticeModel.hpp
+	src/components/chat-room/ChatRoomListener.hpp
 	src/components/chat-room/ChatRoomModel.hpp
-	src/components/chat-room/ChatRoomListModel.hpp
 	src/components/chat-room/ChatRoomProxyModel.hpp
 	src/components/codecs/AbstractCodecsModel.hpp
 	src/components/codecs/AudioCodecsModel.hpp
@@ -259,7 +300,15 @@ set(HEADERS
 	src/components/Components.hpp
 	src/components/conference/ConferenceAddModel.hpp
 	src/components/conference/ConferenceHelperModel.hpp
+	src/components/conference/ConferenceListener.hpp
 	src/components/conference/ConferenceModel.hpp
+	src/components/conference/ConferenceProxyModel.hpp
+	src/components/conferenceInfo/ConferenceInfoModel.hpp
+	src/components/conferenceInfo/ConferenceInfoMapModel.hpp
+	src/components/conferenceInfo/ConferenceInfoProxyListModel.hpp
+	src/components/conferenceInfo/ConferenceInfoProxyModel.hpp
+	src/components/conferenceScheduler/ConferenceScheduler.hpp
+	src/components/conferenceScheduler/ConferenceSchedulerListener.hpp
 	src/components/contact/ContactModel.hpp
 	src/components/contact/VcardModel.hpp
 	src/components/contacts/ContactsImporterModel.hpp
@@ -292,10 +341,14 @@ set(HEADERS
 	src/components/other/images/ImageProxyModel.hpp
 	src/components/other/desktop-tools/DesktopTools.hpp
 	src/components/other/text-to-speech/TextToSpeech.hpp
+	src/components/other/timeZone/TimeZoneModel.hpp
+	src/components/other/timeZone/TimeZoneListModel.hpp
+	src/components/other/timeZone/TimeZoneProxyModel.hpp
 	src/components/other/units/Units.hpp
 	src/components/participant/ParticipantModel.hpp
 	src/components/participant/ParticipantListModel.hpp
 	src/components/participant/ParticipantProxyModel.hpp
+	src/components/participant/ParticipantDeviceListener.hpp
 	src/components/participant/ParticipantDeviceModel.hpp
 	src/components/participant/ParticipantDeviceListModel.hpp
 	src/components/participant/ParticipantDeviceProxyModel.hpp
@@ -306,7 +359,7 @@ set(HEADERS
 	src/components/presence/Presence.hpp
 	src/components/recorder/RecorderManager.hpp
 	src/components/recorder/RecorderModel.hpp
-	src/components/search/SearchHandler.hpp
+	src/components/search/SearchListener.hpp
 	src/components/search/SearchResultModel.hpp
 	src/components/search/SearchSipAddressesModel.hpp
 	src/components/search/SearchSipAddressesProxyModel.hpp

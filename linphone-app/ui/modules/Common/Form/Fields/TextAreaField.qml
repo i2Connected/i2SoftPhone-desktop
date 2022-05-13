@@ -6,42 +6,55 @@ import Common.Styles 1.0
 
 // =============================================================================
 
-Flickable {
-  property alias text: textArea.text
-  readonly property alias length: textArea.length
-
-  boundsBehavior: Flickable.StopAtBounds
-  height: TextAreaFieldStyle.background.height
-  width: TextAreaFieldStyle.background.width
-
-  ScrollBar.vertical: ForceScrollBar {
-    id: scrollBar
-  }
-
-  TextArea.flickable: TextArea {
-    id: textArea
-
-    background: Rectangle {
-      border {
-        color: TextAreaFieldStyle.background.border.color
-        width: TextAreaFieldStyle.background.border.width
-      }
-
-      color: textArea.readOnly
-        ? TextAreaFieldStyle.background.color.readOnly
-        : TextAreaFieldStyle.background.color.normal
-
-      radius: TextAreaFieldStyle.background.radius
-    }
-
-    color: TextAreaFieldStyle.text.color
-    font.pointSize: TextAreaFieldStyle.text.pointSize
-    selectByMouse: true
-    wrapMode: TextArea.Wrap
-
-    bottomPadding: TextAreaFieldStyle.text.padding
-    leftPadding: TextAreaFieldStyle.text.padding
-    rightPadding: TextAreaFieldStyle.text.padding + Number(scrollBar.visible) * scrollBar.width
-    topPadding: TextAreaFieldStyle.text.padding
-  }
+Rectangle {
+	id: mainItem
+	property alias text: textArea.text
+	property alias placeholderText: textArea.placeholderText
+	readonly property alias length: textArea.length
+	property alias boundsBehavior: flickable.boundsBehavior
+	property alias font: textArea.font
+	property alias textColor: textArea.color
+	property alias readOnly: textArea.readOnly
+	property int padding: TextAreaFieldStyle.text.padding
+	
+	height: TextAreaFieldStyle.background.height
+	width: TextAreaFieldStyle.background.width
+	border {
+		color: TextAreaFieldStyle.background.border.color
+		width: TextAreaFieldStyle.background.border.width
+	}
+	
+	color: textArea.readOnly
+		   ? TextAreaFieldStyle.background.color.readOnly
+		   : TextAreaFieldStyle.background.color.normal
+	
+	radius: TextAreaFieldStyle.background.radius
+	
+	Flickable {
+		id: flickable
+		anchors.fill: parent
+		
+		boundsBehavior: Flickable.StopAtBounds
+		
+		ScrollBar.vertical: ForceScrollBar {
+			id: scrollBar
+		}
+		
+		TextArea.flickable: TextArea {
+			id: textArea
+			
+			background: Item{}
+			
+			color: TextAreaFieldStyle.text.color
+			font.pointSize: TextAreaFieldStyle.text.pointSize
+			selectByMouse: true
+			wrapMode: TextArea.Wrap
+			height: flickable.height
+			
+			bottomPadding: mainItem.padding
+			leftPadding: mainItem.padding
+			rightPadding: mainItem.padding + Number(scrollBar.visible) * scrollBar.width
+			topPadding: mainItem.padding
+		}
+	}
 }

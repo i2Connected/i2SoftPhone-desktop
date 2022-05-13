@@ -36,7 +36,7 @@ function handleClosing (close) {
 		return
 	}
 	
-	window.attachVirtualWindow(Utils.buildDialogUri('ConfirmDialog'), {
+	window.attachVirtualWindow(Utils.buildCommonDialogUri('ConfirmDialog'), {
 								   descriptionText: qsTr('acceptClosingDescription')
 							   }, function (status) {
 								   if (status) {
@@ -44,7 +44,6 @@ function handleClosing (close) {
 									   window.close()
 								   }
 							   })
-	
 	close.accepted = false
 }
 
@@ -58,12 +57,22 @@ function openConferenceManager (params, exitHandler) {
 	window.attachVirtualWindow(Qt.resolvedUrl('Dialogs/ConferenceManager.qml'), params, exitHandler)
 }
 
+function openWaitingRoom(model){
+	if(window.conferenceInfoModel)
+		window.conferenceInfoModel = null;
+	window.conferenceInfoModel = model
+	console.log('set : '+window.conferenceInfoModel)
+}
+
 // -----------------------------------------------------------------------------
 // Used to get Component based from Call Status
-function getContent () {
-	var call = window.call
+function getContent (call, conferenceInfoModel) {
+	console.log('getContent call')
 	if (call == null) {
-		return conference
+		if(conferenceInfoModel)
+			return waitingRoom
+		else
+			return null
 	}
 	
 	var status = call.status
@@ -84,6 +93,9 @@ function getContent () {
 		return endedCall
 	}
 	
+	if(call.isConference)
+		return videoConference
+		
 	return incall
 }
 

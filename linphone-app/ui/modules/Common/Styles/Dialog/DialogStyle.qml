@@ -31,6 +31,8 @@ QtObject {
 	property QtObject content: QtObject {
 		property int leftMargin: 25
 		property int rightMargin: 25
+		property int topMargin: 25
+		property int bottomMargin: 25
 	}
 	
 	property QtObject description: QtObject {

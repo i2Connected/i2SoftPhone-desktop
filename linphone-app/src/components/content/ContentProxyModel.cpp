@@ -36,6 +36,10 @@ ContentProxyModel::ContentProxyModel (QObject * parent) : QSortFilterProxyModel(
 	setContentListModel(CoreManager::getInstance()->getChatModel()->getContentListModel().get());
 }
 
+ChatMessageModel * ContentProxyModel::getChatMessageModel() const{
+	return nullptr;
+}
+
 void ContentProxyModel::setChatMessageModel(ChatMessageModel * message){
 	if(message){
 		setSourceModel(message->getContents().get());
@@ -51,7 +55,7 @@ void ContentProxyModel::setContentListModel(ContentListModel * model){
 }
 
 void ContentProxyModel::addFile(const QString& path){
-	ContentListModel* model = dynamic_cast<ContentListModel*>(sourceModel());
+	ContentListModel* model = qobject_cast<ContentListModel*>(sourceModel());
 	model->addFile(path);
 }
 
@@ -89,9 +93,9 @@ bool ContentProxyModel::lessThan (const QModelIndex &left, const QModelIndex &ri
 			);
 }
 void ContentProxyModel::remove(ContentModel * model){
-	dynamic_cast<ContentListModel*>(sourceModel())->remove(model);
+	qobject_cast<ContentListModel*>(sourceModel())->remove(model);
 }
 
 void ContentProxyModel::clear(){
-	dynamic_cast<ContentListModel*>(sourceModel())->clear();
+	qobject_cast<ContentListModel*>(sourceModel())->clear();
 }

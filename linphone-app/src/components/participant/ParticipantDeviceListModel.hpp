@@ -27,35 +27,48 @@
 #include <QObject>
 #include <QDateTime>
 #include <QString>
-#include <QAbstractListModel>
+#include "app/proxyModel/ProxyListModel.hpp"
 
+class CallModel;
 class ParticipantDeviceModel;
 
-class ParticipantDeviceListModel : public QAbstractListModel {
+class ParticipantDeviceListModel : public ProxyListModel {
 	Q_OBJECT
 	
 public:
 	ParticipantDeviceListModel (std::shared_ptr<linphone::Participant> participant, QObject *parent = nullptr);
-	
-	int rowCount (const QModelIndex &index = QModelIndex()) const override;
-	int count();
+	ParticipantDeviceListModel (CallModel * callModel, QObject *parent = nullptr);
 	
 	void updateDevices(std::shared_ptr<linphone::Participant> participant);
+	void updateDevices(const std::list<std::shared_ptr<linphone::ParticipantDevice>>& devices, const bool& isMe);
 	
-	virtual QHash<int, QByteArray> roleNames () const override;
-	virtual QVariant data (const QModelIndex &index, int role = Qt::DisplayRole) const override;
-		
+	bool add(std::shared_ptr<linphone::ParticipantDevice> deviceToAdd);
+	bool remove(std::shared_ptr<const linphone::ParticipantDevice> deviceToAdd);
+	QSharedPointer<ParticipantDeviceModel> get(std::shared_ptr<const linphone::ParticipantDevice> deviceToGet, int * index = nullptr);
+	
+	bool isMe(std::shared_ptr<linphone::ParticipantDevice> device)const;
+	bool isMeAlone() const;
+	
 public slots:
 	void onSecurityLevelChanged(std::shared_ptr<const linphone::Address> device);
+	void onParticipantAdded(const std::shared_ptr<const linphone::Participant> & participant);
+	void onParticipantRemoved(const std::shared_ptr<const linphone::Participant> & participant);
+	void onParticipantDeviceAdded(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice);
+	void onParticipantDeviceRemoved(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice);
+	void onParticipantDeviceJoined(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice);
+	void onParticipantDeviceLeft(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice);
+	void onConferenceStateChanged(linphone::Conference::State newState);
+	void onParticipantDeviceMediaCapabilityChanged(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice);
+	void onParticipantDeviceMediaAvailabilityChanged(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice);
+	void onParticipantDeviceIsSpeakingChanged(const std::shared_ptr<const linphone::ParticipantDevice> & device, bool isSpeaking);
+	void onParticipantDeviceSpeaking();
 
 signals:
 	void securityLevelChanged(std::shared_ptr<const linphone::Address> device);
+	void participantSpeaking(ParticipantDeviceModel *speakingDevice);
 	
 private:
-	bool removeRow (int row, const QModelIndex &parent = QModelIndex());
-	virtual bool removeRows (int row, int count, const QModelIndex &parent = QModelIndex()) override;
-	
-	QList<std::shared_ptr<ParticipantDeviceModel>> mList;
+	CallModel * mCallModel = nullptr;
 	
 };
 

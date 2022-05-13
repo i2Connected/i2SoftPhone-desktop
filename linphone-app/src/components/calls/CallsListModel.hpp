@@ -22,26 +22,23 @@
 #define CALLS_LIST_MODEL_H_
 
 #include <linphone++/linphone.hh>
-#include <QAbstractListModel>
 
 #include "components/call/CallModel.hpp"
 #include "utils/LinphoneEnums.hpp"
+#include "app/proxyModel/ProxyListModel.hpp"
 
 // =============================================================================
 
 class ChatRoomModel;
 class CoreHandlers;
+class ConferenceInfoModel;
 
-class CallsListModel : public QAbstractListModel {
+class CallsListModel : public ProxyListModel {
 	Q_OBJECT
 	
 public:
 	CallsListModel (QObject *parent = Q_NULLPTR);
 	
-	int rowCount (const QModelIndex &index = QModelIndex()) const override;
-	
-	QHash<int, QByteArray> roleNames () const override;
-	QVariant data (const QModelIndex &index, int role = Qt::DisplayRole) const override;
 	CallModel *findCallModelFromPeerAddress (const QString &peerAddress) const;
 	
 	void askForTransfer (CallModel *callModel);
@@ -49,7 +46,7 @@ public:
 	
 	Q_INVOKABLE void launchAudioCall (const QString &sipAddress, const QString& prepareTransfertAddress = "", const QHash<QString, QString> &headers = {}) const;
 	Q_INVOKABLE void launchSecureAudioCall (const QString &sipAddress, LinphoneEnums::MediaEncryption encryption, const QHash<QString, QString> &headers = {}, const QString& prepareTransfertAddress = "") const;
-	Q_INVOKABLE void launchVideoCall (const QString &sipAddress, const QString& prepareTransfertAddress = "") const;
+	Q_INVOKABLE void launchVideoCall (const QString &sipAddress, const QString& prepareTransfertAddress = "", const bool& autoSelectAfterCreation = true, QVariantMap options = QVariantMap()) const;
 	Q_INVOKABLE ChatRoomModel* launchSecureChat (const QString &sipAddress) const;
 	Q_INVOKABLE QVariantMap launchChat(const QString &sipAddress, const int& securityLevel) const;
 	Q_INVOKABLE ChatRoomModel* createChat (const QString &participantAddress) const;
@@ -58,6 +55,8 @@ public:
 	
 	QVariantMap createChatRoom(const QString& subject, const int& securityLevel, std::shared_ptr<linphone::Address> localAddress, const QVariantList& participants, const bool& selectAfterCreation) const;
 	Q_INVOKABLE QVariantMap createChatRoom(const QString& subject, const int& securityLevel, const QVariantList& participants, const bool& selectAfterCreation) const;
+	Q_INVOKABLE void prepareConferenceCall(ConferenceInfoModel * model);
+	
 	
 	Q_INVOKABLE int getRunningCallsNumber () const;
 	
@@ -70,20 +69,19 @@ signals:
 	void callRunning (int index, CallModel *callModel);
 	void callTransferAsked (CallModel *callModel);
 	void callAttendedTransferAsked (CallModel *callModel);
+	void callConferenceAsked(ConferenceInfoModel * conferenceInfoModel);
 	
 	void callMissed (CallModel *callModel);
 	
+	
 private:
-	bool removeRow (int row, const QModelIndex &parent = QModelIndex());
-	bool removeRows (int row, int count, const QModelIndex &parent = QModelIndex()) override;
 	
 	void handleCallStateChanged (const std::shared_ptr<linphone::Call> &call, linphone::Call::State state);
 	
 	void addCall (const std::shared_ptr<linphone::Call> &call);
+	void addDummyCall ();
 	void removeCall (const std::shared_ptr<linphone::Call> &call);
 	void removeCallCb (CallModel *callModel);
-	
-	QList<CallModel *> mList;
 	
 	std::shared_ptr<CoreHandlers> mCoreHandlers;
 };

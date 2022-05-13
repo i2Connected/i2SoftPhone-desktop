@@ -28,13 +28,7 @@
 
 // =============================================================================
 
-function computeAvatarSize (maxSize) {
-  var height = container.height
-  var width = container.width
 
-  var size = height < maxSize && height > 0 ? height : maxSize
-  return size < width ? size : width
-}
 
 function handleCallStatisticsClosed () {
   // Prevent many clicks on call statistics button.
@@ -71,38 +65,35 @@ function handleStatusChanged (status) {
   }
 }
 
-function handleVideoRequested () {
-  var call = incall.call
+function handleVideoRequested (call) {
   if (window.virtualWindowVisible || !Linphone.SettingsModel.videoSupported) {
     call.rejectVideoRequest()
     return
   }
-
+  /*
   // Close dialog after 10s.
   var timeout = Utils.setTimeout(incall, 10000, function () {
     call.statusChanged.disconnect(endedHandler)
     window.detachVirtualWindow()
     call.rejectVideoRequest()
   })
-
+  */
   // Close dialog if call is ended.
   var endedHandler = function (status) {
     if (status === Linphone.CallModel.CallStatusEnded) {
-      Utils.clearTimeout(timeout)
+      Utils.clearTimeout(timeout)	
       call.statusChanged.disconnect(endedHandler)
       window.detachVirtualWindow()
     }
   }
-
   call.statusChanged.connect(endedHandler)
-
+console.log("D")
   // Ask video to user.
-  window.attachVirtualWindow(Utils.buildDialogUri('ConfirmDialog'), {
+  window.attachVirtualWindow(Utils.buildCommonDialogUri('ConfirmDialog'), {
     descriptionText: qsTr('acceptVideoDescription'),
   }, function (status) {
-    Utils.clearTimeout(timeout)
+    //Utils.clearTimeout(timeout)	
     call.statusChanged.disconnect(endedHandler)
-
     if (status) {
       call.acceptVideoRequest()
     } else {
@@ -125,31 +116,32 @@ function openCallStatistics () {
 }
 
 function openMediaParameters (window, incall) {
-  window.attachVirtualWindow(Qt.resolvedUrl('Dialogs/MultimediaParameters.qml'), {
+  window.attachVirtualWindow(Utils.buildLinphoneDialogUri('MultimediaParametersDialog'), {
     call: incall.call
   })
 }
-
-function showFullscreen (position) {
-  incall.isFullScreen = true
-  if (incall._fullscreen) {
-    incall._fullscreen.raise()
+// callerId = incall, qmlFile = 'IncallFullscreenWindow.qml'
+// callerId need to have : _fullscreen and isFullScreen
+function showFullscreen (window, callerId, qmlFile, position) {
+  callerId.isFullScreen = true
+  if (callerId._fullscreen) {
+	callerId._fullscreen.raise()
     return
   }
   DesktopTools.DesktopTools.screenSaverStatus = false
   var parameters = {
-	  caller: incall,
+	  caller: callerId,
 	  x:position.x,
 	  y:position.y,
 	  width:window.width,
 	  height:window.height,
 	  window:window
 	}
-  incall._fullscreen = Utils.openWindow(Qt.resolvedUrl('IncallFullscreenWindow.qml'), parameters.window, {
+  callerId._fullscreen = Utils.openWindow(Qt.resolvedUrl(qmlFile), parameters.window, {
 	properties: parameters
   }, true)
-  if(incall._fullscreen) {
-	incall._fullscreen.cameraIsReady = Qt.binding(function(){ return !incall.cameraIsReady})
-	incall._fullscreen.previewIsReady = Qt.binding(function(){ return !incall.previewIsReady})
+  if(callerId._fullscreen) {
+	callerId._fullscreen.cameraIsReady = Qt.binding(function(){ return !callerId.cameraIsReady})
+	callerId._fullscreen.previewIsReady = Qt.binding(function(){ return !callerId.previewIsReady})
   }
 }

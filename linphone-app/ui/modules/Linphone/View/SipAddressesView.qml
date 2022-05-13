@@ -124,14 +124,15 @@ ScrollableListView {
 									
 									visible: modelData.visible
 									
-									onClicked: sipAddressesView.actions[index].handler({	// Do not use modelData on functions : Qt bug
+									onClicked: {
+										sipAddressesView.actions[index].handler({	// Do not use modelData on functions : Qt bug
 																	 sipAddress: sipAddressesView.interpretableSipAddress
 																 })
+									}
 									Icon{
-										visible: modelData.secure>0 && 
-							 										// Do not use modelData on functions : Qt bug
+										visible: modelData.secure>0 &&
+										// Do not use modelData on functions : Qt bug
 												 (sipAddressesView.actions[index].secureIconVisibleHandler ? sipAddressesView.actions[index].secureIconVisibleHandler({ sipAddress : sipAddressesView.interpretableSipAddress}) : true)
-
 										icon: 'secure_on'
 										iconSize: parent.height/2
 										anchors.top:parent.top
@@ -190,10 +191,11 @@ ScrollableListView {
 						}
 						
 						icon: sipAddressesView.headerButtonIcon
-						iconSize: SipAddressesViewStyle.header.iconSize
+						iconSize: parent.height
 						overwriteColor: sipAddressesView.headerButtonOverwriteColor
 						
 						visible: icon.length > 0
+						
 					}
 				}
 			}
@@ -207,7 +209,7 @@ ScrollableListView {
 	delegate: Rectangle {
 		id: sipAddressEntry
 		
-		property var entry: modelData
+		property var entry: $modelData
 		
 		color: SipAddressesViewStyle.entry.color.normal
 		height: SipAddressesViewStyle.entry.height
@@ -244,11 +246,11 @@ ScrollableListView {
 					Layout.fillWidth: true
 					showContactAddress: sipAddressesView.showContactAddress
 					
-					entry: modelData
+					entry: $modelData
 					
 					MouseArea {
 						anchors.fill: parent
-						onClicked: sipAddressesView.entryClicked(modelData, index)
+						onClicked: sipAddressesView.entryClicked($modelData, index)
 					}
 				}
 				
@@ -283,25 +285,22 @@ ScrollableListView {
 						active: sipAddressesView.showSwitch	// Resolve a random Qt crash from using indicator on switch. This way, switch is not loaded.
 						// https://bugreports.qt.io/browse/QTBUG-82285.
 					}
-					
 					Repeater {
 						model: sipAddressesView.actions
 						
 						ActionButton {
 							isCustom: true
 							backgroundRadius: 90
-							colorSet: modelData.colorSet
-							tooltipText:modelData.tooltipText?modelData.tooltipText:''
-							visible: modelData.visible
-							onClicked: {// Do not use modelData on functions : Qt bug
+							colorSet: sipAddressesView.actions[index].colorSet
+							tooltipText:$modelData.tooltipText?$modelData.tooltipText:''
+							visible: sipAddressesView.actions[index].visible
+							onClicked: {// Do not use $modelData on functions : Qt bug
 								sipAddressesView.actions[index].handler(sipAddressEntry.entry)
-
 							}
 							Icon{
-								visible: modelData.secure>0 && 
-								// Do not use modelData on functions : Qt bug
+								visible: sipAddressesView.actions[index].secure>0 && 
+								// Do not use $modelData on functions : Qt bug
 										 (sipAddressesView.actions[index].secureIconVisibleHandler ? sipAddressesView.actions[index].secureIconVisibleHandler(sipAddressEntry.entry) : true)
-
 								icon: 'secure_on'
 								iconSize: parent.height/2
 								anchors.top:parent.top

@@ -68,7 +68,8 @@ public:
 	static constexpr char LinphoneBZip2_dll[] = "https://www.linphone.org/releases/windows/tools/bzip2/bzip2.dll";
 	static constexpr char DefaultRlsUri[] = "sips:rls@sip.linphone.org";
 	static constexpr char DefaultLogsEmail[] = "linphone-desktop@belledonne-communications.com";
-	static constexpr char DefaultConferenceURI[] = "sip:conference-factory@sip.linphone.org";
+	//static constexpr char DefaultConferenceURI[] = "sip:conference-factory@sip.linphone.org";
+	static constexpr char DefaultConferenceURI[] = "sip:videoconference-factory2@sip.linphone.org";
 	static constexpr char DefaultLimeServerURL[] = "https://lime.linphone.org/lime-server/lime-server.php";
 	static constexpr char RemoteProvisioningURL[] = "https://subscribe.linphone.org/flexiapi/provisioning";
 		
@@ -135,8 +136,9 @@ public:
 	static constexpr char VcardScheme[] = EXECUTABLE_NAME "-desktop:/";
 	static constexpr int CbsCallInterval = 20;
 	static constexpr char RcVersionName[] = "rc_version";
-	static constexpr int RcVersionCurrent = 3;	// 2 = Conference URI
+	static constexpr int RcVersionCurrent = 4;	// 2 = Conference URI
 												// 3 = CPIM on basic chat rooms
+												// 4 = RTP bundle mode
 	
 //--------------------------------------------------------------------------------	
 //								CISCO
@@ -151,7 +153,7 @@ public:
 #ifdef Q_PROCESSOR_X86_64
 	static constexpr char PluginUrlH264[] = "http://ciscobinary.openh264.org/libopenh264-2.1.0-linux64.5.so.bz2";
 #else
-	static constexpr char PluginUrlH264[] = "http://ciscobinary.openh264.org/libopenh264-2.1-0-linux32.5.so.bz2";
+	static constexpr char PluginUrlH264[] = "http://ciscobinary.openh264.org/libopenh264-2.1.0-linux32.5.so.bz2";
 #endif // ifdef Q_PROCESSOR_X86_64
 #elif defined(Q_OS_WIN)
 	static constexpr char LibraryExtension[] = "dll";

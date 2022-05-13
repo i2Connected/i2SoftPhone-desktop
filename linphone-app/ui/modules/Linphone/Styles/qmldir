@@ -9,10 +9,13 @@ singleton AccountStatusStyle                   1.0 Account/AccountStatusStyle.qm
 singleton CardBlockStyle                       1.0 Blocks/CardBlockStyle.qml
 singleton RequestBlockStyle                    1.0 Blocks/RequestBlockStyle.qml
 
+singleton CameraViewStyle                      1.0 Camera/CameraViewStyle.qml
+
 singleton ChatStyle                            1.0 Chat/ChatStyle.qml
 singleton ChatAudioMessageStyle                1.0 Chat/ChatAudioMessageStyle.qml
 singleton ChatAudioPreviewStyle                1.0 Chat/ChatAudioPreviewStyle.qml
 singleton ChatFilePreviewStyle                 1.0 Chat/ChatFilePreviewStyle.qml
+singleton ChatCalendarMessageStyle             1.0 Chat/ChatCalendarMessageStyle.qml
 singleton ChatForwardMessageStyle              1.0 Chat/ChatForwardMessageStyle.qml
 singleton ChatReplyMessageStyle                1.0 Chat/ChatReplyMessageStyle.qml
 
@@ -28,12 +31,14 @@ singleton ContactDescriptionStyle              1.0 Contact/ContactDescriptionSty
 singleton ContactMessageCounterStyle           1.0 Contact/ContactMessageCounterStyle.qml
 singleton ContactStyle                         1.0 Contact/ContactStyle.qml
 
+singleton MultimediaParametersDialogStyle      1.0 Dialog/MultimediaParametersDialogStyle.qml
 singleton OnlineInstallerDialogStyle           1.0 Dialog/OnlineInstallerDialogStyle.qml
 singleton SipAddressDialogStyle                1.0 Dialog/SipAddressDialogStyle.qml
 
 singleton HistoryStyle                         1.0 History/HistoryStyle.qml
 
 singleton SipAddressesMenuStyle                1.0 Menus/SipAddressesMenuStyle.qml
+singleton VideoConferenceMenuStyle             1.0 Menus/VideoConferenceMenuStyle.qml
 
 singleton MessageCounterStyle                  1.0 Misc/MessageCounterStyle.qml
 
@@ -47,5 +52,7 @@ singleton TelKeypadStyle                       1.0 TelKeypad/TelKeypadStyle.qml
 
 singleton TimelineStyle                        1.0 Timeline/TimelineStyle.qml
 
-singleton SipAddressesViewStyle                1.0 View/SipAddressesViewStyle.qml
+singleton ParticipantsListViewStyle            1.0 View/ParticipantsListViewStyle.qml
 singleton ParticipantsViewStyle                1.0 View/ParticipantsViewStyle.qml
+singleton SipAddressesViewStyle                1.0 View/SipAddressesViewStyle.qml
+

@@ -56,7 +56,7 @@ Item {
 		}
 		height: parent.height - (deliveryLayout.visible? deliveryLayout.height : 0)
 		radius: ChatStyle.entry.message.radius
-		
+		clip: false
 		width: (
 				   ephemeralTimerRow.visible && dataWidth < ephemeralTimerRow.width + 2*ChatStyle.entry.message.padding
 				   ? ephemeralTimerRow.width + 2*ChatStyle.entry.message.padding
@@ -82,6 +82,7 @@ Item {
 			}
 			ChatReplyMessage{
 				id: replyMessage
+				z: 1
 				mainChatMessageModel: $chatEntry
 				visible: $chatEntry.isReply
 				maxWidth: container.width
@@ -96,6 +97,7 @@ Item {
 				anchors.right: parent.right
 				visible: count > 0
 				spacing: 0
+				clip: false
 				model: ContentProxyModel{
 					chatMessageModel: $chatEntry
 				}
@@ -104,7 +106,8 @@ Item {
 				interactive: false
 				delegate: 
 					ChatContent{
-						contentModel: modelData
+						maxWidth: container.width
+						contentModel: $modelData
 						onFitWidthChanged:{
 							rectangle.updateWidth()			
 						}
@@ -126,7 +129,6 @@ Item {
 			anchors.bottom:parent.bottom
 			anchors.rightMargin : 5
 			visible:$chatEntry.isEphemeral
-			//onVisibleChanged:  container.updateHeight()
 			Text{
 				id: ephemeralText
 				anchors.bottom: parent.bottom	
