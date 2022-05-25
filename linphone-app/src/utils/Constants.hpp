@@ -55,7 +55,8 @@ public:
 	static constexpr char DefaultContactParametersOnRemove[] = "message-expires=0";
 	static constexpr int DefaultExpires = 3600;
 	static constexpr char DownloadUrl[] = "https://www.linphone.org/technical-corner/linphone";
-	static constexpr char VersionCheckUrl[] = "https://linphone.org/releases";
+	static constexpr char VersionCheckReleaseUrl[] = "https://download.linphone.org/releases";
+	static constexpr char VersionCheckNightlyUrl[] = "https://download.linphone.org/snapshots";
 	static constexpr char PasswordRecoveryUrl[] = "https://subscribe.linphone.org/login";
 	static constexpr char CguUrl[] = "https://www.linphone.org/general-terms";
 	static constexpr char PrivatePolicyUrl[] = "https://www.linphone.org/privacy-policy";
@@ -151,7 +152,7 @@ public:
 #ifdef Q_PROCESSOR_X86_64
 	static constexpr char PluginUrlH264[] = "http://ciscobinary.openh264.org/libopenh264-2.1.0-linux64.5.so.bz2";
 #else
-	static constexpr char PluginUrlH264[] = "http://ciscobinary.openh264.org/libopenh264-2.1-0-linux32.5.so.bz2";
+	static constexpr char PluginUrlH264[] = "http://ciscobinary.openh264.org/libopenh264-2.1.0-linux32.5.so.bz2";
 #endif // ifdef Q_PROCESSOR_X86_64
 #elif defined(Q_OS_WIN)
 	static constexpr char LibraryExtension[] = "dll";

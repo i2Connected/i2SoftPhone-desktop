@@ -29,14 +29,14 @@ ColumnLayout  {
 	
 	
 	property ChatRoomModel chatRoomModel
-	property string peerAddress : chatRoomModel?chatRoomModel.getPeerAddress() : defaultPeerAddress
+	property string peerAddress : getPeerAddress()
 	property string localAddress : chatRoomModel?chatRoomModel.getLocalAddress() : defaultLocalAddress
-	property string fullPeerAddress : chatRoomModel?chatRoomModel.getFullPeerAddress() : defaultFullPeerAddress
+	property string fullPeerAddress : getFullPeerAddress()
 	property string fullLocalAddress : chatRoomModel?chatRoomModel.getFullLocalAddress() : defaultFullLocalAddress
 	
 	property int securityLevel : chatRoomModel ? chatRoomModel.securityLevel : 1
 	
-	readonly property var _sipAddressObserver: SipAddressesModel.getSipAddressObserver((fullPeerAddress?fullPeerAddress:peerAddress), (fullLocalAddress?fullLocalAddress:localAddress))
+	property SipAddressObserver _sipAddressObserver: SipAddressesModel.getSipAddressObserver((fullPeerAddress?fullPeerAddress:peerAddress), (fullLocalAddress?fullLocalAddress:localAddress))
 	property bool haveMoreThanOneParticipants: chatRoomModel ? chatRoomModel.participants.count > 2 : false
 	property bool haveLessThanMinParticipantsForCall: chatRoomModel ? chatRoomModel.participants.count <= 5 : false
 	
@@ -48,7 +48,18 @@ ColumnLayout  {
 				return chatRoomModel.sipAddress;
 			}
 		}else {
-			return conversation.fullPeerAddress || conversation.peerAddress || '';
+			return defaultPeerAddress
+		}	
+	}
+	function getFullPeerAddress() {
+		if(chatRoomModel) {
+			if(chatRoomModel.groupEnabled || chatRoomModel.isSecure()) {
+				return chatRoomModel.participants.addressesToString;
+			}else {
+				return chatRoomModel.sipAddress;
+			}
+		}else {
+			return defaultFullPeerAddress;
 		}	
 	}
 	
@@ -125,7 +136,7 @@ ColumnLayout  {
 							Layout.topMargin: 15
 							Layout.preferredHeight: implicitHeight
 							Layout.alignment: Qt.AlignBottom
-							visible:chatRoomModel.isMeAdmin && !usernameEdit.visible
+							visible:chatRoomModel.isMeAdmin && !usernameEdit.visible && !chatRoomModel.isOneToOne
 							
 							Icon{
 								id:adminIcon
@@ -153,7 +164,7 @@ ColumnLayout  {
 							visible: !usernameEdit.visible 
 							contactDescriptionStyle: ConversationStyle.bar.contactDescription
 							username: avatar.username
-							usernameClickable: chatRoomModel.isMeAdmin
+							usernameClickable: chatRoomModel.isMeAdmin && !chatRoomModel.isOneToOne
 							participants: if(chatRoomModel) {
 											if(chatRoomModel.groupEnabled) {
 												return chatRoomModel.participants.displayNamesToString;
@@ -187,7 +198,7 @@ ColumnLayout  {
 						Item{
 							Layout.fillHeight: true
 							Layout.fillWidth: true
-							visible: chatRoomModel.isMeAdmin
+							visible: chatRoomModel.isMeAdmin && !chatRoomModel.isOneToOne
 						}
 					}
 					Icon{
@@ -312,7 +323,7 @@ ColumnLayout  {
 						visible: SettingsModel.contactsEnabled && !conversation.chatRoomModel.groupEnabled
 						
 						onClicked: window.setView('ContactEdit', {
-													  sipAddress: conversation.getPeerAddress()
+													  sipAddress: conversation.getFullPeerAddress()
 												  })
 						tooltipText: Logic.getEditTooltipText()
 					}
