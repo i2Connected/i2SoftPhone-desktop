@@ -2035,6 +2035,10 @@
         <extracomment>&apos;No Plugins to load&apos; : Text in combobox</extracomment>
         <translation>Нет плагинов для загрузки</translation>
     </message>
+    <message>
+        <source>viewlogs</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsAudio</name>
@@ -3182,6 +3186,10 @@
         <source>phoneNumberLabel</source>
         <translation>Номер телефона</translation>
     </message>
+    <message>
+        <source>displayNameLabel</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>UseAppSipAccountWithUsername</name>
@@ -3192,6 +3200,10 @@
     <message>
         <source>passwordLabel</source>
         <translation>Пароль</translation>
+    </message>
+    <message>
+        <source>displayNameLabel</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

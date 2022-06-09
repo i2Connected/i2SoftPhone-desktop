@@ -2023,6 +2023,10 @@ Click here: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
         <extracomment>&apos;No Plugins to load&apos; : Text in combobox</extracomment>
         <translation>No Plugins to load</translation>
     </message>
+    <message>
+        <source>viewlogs</source>
+        <translation>VIEW</translation>
+    </message>
 </context>
 <context>
     <name>SettingsAudio</name>
@@ -3193,6 +3197,10 @@ Click here: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
         <source>phoneNumberLabel</source>
         <translation>Phone number</translation>
     </message>
+    <message>
+        <source>displayNameLabel</source>
+        <translation>Display name (optional)</translation>
+    </message>
 </context>
 <context>
     <name>UseAppSipAccountWithUsername</name>
@@ -3203,6 +3211,10 @@ Click here: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>passwordLabel</source>
         <translation>Password</translation>
+    </message>
+    <message>
+        <source>displayNameLabel</source>
+        <translation>Display name (optional)</translation>
     </message>
 </context>
 <context>

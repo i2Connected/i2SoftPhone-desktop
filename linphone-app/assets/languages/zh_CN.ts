@@ -2011,6 +2011,10 @@
         <extracomment>&apos;No Plugins to load&apos; : Text in combobox</extracomment>
         <translation>没有插件可加载</translation>
     </message>
+    <message>
+        <source>viewlogs</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsAudio</name>
@@ -3158,6 +3162,10 @@
         <source>phoneNumberLabel</source>
         <translation>电话号码</translation>
     </message>
+    <message>
+        <source>displayNameLabel</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>UseAppSipAccountWithUsername</name>
@@ -3168,6 +3176,10 @@
     <message>
         <source>passwordLabel</source>
         <translation>密码</translation>
+    </message>
+    <message>
+        <source>displayNameLabel</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
