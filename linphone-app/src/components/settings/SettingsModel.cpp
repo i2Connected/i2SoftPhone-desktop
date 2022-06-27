@@ -1387,9 +1387,10 @@ QString SettingsModel::getVersionCheckUrl() const{
 	return Utils::coreStringToAppString(mConfig->getString("misc", "version_check_url_root", Constants::VersionCheckReleaseUrl));
 }
 
-void SettingsModel::setVersionCheckUrl(const QString& url){
+void SettingsModel::setVersionCheckUrl(QString url){
 	if( url != getVersionCheckUrl()){
-		mConfig->setString("misc", "version_check_url_root", Utils::appStringToCoreString(url));
+	// Do not trim the url before because we want to update GUI from potential auto fix.
+		mConfig->setString("misc", "version_check_url_root", Utils::appStringToCoreString(url.trimmed()));
 		if( url == Constants::VersionCheckReleaseUrl)
 			setVersionCheckType(VersionCheckType_Release);
 		else if( url == Constants::VersionCheckNightlyUrl)
