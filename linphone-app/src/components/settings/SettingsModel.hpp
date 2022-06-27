@@ -521,7 +521,7 @@ public:
 	void setCheckForUpdateEnabled(bool enable);
 	
 	QString getVersionCheckUrl() const;
-	void setVersionCheckUrl(const QString& url);
+	void setVersionCheckUrl(QString url);
 	
 	VersionCheckType getVersionCheckType() const;
 	void setVersionCheckType(const VersionCheckType& type);
