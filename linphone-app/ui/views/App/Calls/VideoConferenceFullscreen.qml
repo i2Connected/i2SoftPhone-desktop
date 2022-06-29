@@ -75,7 +75,7 @@ Window {
 		focus: true
 
 		Keys.onEscapePressed: window.exit()
-		color: VideoConferenceStyle.backgroundColor
+		color: hideButtons ? VideoConferenceStyle.fullBackgroundColor : VideoConferenceStyle.backgroundColor
 
 		Connections {
 			target: callModel
@@ -139,7 +139,7 @@ Window {
 			anchors.left: parent.left
 			anchors.right: parent.right
 
-			anchors.topMargin: 10
+			anchors.topMargin: window.hideButtons ? 0 : 10
 			anchors.leftMargin: 25
 			anchors.rightMargin: 25
 			spacing: 10
@@ -416,17 +416,25 @@ Window {
 				isCustom: true
 				backgroundRadius: width/2
 				colorSet: VideoConferenceStyle.buttons.participants
-				visible: false	// TODO
+				toggled: rightMenu.visible && rightMenu.isParticipantsMenu
+				onClicked: {
+						if(toggled)
+							rightMenu.visible = false
+						else
+							rightMenu.showParticipantsMenu()
+					}
 			}
 			ActionButton {
 				id: callQuality
 
 				isCustom: true
-				backgroundRadius: 4
+				backgroundRadius: width/2
 				colorSet: VideoConferenceStyle.buttons.callQuality
-				percentageDisplayed: 0
-
-				onClicked: {Logic.openCallStatistics();}
+				icon: VideoConferenceStyle.buttons.callQuality.icon_0
+				toggled: callStatistics.isOpen
+			
+				onClicked: callStatistics.isOpen ? callStatistics.close() : callStatistics.open()
+			
 				Timer {
 					interval: 500
 					repeat: true
@@ -436,10 +444,16 @@ Window {
 						if(callModel) {
 							// Note: `quality` is in the [0, 5] interval and -1.
 							var quality = callModel.quality
-							if(quality >= 0)
-								callQuality.percentageDisplayed = quality * 100 / 5
+							if(quality > 4)
+								callQuality.icon = VideoConferenceStyle.buttons.callQuality.icon_4
+							else if(quality > 3)
+								callQuality.icon = VideoConferenceStyle.buttons.callQuality.icon_3
+							else if(quality > 2)
+								callQuality.icon = VideoConferenceStyle.buttons.callQuality.icon_2
+							else if(quality > 1)
+								callQuality.icon = VideoConferenceStyle.buttons.callQuality.icon_1
 							else
-								callQuality.percentageDisplayed = 0
+								callQuality.icon = VideoConferenceStyle.buttons.callQuality.icon_0
 						}
 					}
 				}
@@ -448,6 +462,7 @@ Window {
 				isCustom: true
 				backgroundRadius: width/2
 				colorSet: VideoConferenceStyle.buttons.options
+				toggled: rightMenu.visible
 				onClicked: rightMenu.visible = !rightMenu.visible
 			}
 		}
@@ -464,7 +479,6 @@ Window {
 			relativeTo: conference
 			relativeY: CallStyle.header.stats.relativeY
 			relativeX: 10
-			onClosed: Logic.handleCallStatisticsClosed()
 		}
 	}
 	TelKeypad {
@@ -495,7 +509,8 @@ Window {
 		anchors.fill: parent
 		acceptedButtons: Qt.NoButton
 		propagateComposedEvents: true
-		cursorShape: Qt.ArrowCursor
+		cursorShape: undefined
+		//cursorShape: Qt.ArrowCursor
 
 		onEntered: hideButtonsTimer.startTimer()
 		onExited: hideButtonsTimer.stopTimer()

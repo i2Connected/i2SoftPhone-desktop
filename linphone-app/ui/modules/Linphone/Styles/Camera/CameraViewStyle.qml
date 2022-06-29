@@ -12,6 +12,7 @@ QtObject {
 	property string sectionName: 'CameraView'
 	property color outBackgroundColor: ColorsList.add(sectionName+'_out_bg', 'conference_out_avatar_bg').color
 	property color inAvatarBackgroundColor: ColorsList.add(sectionName+'_in_bg', 'conference_bg').color
+	property color cameraBackgroundColor: ColorsList.add(sectionName+'_camera_bg', 'fullscreen_conference_bg').color
 	
 	property int radius : 10
 	
@@ -51,9 +52,9 @@ QtObject {
 		}
 	}
 	property QtObject isMuted: QtObject{
-		property color backgroundColor : ColorsList.add(sectionName+'_isMuted_bg', 'l').color
+		property color backgroundColor : ColorsList.add(sectionName+'_isMuted_bg', 'j').color
 		property QtObject button: QtObject {
-			property int iconSize: 40
+			property int iconSize: 30
 			property string icon : 'micro_off_custom'
 			property string name : 'isMuted'
 			property color backgroundNormalColor : ColorsList.addImageColor(sectionName+'_'+name+'_bg', icon, 's_d_b_bg').color
@@ -61,9 +62,9 @@ QtObject {
 		}
 	}
 	property QtObject isAudioOnly: QtObject{
-		property color backgroundColor : ColorsList.add(sectionName+'_isAudioOnly_bg', 'l').color
+		property color backgroundColor : ColorsList.add(sectionName+'_isAudioOnly_bg', 'j').color
 		property QtObject button: QtObject {
-			property int iconSize: 40
+			property int iconSize: 30
 			property string icon : 'conference_audio_only_custom'
 			property string name : 'isAudioOnly'
 			property color backgroundNormalColor : ColorsList.addImageColor(sectionName+'_'+name+'_bg', icon, 's_d_b_bg').color

@@ -22,7 +22,7 @@ Item{
 	property alias isCameraFromDevice: camera.isCameraFromDevice
 	property bool showCloseButton: true
 	property bool showActiveSpeakerOverlay: true
-	property color color : CameraViewStyle.outBackgroundColor
+	property color color : camera.isReady ?  CameraViewStyle.cameraBackgroundColor : CameraViewStyle.outBackgroundColor
 	signal closeRequested()
 	
 	MouseArea{
@@ -48,7 +48,7 @@ Item{
 			
 			IncallAvatar {
 				participantDeviceModel: mainItem.currentDevice
-				height: Utils.computeAvatarSize(mainItem, CallStyle.container.avatar.maxSize)
+				height: Utils.computeAvatarSize(backgroundArea, CallStyle.container.avatar.maxSize)
 				width: height
 				backgroundColor: CameraViewStyle.inAvatarBackgroundColor
 			}
@@ -155,9 +155,9 @@ Item{
 	}
 	Rectangle{
 		visible: mainItem.currentDevice && mainItem.currentDevice.isMuted
-		anchors.left: parent.left
+		anchors.right: parent.right
 		anchors.top: parent.top
-		anchors.leftMargin: 15
+		anchors.rightMargin: 15
 		anchors.topMargin: 15
 		height: CameraViewStyle.isMuted.button.iconSize
 		width: height
@@ -170,25 +170,4 @@ Item{
 			iconSize: CameraViewStyle.isMuted.button.iconSize
 		}
 	}
-
-	Rectangle{
-		visible: (mainItem.callModel && !mainItem.callModel.videoEnabled) ||
-				 (mainItem.currentDevice && !mainItem.currentDevice.videoEnabled)
-		anchors.right: parent.right
-		anchors.top: parent.top
-		anchors.rightMargin: 15
-		anchors.topMargin: 15
-		height: CameraViewStyle.isAudioOnly.button.iconSize
-		width: height
-		radius: width/2
-		color: CameraViewStyle.isAudioOnly.button.backgroundNormalColor
-		Icon{
-			anchors.centerIn: parent
-			icon: CameraViewStyle.isAudioOnly.button.icon
-			overwriteColor: CameraViewStyle.isAudioOnly.button.foregroundNormalColor
-			iconSize: CameraViewStyle.isAudioOnly.button.iconSize
-		}
-	}
-	
-	
 }
