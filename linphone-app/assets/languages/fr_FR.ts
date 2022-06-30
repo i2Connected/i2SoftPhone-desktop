@@ -525,11 +525,6 @@ URL du serveur non configurée.</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>icsconferenceAddressTitle</source>
-        <extracomment>&apos;Conference address&apos; : Title for the conference address.</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>icsJoinButton</source>
         <extracomment>&apos;Join&apos; : Action button to join the conference.</extracomment>
         <translation type="unfinished"></translation>
@@ -3034,6 +3029,46 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>videoSettingsInCallWarning</source>
         <translation>Appel vidéo en cours : certains paramètres ne sont pas disponibles.</translation>
+    </message>
+    <message>
+        <source>videoDisplayTitle</source>
+        <extracomment>&apos;Video display&apos; : Title for display parameters</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>videoModeLabel</source>
+        <extracomment>&apos;Camera mode&apos; : Label to choose a camera mode.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>videoHybrid</source>
+        <extracomment>&apos;Hybrid&apos; : Hybrid mode for camera.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>videoOccupyAllSpace</source>
+        <extracomment>&apos;Occupy all space&apos; : Camera mode for a centered cropping view.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>videoBlackBars</source>
+        <extracomment>&apos;Black bars&apos; : Camera mode for a fit view with black bars to keep ratio.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>videoLayout</source>
+        <extracomment>&apos;Default video layout&apos; : Label to choose the default layout in video conference.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>videoActiveSpeakerLayout</source>
+        <extracomment>&apos;Active speaker&apos; : Active speaker layout for video conference.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>videoMosaicLayout</source>
+        <extracomment>&apos;Mosaic&apos; : Mosaic layout invideo conference.</extracomment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

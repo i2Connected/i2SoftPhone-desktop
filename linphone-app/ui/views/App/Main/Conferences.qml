@@ -160,7 +160,7 @@ Item{
 						id: calendarGrid
 						property bool expanded : false					//anchors.fill: parent
 						cellWidth: width/2
-						cellHeight: expanded ? 450 : 100
+						cellHeight: expanded ? 460 : 90
 						model: $modelData
 						height: cellHeight * Math.floor( (count+1) / 2)
 						width: mainItem.width - 20
@@ -180,8 +180,7 @@ Item{
 								width: parent.width
 								height: parent.height
 								conferenceInfoModel: $modelData
-								gotoButtonMode: mainItem.filterType == ConferenceInfoProxyModel.Scheduled ? 1 
-																										  : mainItem.filterType == ConferenceInfoProxyModel.Ended ? -1
+								gotoButtonMode: mainItem.filterType == ConferenceInfoProxyModel.Scheduled || mainItem.filterType == ConferenceInfoProxyModel.Ended? 1
 																																								  : 0
 								onExpandToggle: calendarGrid.expanded = !calendarGrid.expanded
 								isExpanded: calendarGrid.expanded
