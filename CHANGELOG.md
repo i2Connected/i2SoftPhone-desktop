@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Crash on exit.
 - Memory stability.
 
+## 4.4.7 - 2022-07-01
+
+### Fixes
+- When receiving a SIP URL, copy it in Smart search bar instead of openning conversation.
+- Update SDK to prepare video conference and improve DTLS handshakes.
+
 ## 4.4.6 - 2022-06-14
 
 ### Fixed
