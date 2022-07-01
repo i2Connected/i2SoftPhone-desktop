@@ -52,6 +52,7 @@ public:
 	ConferenceInfoModel (std::shared_ptr<linphone::ConferenceInfo> conferenceInfo, QObject * parent = nullptr);
 	~ConferenceInfoModel ();
 	std::shared_ptr<linphone::ConferenceInfo> getConferenceInfo();
+	static std::shared_ptr<linphone::ConferenceInfo> findConferenceInfo(const std::shared_ptr<const linphone::ConferenceInfo> & conferenceInfo);
 	
 //-------------------------------
 
@@ -68,6 +69,7 @@ public:
 	Q_INVOKABLE QVariantList getParticipants() const;
 	Q_INVOKABLE int getParticipantCount()const;
 	Q_INVOKABLE TimeZoneModel* getTimeZoneModel() const;
+	Q_INVOKABLE QString getIcalendarString() const;
 	
 	void setDateTime(const QDateTime& dateTime);
 	void setDuration(const int& duration);
@@ -81,6 +83,7 @@ public:
 	
 // Tools
 	Q_INVOKABLE void createConference(const int& securityLevel, const int& inviteMode);
+	Q_INVOKABLE void deleteConferenceInfo();// Remove completly this conference info from DB
 
 // SCHEDULER
 	
@@ -102,6 +105,7 @@ signals:
 	void conferenceCreated();
 	void conferenceCreationFailed();
 	void invitationsSent();
+	void removed();
 	
 private:
 	std::shared_ptr<linphone::ConferenceInfo> mConferenceInfo;

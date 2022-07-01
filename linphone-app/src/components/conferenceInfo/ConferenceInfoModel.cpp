@@ -107,6 +107,10 @@ std::shared_ptr<linphone::ConferenceInfo> ConferenceInfoModel::getConferenceInfo
 	return mConferenceInfo;
 }
 
+std::shared_ptr<linphone::ConferenceInfo> ConferenceInfoModel::findConferenceInfo(const std::shared_ptr<const linphone::ConferenceInfo> & conferenceInfo){
+	return CoreManager::getInstance()->getCore()->findConferenceInformationFromUri(conferenceInfo->getUri()->clone());
+}
+
 //------------------------------------------------------------------------------------------------
 
 
@@ -179,6 +183,10 @@ TimeZoneModel* ConferenceInfoModel::getTimeZoneModel() const{
 	TimeZoneModel * model = new TimeZoneModel(mTimeZone);
 	App::getInstance()->getEngine()->setObjectOwnership(model, QQmlEngine::JavaScriptOwnership);
 	return model;
+}
+
+QString ConferenceInfoModel::getIcalendarString() const{
+	return Utils::coreStringToAppString(mConferenceInfo->getIcalendarString());
 }
 
 //------------------------------------------------------------------------------------------------
@@ -257,6 +265,13 @@ void ConferenceInfoModel::createConference(const int& securityLevel, const int& 
 	connect(mConferenceScheduler.get(), &ConferenceScheduler::invitationsSent, this, &ConferenceInfoModel::onInvitationsSent);
 	connect(mConferenceScheduler.get(), &ConferenceScheduler::stateChanged, this, &ConferenceInfoModel::onStateChanged);
 	mConferenceScheduler->getConferenceScheduler()->setInfo(mConferenceInfo);
+}
+
+void ConferenceInfoModel::deleteConferenceInfo(){
+	if(mConferenceInfo) {
+		CoreManager::getInstance()->getCore()->deleteConferenceInformation(mConferenceInfo);
+		emit removed();
+	}
 }
 
 //-------------------------------------------------------------------------------------------------

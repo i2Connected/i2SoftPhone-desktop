@@ -494,6 +494,10 @@ Nesukonfigūruotas serverio url.</translation>
         <extracomment>&apos;Choose where to forward the message&apos; : Dialog title for choosing where to forward the current message.</extracomment>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>conferencesCopiedICS</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ChatCalendarMessage</name>
@@ -3049,11 +3053,6 @@ Spustelėkite čia: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>videoModeLabel</source>
-        <extracomment>&apos;Camera mode&apos; : Label to choose a camera mode.</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>videoHybrid</source>
         <extracomment>&apos;Hybrid&apos; : Hybrid mode for camera.</extracomment>
         <translation type="unfinished"></translation>
@@ -3081,6 +3080,26 @@ Spustelėkite čia: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>videoMosaicLayout</source>
         <extracomment>&apos;Mosaic&apos; : Mosaic layout invideo conference.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>videoGridModeLabel</source>
+        <extracomment>&apos;Mosaic&apos; : Label to choose a camera mode.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>videoActiveSpeakerModeLabel</source>
+        <extracomment>&apos;Active speaker&apos; : Label to choose a camera mode.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>videoCallsModeLabel</source>
+        <extracomment>&apos;Calls&apos; : Label to choose a camera mode.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>videoModeLabel</source>
+        <extracomment>&apos;Camera modes&apos; : Label to choose a camera modes.</extracomment>
         <translation type="unfinished"></translation>
     </message>
 </context>
