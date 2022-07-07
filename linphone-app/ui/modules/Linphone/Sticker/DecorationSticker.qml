@@ -17,6 +17,7 @@ import 'qrc:/ui/scripts/Utils/utils.js' as Utils
 Item{
 	id: mainItem
 	default property alias _content: content.data
+	property alias speakingOverlayDisplayed: effect.visible
 	
 	property ParticipantDeviceModel _currentDevice
 	property CallModel _callModel
@@ -28,6 +29,8 @@ Item{
 	property bool _showCustomButton: false
 	property bool _customButtonToggled: false
 	property alias _customButtonColorSet : customButton.colorSet
+	
+	property int radius
 	
 	signal closeRequested()
 	signal backgroundClicked()
@@ -43,7 +46,7 @@ Item{
         glowRadius: 4
         spread: 0.9
         color: DecorationStickerStyle.border.color
-        cornerRadius: (content.radius? content.radius : 0) + glowRadius
+        cornerRadius: (mainItem.radius? mainItem.radius : 0) + glowRadius
         visible: mainItem._showActiveSpeakerOverlay && mainItem._currentDevice && mainItem._currentDevice.isSpeaking
     }
     Item{
