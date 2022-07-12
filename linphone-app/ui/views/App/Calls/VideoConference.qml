@@ -331,6 +331,7 @@ Rectangle {
 	
 	// Security
 	ActionButton{
+		id: securityButton
 		visible: callModel && !callModel.isConference
 		anchors.left: parent.left
 		anchors.verticalCenter: actionsButtons.verticalCenter
@@ -345,6 +346,30 @@ Rectangle {
 		onClicked: zrtp.visible = (callModel.encryption === CallModel.CallEncryptionZrtp)
 					
 		tooltipText: Logic.makeReadableSecuredString(callModel.securedString)
+	}
+	RowLayout{
+		visible: callModel.remoteRecording
+		
+		anchors.verticalCenter: actionsButtons.verticalCenter
+		anchors.left: securityButton.right
+		anchors.leftMargin: 20
+		anchors.right: actionsButtons.left
+		anchors.rightMargin: 10
+		
+		Icon{
+			icon: VideoConferenceStyle.recordWarning.icon
+			iconSize: VideoConferenceStyle.recordWarning.iconSize
+			overwriteColor: VideoConferenceStyle.recordWarning.iconColor
+		}
+		Text{
+			Layout.fillWidth: true
+			//: 'This call is being recorded.' : Warn the user that the remote is currently recording the call.
+			text: qsTr('callWarningRecord')
+			color: VideoConferenceStyle.recordWarning.color
+			font.italic: true
+			font.pointSize: VideoConferenceStyle.recordWarning.pointSize
+			wrapMode: Text.WordWrap
+		}
 	}
 	// Action buttons			
 	RowLayout{
@@ -487,17 +512,14 @@ Rectangle {
 		id: callStatistics
 		
 		call: conference.callModel
-		width: conference.width - 20
-		height: conference.height * 2/3
-		relativeTo: conference
-		relativeY: CallStyle.header.stats.relativeY
-		relativeX: 10
+		width: conference.width
+		height: conference.height
 	}
 	TelKeypad {
 		id: telKeypad
 		showHistory:true
 		call: callModel
 		visible: SettingsModel.showTelKeypadAutomatically
-		y: 50
+		y: 70
 	}
 }
