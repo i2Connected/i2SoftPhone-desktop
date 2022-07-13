@@ -8,10 +8,10 @@ import ColorsList 1.0
 // =============================================================================
 
 QtObject {
-	property string sectionName: 'VideoConference'
+	property string sectionName: 'Incall'
 	property color backgroundColor: ColorsList.add(sectionName+'_bg', 'conference_bg').color
 	property color fullBackgroundColor: ColorsList.add(sectionName+'_fullscreen_bg', 'fullscreen_conference_bg').color
-	property color buzyColor: ColorsList.add(sectionName+'_indicator', 'i').color
+	property color buzyColor: ColorsList.add(sectionName+'_indicator', 'q').color
 	
 	property QtObject title: QtObject {
 		property color color: ColorsList.add(sectionName+'_title', 'q').color
@@ -117,12 +117,6 @@ QtObject {
 		property int rightMargin: 20
 		property int spacing: 10
 		property int topMargin: 26
-		
-		property QtObject busyIndicator: QtObject {
-			property color color: ColorsList.add(sectionName+'_header_busy', 'g').color
-			property int height: 30
-			property int width: 30
-		}
 		
 		property QtObject contactDescription: QtObject {
 			property int height: 50
