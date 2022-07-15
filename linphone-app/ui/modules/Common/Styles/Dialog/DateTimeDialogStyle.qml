@@ -7,7 +7,7 @@ import ColorsList 1.0
 // =============================================================================
 
 QtObject {
-	property string sectionName : 'Dialog'
+	property string sectionName : 'DateTimeDialog'
 	property color color: ColorsList.add(sectionName, 'k').color
 	
 	property QtObject title: QtObject {
