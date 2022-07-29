@@ -126,7 +126,7 @@ public:
 	std::shared_ptr<linphone::Address> getConferenceAddress () const;
 	
 	ContactModel *getContactModel() const;
-	ChatRoomModel * getChatRoomModel() const;
+	ChatRoomModel * getChatRoomModel();
 	ConferenceModel* getConferenceModel();
 	ConferenceInfoModel* getConferenceInfoModel();
 	QSharedPointer<ConferenceModel> getConferenceSharedModel();
@@ -185,6 +185,7 @@ public:
 	
 	std::shared_ptr<linphone::Call> mCall;
 	std::shared_ptr<CallListener> mCallListener;	// This is passed to linpĥone object and must be in shared_ptr
+	std::shared_ptr<linphone::ChatRoom> mChatRoom;	// Used chat room for the call.
 	std::shared_ptr<linphone::Address> mRemoteAddress;
 	std::shared_ptr<linphone::MagicSearch> mMagicSearch;
 	
@@ -193,6 +194,7 @@ public slots:
 	void searchReceived(std::list<std::shared_ptr<linphone::SearchResult>> results);
 	void endCall();
 	void onRemoteRecording(const std::shared_ptr<linphone::Call> & call, bool recording);
+	void onChatRoomInitialized(int state);
 	
 signals:
 	void callErrorChanged (const QString &callError);
