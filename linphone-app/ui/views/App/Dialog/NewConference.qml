@@ -20,6 +20,7 @@ DialogPlus {
 	property bool isNew: !conferenceInfoModel || conferenceInfoModel.uri === ''
 	property ConferenceInfoModel conferenceInfoModel: ConferenceInfoModel{}
 	onConferenceInfoModelChanged: selectedParticipants.setAddresses(conferenceInfoModel)
+	property bool forceSchedule : false
 	property int creationState: 0
 	Timer{
 		id: closeDelay
@@ -249,7 +250,8 @@ DialogPlus {
 							checked: conferenceInfoModel.isScheduled
 							
 							onClicked: {
-								checked = !checked
+								if( !conferenceManager.forceSchedule)
+									checked = !checked
 							}
 							indicatorStyle: SwitchStyle.aux
 						}
@@ -308,7 +310,7 @@ DialogPlus {
 							MouseArea{
 								anchors.fill: parent
 								onClicked: {
-									window.attachVirtualWindow(Utils.buildCommonDialogUri('DateTimeDialog'), {showDatePicker:true, selectedDate: new Date(dateField.getDate())}
+									window.attachVirtualWindow(Utils.buildCommonDialogUri('DateTimeDialog'), {hideOldDates:true, showDatePicker:true, selectedDate: new Date(dateField.getDate())}
 										, function (status) {
 											if(status){
 												dateField.setDate(status.selectedDate)
