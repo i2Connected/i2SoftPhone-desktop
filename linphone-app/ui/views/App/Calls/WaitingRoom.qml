@@ -22,6 +22,7 @@ Rectangle {
 	property CallModel callModel	// Store the call for processing calling.
 	property bool previewLoaderEnabled: callModel ? callModel.videoEnabled : true
 	property var _sipAddressObserver: callModel ? SipAddressesModel.getSipAddressObserver(callModel.fullPeerAddress, callModel.fullLocalAddress) : undefined
+	property bool isEnding: callModel && callModel.status == CallModel.CallStatusEnded
 	
 	signal cancel()
 	
@@ -60,7 +61,7 @@ Rectangle {
 			Text{
 				Layout.alignment: Qt.AlignCenter
 				text: mainItem.callModel
-						? mainItem.callModel.status == CallModel.CallStatusEnded
+						? mainItem.isEnding
 							? "Ending call"
 							: mainItem.callModel.isOutgoing 
 								? "Outgoing call"
@@ -79,7 +80,7 @@ Rectangle {
 				font.pointSize: WaitingRoomStyle.elapsedTime.pointSize
 				horizontalAlignment: Text.AlignHCenter
 				width: parent.width
-				visible: mainItem.callModel
+				visible: mainItem.callModel && mainItem.isEnding
 				Timer {
 					interval: 1000
 					repeat: true
@@ -138,10 +139,10 @@ Rectangle {
 					anchors.centerIn: parent
 					height: cameraHeight
 					width : cameraWidth
-					
-					deactivateCamera: !mainItem.previewLoaderEnabled
-					callModel: mainItem.callModel
+					callModel:  mainItem.callModel
 					conferenceInfoModel: mainItem.conferenceInfoModel
+					deactivateCamera: !mainItem.previewLoaderEnabled || mainItem.isEnding
+					
 					/*
 					image: mainItem._sipAddressObserver && mainItem._sipAddressObserver.contact && mainItem._sipAddressObserver.contact.vcard.avatar
 					
@@ -209,7 +210,7 @@ Rectangle {
 			Layout.alignment: Qt.AlignCenter
 			Layout.topMargin: 20
 			Layout.bottomMargin: 15
-			visible: mainItem.conferenceInfoModel
+			visible: mainItem.conferenceInfoModel && !mainItem.isEnding
 			
 			spacing: 30
 			TextButtonA {
@@ -243,6 +244,7 @@ Rectangle {
 			Layout.preferredHeight: actionsButtons.height
 			Layout.bottomMargin: 30
 			Layout.topMargin: 20
+			visible: !mainItem.isEnding
 			// Action buttons
 			RowLayout{
 				id: actionsButtons

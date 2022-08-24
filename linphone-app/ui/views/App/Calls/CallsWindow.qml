@@ -18,6 +18,7 @@ Window {
 	
 	// `{}` is a workaround to avoid `TypeError: Cannot read property...` when calls list is empty
 	property CallModel call: calls.selectedCall
+	onCallChanged: if(!call && conferenceInfoModel) {conferenceInfoModel = null}
 	/*
 	?calls.selectedCall:{
 														  callError: '',
@@ -53,7 +54,6 @@ Window {
 	function endOfProcess(exitValue){
 		window.detachVirtualWindow();
 		if(exitValue == 0 && calls.count == 0 && middlePane.sourceComponent != waitingRoom) {
-			console.log("Closing")
 			close();
 		}
 	}
@@ -84,6 +84,7 @@ Window {
 		id: mainPaned
 		anchors.fill: parent
 		defaultChildAWidth: CallsWindowStyle.callsList.defaultWidth
+		defaultClosed: true
 		maximumLeftLimit: CallsWindowStyle.callsList.maximumWidth
 		minimumLeftLimit: CallsWindowStyle.callsList.minimumWidth
 		
@@ -119,46 +120,48 @@ Window {
 							GradientStop { position: 1.0; color: CallsWindowStyle.callsList.header.color2 }
 						}
 					}
-					
-					ActionBar {
-						anchors {
-							left: parent.left
-							leftMargin: CallsWindowStyle.callsList.header.leftMargin
-							verticalCenter: parent.verticalCenter
-						}
-						
-						iconSize: CallsWindowStyle.callsList.header.iconSize
-						
-						ActionButton {
-							isCustom: true
-							backgroundRadius: 4
-							colorSet: CallsWindowStyle.callsList.newCall
-							visible: SettingsModel.outgoingCallsEnabled
+					RowLayout{
+						anchors.fill: parent
+						ActionBar {
+							Layout.leftMargin: CallsWindowStyle.callsList.header.leftMargin
+							Layout.alignment: Qt.AlignVCenter
 							
-							onClicked: Logic.openCallSipAddress()
-						}
-						
-						ActionButton {
-							isCustom: true
-							backgroundRadius: 4
-							colorSet: CallsWindowStyle.callsList.newConference
-							visible: SettingsModel.conferenceEnabled
+							iconSize: CallsWindowStyle.callsList.header.iconSize
 							
-							onClicked: {
-								Logic.openConferenceManager()
+							ActionButton {
+								isCustom: true
+								backgroundRadius: 4
+								colorSet: CallsWindowStyle.callsList.newCall
+								visible: SettingsModel.outgoingCallsEnabled
+								
+								onClicked: Logic.openCallSipAddress()
+							}
+							
+							ActionButton {
+								isCustom: true
+								backgroundRadius: 4
+								colorSet: CallsWindowStyle.callsList.newConference
+								visible: SettingsModel.conferenceEnabled
+								
+								onClicked: {
+									Logic.openConferenceManager()
+								}
 							}
 						}
+						Item{// Spacer
+							Layout.fillWidth: true
+						}
+						ActionButton {
+							Layout.alignment: Qt.AlignVCenter
+							Layout.rightMargin: 15
+							isCustom: true
+							backgroundRadius: 4
+							colorSet: CallsWindowStyle.callsList.closeButton
+							
+							onClicked: mainPaned.close()
+						}
 					}
-					ActionButton {
-						anchors.right: parent.right
-						anchors.rightMargin: 15
-						anchors.verticalCenter: parent.verticalCenter
-						isCustom: true
-						backgroundRadius: 4
-						colorSet: CallsWindowStyle.callsList.closeButton
-						
-						onClicked: mainPaned.close()
-					}
+					
 				}
 				
 				Calls {
@@ -262,13 +265,18 @@ Window {
 				id: middlePane
 				anchors.fill: parent
 				sourceComponent: Logic.getContent(window.call, window.conferenceInfoModel)
+				property var lastComponent: null
 				onSourceComponentChanged: {
-					if( sourceComponent == waitingRoom)
-						mainPaned.close()
-					rightPaned.childAItem.update()
-					if(!sourceComponent && calls.count == 0)
-						window.close()
-				}// Force update when loading a new Content. It's just to be sure
+											if(lastComponent != sourceComponent){
+												if( sourceComponent == waitingRoom)
+													mainPaned.close()
+												rightPaned.childAItem.update()
+												if(!sourceComponent && calls.count == 0)
+													window.close()
+												lastComponent = sourceComponent
+											}
+						
+										}// Force update when loading a new Content. It's just to be sure
 				active: window.call || window.conferenceInfoModel
 			}
 			
