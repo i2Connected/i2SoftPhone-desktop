@@ -377,6 +377,10 @@
         <source>callStatsSentFramerate</source>
         <translation>Tasa de frames enviados</translation>
     </message>
+    <message>
+        <source>callErrorHangUp</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CallSipAddress</name>
@@ -1932,6 +1936,11 @@ Haga clic aquí: &lt;a href=&quot;%1&quot;&gt;%1 &lt;/a&gt;
     <message>
         <source>newConferenceSendEmailInviteLabel</source>
         <extracomment>&apos;Send invite via Email&apos; : Label for checkbox for sending invitations with mailer.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>busyOperations</source>
+        <extracomment>&apos;Operations in progress, please wait&apos; : Waiting message till the end of operations when creating a conference.</extracomment>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3496,6 +3505,21 @@ Haga clic aquí: &lt;a href=&quot;%1&quot;&gt;%1 &lt;/a&gt;
     <message>
         <source>startButton</source>
         <extracomment>&apos;Start&apos; : Button label for starting the conference.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>endCallStatus</source>
+        <extracomment>&quot;Ending call&quot; : status of the call in waiting room when the call end.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>outgoingCallStatus</source>
+        <extracomment>&quot;Outgoing call&quot; : status of the call in waiting room when user is calling.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>incomingCallStatus</source>
+        <extracomment>&quot;Incoming call&quot; : status of the call in waiting room when user receive a call.</extracomment>
         <translation type="unfinished"></translation>
     </message>
 </context>
