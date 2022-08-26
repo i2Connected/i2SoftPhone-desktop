@@ -817,8 +817,13 @@ Server URL not configured.</translation>
     </message>
     <message>
         <source>conferencesCopiedURL</source>
-        <extracomment>&apos;Conference URL has been copied&apos; : Message text in a banner to warn the user that the µURL have been copied to the clipboard.</extracomment>
+        <extracomment>&apos;Conference URL has been copied&apos; : Message text in a banner to warn the user that the URL have been copied to the clipboard.</extracomment>
         <translation>Conference URL has been copied</translation>
+    </message>
+    <message>
+        <source>conferencesDeleted</source>
+        <extracomment>&apos;Conference has been deleted&apos; : Message text in a banner to warn the user that the conference has been deleted.</extracomment>
+        <translation>Conference has been deleted</translation>
     </message>
 </context>
 <context>
@@ -1007,8 +1012,8 @@ Server URL not configured.</translation>
     </message>
     <message>
         <source>conversationMenuDelete</source>
-        <extracomment>&apos;Delete&apos; : Item menu to delete the chat</extracomment>
-        <translation>Delete</translation>
+        <extracomment>&apos;Delete history&apos; : Item menu to delete the chat&apos;s history</extracomment>
+        <translation>Delete history</translation>
     </message>
     <message>
         <source>conversationMenuViewContact</source>
@@ -3406,6 +3411,19 @@ Click here: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
         <source>timelineFilterConferences</source>
         <extracomment>&apos;Conferences&apos; : Filter item. Selecting it will show all conferences.</extracomment>
         <translation>Conferences</translation>
+    </message>
+</context>
+<context>
+    <name>TimelineItem</name>
+    <message>
+        <source>deleteTimeline</source>
+        <extracomment>&apos;Are you sure you want to delete and leave this timeline?&apos;</extracomment>
+        <translation>Are you sure you want to delete and leave this timeline?</translation>
+    </message>
+    <message>
+        <source>deleteTimelineTooltip</source>
+        <extracomment>&apos;After confirmation, it will erase all history, leave the chat room if it is a group chat and delete it in database.&apos;</extracomment>
+        <translation>After confirmation, it will erase all history, leave the chat room if it is a group chat and delete it in database.</translation>
     </message>
 </context>
 <context>
