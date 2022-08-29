@@ -17,6 +17,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Crash on exit.
 - Memory stability.
 
+## 4.4.9 - 2022-08-29
+
+### Fixes
+- Update SDK to fix a crash on startup due to a test on a removed participant device.
+- Use default values for new accounts in settings panel.
+
+### Added
+- Add 'sip' scheme in authentication popup.
+
 ## 4.4.8 - 2022-07-05
 
 ### Fixes
