@@ -32,21 +32,22 @@ Item {
 	
 	Image {
 		id:image
+		anchors.fill: parent
+		
 		property bool colorOverwriteEnabled : false
 		mipmap: SettingsModel.mipmapEnabled
 		cache: Images.areReadOnlyImages	
 		asynchronous: true
 		smooth: true
-		//anchors.centerIn: parent
-		anchors.fill: parent
-		
-		//width: iconWidth > 0 ? iconWidth : mainItem.width
-		//height: iconHeight > 0 ? iconHeight : mainItem.height
+		antialiasing: false
 		
 		fillMode: Image.PreserveAspectFit
 		source: Utils.resolveImageUri(icon)
-		sourceSize.width:  (iconWidth > 0 ? iconWidth : iconSize)
-		sourceSize.height: ( iconHeight > 0 ? iconHeight : iconSize)
+				
+		//Test if we need to preserve aspect fit to avoid loss quality. This is the point of having svg in square format.
+		sourceSize.width: width == height ? parent.width : 0
+		sourceSize.height: width == height ? parent.height : 0
+		
 		layer {
 			enabled: image.colorOverwriteEnabled
 			effect: ColorOverlay {
