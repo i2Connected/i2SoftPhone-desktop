@@ -381,6 +381,36 @@
         <source>callErrorHangUp</source>
         <translation>Remote party hanged up the call.</translation>
     </message>
+    <message>
+        <source>callStatsMediaEncryption</source>
+        <extracomment>&apos;Media encryption&apos; : label in encryption section of call statistics</extracomment>
+        <translation>Media encryption</translation>
+    </message>
+    <message>
+        <source>callStatsCipherAlgo</source>
+        <extracomment>&apos;Cipher algorithm&apos; : label in encryption section of call statistics</extracomment>
+        <translation>Cipher algorithm</translation>
+    </message>
+    <message>
+        <source>callStatsKeyAgreementAlgo</source>
+        <extracomment>&apos;Key agreement algorithm&apos; : label in encryption section of call statistics</extracomment>
+        <translation>Key agreement algorithm&apos;</translation>
+    </message>
+    <message>
+        <source>callStatsHashAlgo</source>
+        <extracomment>&apos;Hash algorithm&apos; : label in encryption section of call statistics</extracomment>
+        <translation>Hash algorithm</translation>
+    </message>
+    <message>
+        <source>callStatsAuthAlgo</source>
+        <extracomment>&apos;Authentication algorithm&apos; : label in encryption section of call statistics</extracomment>
+        <translation>Authentication algorithm</translation>
+    </message>
+    <message>
+        <source>callStatsSasAlgo</source>
+        <extracomment>&apos;SAS algorithm&apos; : label in encryption section of call statistics</extracomment>
+        <translation>SAS algorithm</translation>
+    </message>
 </context>
 <context>
     <name>CallSipAddress</name>
@@ -402,6 +432,11 @@
     <message>
         <source>videoStatsLabel</source>
         <translation>Video</translation>
+    </message>
+    <message>
+        <source>mediaEncryptionLabel</source>
+        <extracomment>&apos;Media encryption&apos; : title in call statistics for the encryption section</extracomment>
+        <translation>Media encryption</translation>
     </message>
 </context>
 <context>
@@ -557,13 +592,13 @@ Server URL not configured.</translation>
     </message>
     <message>
         <source>icsUpdatedMeetingInvite</source>
-        <extracomment>&apos;Meeting has been cancelled&apos; : ICS title for a cancelled invitation.</extracomment>
-        <translation>Meeting has been cancelled</translation>
+        <extracomment>&apos;Meeting has been updated&apos; : ICS title for an updated invitation.</extracomment>
+        <translation>Meeting has been updated</translation>
     </message>
     <message>
         <source>icsCancelledMeetingInvite</source>
-        <extracomment>&apos;Meeting has been updated&apos; : ICS title for an updated invitation.</extracomment>
-        <translation>Meeting has been updated</translation>
+        <extracomment>&apos;Meeting has been cancelled&apos; : ICS title for a cancelled invitation.</extracomment>
+        <translation>Meeting has been cancelled</translation>
     </message>
 </context>
 <context>
