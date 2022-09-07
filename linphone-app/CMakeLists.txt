@@ -24,26 +24,27 @@ cmake_minimum_required(VERSION 3.22)
 
 
 #Linphone targets
-set(LINPHONE_PACKAGES LinphoneCxx Mediastreamer2 Belcard LibLinphone)
+set(LINPHONE_PACKAGES LinphoneCxx Mediastreamer2 BelCard LibLinphone)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 find_package(BCToolbox)
 if(NOT BCToolbox_FOUND)
-	find_package(bctoolbox CONFIG REQUIRED)
+	find_package(BCToolbox CONFIG REQUIRED)
 endif()
 if(NOT LINPHONEAPP_VERSION)
 	bc_compute_full_version(LINPHONEAPP_VERSION)
+	set(version_major)
+	set(version_minor)
+	set(version_patch)
+	set(identifiers )
+	set(metadata )
+	bc_parse_full_version("${LINPHONEAPP_VERSION}" version_major version_minor version_patch identifiers metadata)
+	set(LINPHONEAPP_VERSION "${version_major}.${version_minor}.${version_patch}")
 endif()
-set(version_major)
-set(version_minor)
-set(version_patch)
-set(identifiers )
-set(metadata )
-bc_parse_full_version("${LINPHONEAPP_VERSION}" version_major version_minor version_patch identifiers metadata)
 
 
-project(linphoneqt VERSION "${version_major}.${version_minor}.${version_patch}")
+project(linphoneqt VERSION "${LINPHONEAPP_VERSION}")
 
 if(ENABLE_BUILD_VERBOSE)
 	#message("CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}")
@@ -111,11 +112,13 @@ foreach(PACKAGE ${LINPHONE_PACKAGES})
 	endif()
 endforeach()
 
+find_package(jsoncpp REQUIRED)
+
 set(PLUGIN_TARGETS ${LinphoneCxx_TARGET})
 set(APP_TARGETS ${LinphoneCxx_TARGET}
 				${BCToolbox_TARGET}#Logger/App
 				${Mediastreamer2_TARGET}#MediastreamerUtils
-				${Belcard_TARGET}#VCard Model
+				${BelCard_TARGET}#VCard Model
 				${LibLinphone_TARGET})#MediastreamerUtils
 
 ####################################
@@ -123,7 +126,7 @@ set(APP_TARGETS ${LinphoneCxx_TARGET}
 if(ENABLE_QT_KEYCHAIN)
 	find_package(QtKeychain)
 	if(NOT QtKeychain_FOUND)
-		find_package(${QTKEYCHAIN_TARGET_NAME} CONFIG REQUIRED)
+		find_package(Qt5Keychain CONFIG REQUIRED)
 	endif()
 	
 	add_compile_definitions("ENABLE_QT_KEYCHAIN")
@@ -868,9 +871,10 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include" DESTINATION "${CMAKE_INS
 
 
 add_subdirectory(build)
-add_subdirectory(cmake_builder/linphone_package)
-
-deployqt_hack(${TARGET_NAME} ${LINPHONE_QML_DIR})
+if(NOT LINPHONE_QT_ONLY)
+	add_subdirectory(cmake_builder/linphone_package)
+	deployqt_hack(${TARGET_NAME} ${LINPHONE_QML_DIR})
+endif()
 
 
 # ------------------------------------------------------------------------------

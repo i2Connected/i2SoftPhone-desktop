@@ -29,10 +29,10 @@
 if(NOT TARGET mediastreamer2)
     set(EXPORT_PATH ${LINPHONE_OUTPUT_DIR})
     include(GNUInstallDirs)
-    include(${EXPORT_PATH}/${CMAKE_INSTALL_DATADIR}/Mediastreamer2/cmake/Mediastreamer2Targets.cmake)
+    include(${EXPORT_PATH}/${CMAKE_INSTALL_DATADIR}/Mediastreamer2/cmake/Mediastreamer2Targets.cmake OPTIONAL)
 endif()
 
-set(_Mediastreamer2_REQUIRED_VARS Mediastreamer2_TARGET Mediastreamer2_PLUGINS_DIR)
+set(_Mediastreamer2_REQUIRED_VARS Mediastreamer2_TARGET)
 set(_Mediastreamer2_CACHE_VARS ${_Mediastreamer2_REQUIRED_VARS})
 
 if(TARGET mediastreamer2)

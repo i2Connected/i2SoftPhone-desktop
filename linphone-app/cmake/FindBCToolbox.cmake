@@ -34,7 +34,7 @@ if(NOT TARGET bctoolbox)
     set(EXPORT_PATH ${LINPHONE_OUTPUT_DIR})
     include(GNUInstallDirs)
     set(BCToolbox_CMAKE_DIR ${EXPORT_PATH}/${CMAKE_INSTALL_DATADIR}/bctoolbox/cmake)
-    include(${BCToolbox_CMAKE_DIR}/bctoolboxTargets.cmake)
+    include(${BCToolbox_CMAKE_DIR}/bctoolboxTargets.cmake OPTIONAL)
 endif()
 
 set(_BCToolbox_REQUIRED_VARS BCToolbox_TARGET BCToolbox_CMAKE_DIR BCToolbox_CMAKE_UTILS)
