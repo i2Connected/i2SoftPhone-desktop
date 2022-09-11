@@ -61,6 +61,10 @@
 #include "components/participant/ParticipantListModel.hpp"
 #include "components/participant/ParticipantProxyModel.hpp"
 
+#include <linphone++/enums.hh>
+#include <linphone++/linphone.hh>
+
+Q_DECLARE_METATYPE(linphone::ConfiguringState)
 // =============================================================================
 
 using namespace std;
@@ -200,8 +204,7 @@ bool App::setFetchConfig (QCommandLineParser *parser) {
 
 
 App::App (int &argc, char *argv[]) : SingleApplication(argc, argv, true, Mode::User | Mode::ExcludeAppPath | Mode::ExcludeAppVersion) {
-	
-	connect(this, SIGNAL(applicationStateChanged(Qt::ApplicationState)), this, SLOT(stateChanged(Qt::ApplicationState)));
+		connect(this, SIGNAL(applicationStateChanged(Qt::ApplicationState)), this, SLOT(stateChanged(Qt::ApplicationState)));
 	
 	setWindowIcon(QIcon(Constants::WindowIconPath));
 	
@@ -658,6 +661,7 @@ void App::registerTypes () {
 	qRegisterMetaType<QSharedPointer<ChatCallModel>>();
 	qRegisterMetaType<QSharedPointer<ConferenceInfoModel>>();
 	//qRegisterMetaType<std::shared_ptr<ChatEvent>>();
+	qRegisterMetaType<linphone::ConfiguringState>();
 	LinphoneEnums::registerMetaTypes();
 	
 	registerType<AssistantModel>("AssistantModel");
@@ -741,7 +745,7 @@ void App::registerSharedTypes () {
 	qInfo() << QStringLiteral("Registering shared types...");
 	
 	registerSharedSingletonType<App, &App::getInstance>("App");
-	registerSharedSingletonType<CoreManager, &CoreManager::getInstance>("CoreManager");
+	registerSharedSingletonType<CoreManagerGUI, &CoreManager::getInstanceGUI>("CoreManager");
 	registerSharedSingletonType<SettingsModel, &CoreManager::getSettingsModel>("SettingsModel");
 	registerSharedSingletonType<AccountSettingsModel, &CoreManager::getAccountSettingsModel>("AccountSettingsModel");
 	registerSharedSingletonType<SipAddressesModel, &CoreManager::getSipAddressesModel>("SipAddressesModel");  

@@ -52,6 +52,7 @@
 #include "content/ContentProxyModel.hpp"
 #include "core/CoreHandlers.hpp"
 #include "core/CoreManager.hpp"
+#include "core/CoreManagerGUI.hpp"
 #include "file/FileDownloader.hpp"
 #include "file/FileExtractor.hpp"
 #include "file/TemporaryFile.hpp"

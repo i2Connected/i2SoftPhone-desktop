@@ -34,6 +34,7 @@
 #include "components/contact/VcardModel.hpp"
 #include "components/contacts/ContactsListModel.hpp"
 #include "components/contacts/ContactsImporterListModel.hpp"
+#include "components/core/CoreManagerGUI.hpp"
 #include "components/history/HistoryModel.hpp"
 #include "components/ldap/LdapListModel.hpp"
 #include "components/recorder/RecorderManager.hpp"
@@ -56,6 +57,7 @@
 #include <linphone/core.h>
 
 #include <linphone/core.h>
+#include "components/linphoneObject/LinphoneThread.hpp"
 
 // =============================================================================
 
@@ -64,6 +66,8 @@ using namespace std;
 // -----------------------------------------------------------------------------
 
 CoreManager *CoreManager::mInstance=nullptr;
+CoreManagerGUI *CoreManager::mInstanceGUI=nullptr;
+QSharedPointer<LinphoneThread> CoreManager::gLinphoneThread = nullptr;
 
 CoreManager::CoreManager (QObject *parent, const QString &configPath) :
 	QObject(parent), mHandlers(make_shared<CoreHandlers>(this)) {
@@ -123,6 +127,10 @@ CoreManager *CoreManager::getInstance (){
 	return mInstance;
 }
 
+CoreManagerGUI *CoreManager::getInstanceGUI (){
+	return mInstanceGUI;
+}
+
 
 HistoryModel* CoreManager::getHistoryModel(){
 	if(!mHistoryModel){
@@ -144,7 +152,12 @@ RecorderManager* CoreManager::getRecorderManager(){
 void CoreManager::init (QObject *parent, const QString &configPath) {
 	if (mInstance)
 		return;
-	mInstance = new CoreManager(parent, configPath);
+	gLinphoneThread = QSharedPointer<LinphoneThread>::create(parent);
+	gLinphoneThread->start();
+	//this->moveToThread(mLinphoneThread.get());
+	mInstance = new CoreManager(nullptr, configPath);
+	gLinphoneThread->objectToThread(mInstance);
+	mInstanceGUI = new CoreManagerGUI(parent);
 }
 
 void CoreManager::uninit () {
@@ -155,6 +168,10 @@ void CoreManager::uninit () {
 		mInstance->unlockVideoRender();
 		delete mInstance;	// This will also remove stored Linphone objects.
 		mInstance = nullptr;
+		gLinphoneThread->exit();
+		gLinphoneThread = nullptr;
+		mInstanceGUI->deleteLater();
+		mInstanceGUI = nullptr;
 		core->stop();
 		if( core->getGlobalState() != linphone::GlobalState::Off)
 			qWarning() << "Core is not off after stopping it. It may result to have multiple core instance.";
@@ -412,16 +429,19 @@ std::list<std::shared_ptr<linphone::Account>> CoreManager::getAccountList()const
 // -----------------------------------------------------------------------------
 
 void CoreManager::startIterate(){
-	mCbsTimer = new QTimer(this);
+	mCbsTimer = new QTimer();
 	mCbsTimer->setInterval(Constants::CbsCallInterval);
-	QObject::connect(mCbsTimer, &QTimer::timeout, this, &CoreManager::iterate);
+	QObject::connect(mCbsTimer, &QTimer::timeout, this, &CoreManager::iterate, Qt::DirectConnection);
 	qInfo() << QStringLiteral("Start iterate");
-	mCbsTimer->start();
+	emit gLinphoneThread->startT(mCbsTimer);
+	//gLinphoneThread->test(mCbsTimer);
+	//mCbsTimer->start();
 }
 
 void CoreManager::stopIterate(){
 	qInfo() << QStringLiteral("Stop iterate");
-	mCbsTimer->stop();
+	emit gLinphoneThread->stopT(mCbsTimer);
+	//mCbsTimer->stop();
 	mCbsTimer->deleteLater();// allow the timer to continue its stuff
 	mCbsTimer = nullptr;
 }

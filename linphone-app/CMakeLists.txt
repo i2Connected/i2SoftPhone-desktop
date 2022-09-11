@@ -241,6 +241,7 @@ set(SOURCES
 	src/components/content/ContentProxyModel.cpp
 	src/components/core/CoreHandlers.cpp
 	src/components/core/CoreManager.cpp
+	src/components/core/CoreManagerGUI.cpp
 	src/components/core/event-count-notifier/AbstractEventCountNotifier.cpp
 	src/components/file/FileDownloader.cpp
 	src/components/file/FileExtractor.cpp
@@ -252,6 +253,7 @@ set(SOURCES
 	src/components/ldap/LdapModel.cpp
 	src/components/ldap/LdapListModel.cpp
 	src/components/ldap/LdapProxyModel.cpp
+	#src/components/linphoneObject/LinphoneThread.cpp
 	src/components/notifier/Notifier.cpp
 	src/components/other/clipboard/Clipboard.cpp
 	src/components/other/colors/ColorModel.cpp
@@ -381,6 +383,7 @@ set(HEADERS
 	src/components/content/ContentProxyModel.hpp
 	src/components/core/CoreHandlers.hpp
 	src/components/core/CoreManager.hpp
+	src/components/core/CoreManagerGUI.hpp
 	src/components/core/event-count-notifier/AbstractEventCountNotifier.hpp
 	src/components/file/FileDownloader.hpp
 	src/components/file/FileExtractor.hpp
@@ -392,6 +395,7 @@ set(HEADERS
 	src/components/ldap/LdapModel.hpp
 	src/components/ldap/LdapListModel.hpp
 	src/components/ldap/LdapProxyModel.hpp
+	src/components/linphoneObject/LinphoneThread.hpp
 	src/components/notifier/Notifier.hpp
 	src/components/other/clipboard/Clipboard.hpp
 	src/components/other/colors/ColorModel.hpp

@@ -26,6 +26,7 @@
 #include <QString>
 #include <QHash>
 #include <QMutex>
+#include <QSharedPointer>
 
 // =============================================================================
 
@@ -39,6 +40,7 @@ class ChatRoomModel;
 class ContactsListModel;
 class ContactsImporterListModel;
 class CoreHandlers;
+class CoreManagerGUI;
 class EventCountNotifier;
 class HistoryModel;
 class LdapListModel;
@@ -48,16 +50,17 @@ class SipAddressesModel;
 class VcardModel;
 class TimelineListModel;
 
+class LinphoneThread;
+
 
 class CoreManager : public QObject {
-	Q_OBJECT;
+	Q_OBJECT
 	
 	Q_PROPERTY(QString version READ getVersion CONSTANT)
 	Q_PROPERTY(QString downloadUrl READ getDownloadUrl CONSTANT)
 	Q_PROPERTY(int eventCount READ getEventCount NOTIFY eventCountChanged)
 	Q_PROPERTY(int callLogsCount READ getCallLogsCount NOTIFY callLogsCountChanged)
 	Q_PROPERTY(bool initialized READ isInitialized NOTIFY coreManagerInitialized)
-	
 public:
 	bool started () const {
 		return mStarted;
@@ -135,6 +138,11 @@ public:
 	}
 	
 	static CoreManager *getInstance ();
+	static CoreManagerGUI *getInstanceGUI();
+
+	QString getVersion () const;
+	int getEventCount () const;
+	static QString getDownloadUrl ();
 	
 	// ---------------------------------------------------------------------------
 	// Initialization.
@@ -200,15 +208,11 @@ private:
 	
 	void migrate ();
 	
-	QString getVersion () const;
-	
-	int getEventCount () const;
+
 	
 	void iterate ();
 	
 	void handleLogsUploadStateChanged (linphone::Core::LogCollectionUploadState state, const std::string &info);
-	
-	static QString getDownloadUrl ();
 	
 	std::shared_ptr<linphone::Core> mCore;
 	std::shared_ptr<CoreHandlers> mHandlers;	// It is used for handling linphone. Keep it to shared_ptr.
@@ -237,6 +241,9 @@ private:
 	QMutex mMutexVideoRender;
 	
 	static CoreManager *mInstance;
+	static CoreManagerGUI *mInstanceGUI;
+
+	static QSharedPointer<LinphoneThread> gLinphoneThread;
 };
 
 #endif // CORE_MANAGER_H_
