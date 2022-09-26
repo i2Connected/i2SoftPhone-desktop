@@ -564,6 +564,11 @@ Server URL not configured.</translation>
         <extracomment>&apos;Do you really want do delete this meeting?&apos; : Warning message to confirm the deletion of a meeting.</extracomment>
         <translation>Do you really want do delete this meeting?</translation>
     </message>
+    <message>
+        <source>cancelConferenceInfo</source>
+        <extracomment>&apos;Do you really want do cancel this meeting?&apos; : Warning message to confirm the cancellation of a meeting.</extracomment>
+        <translation>Do you really want do cancel this meeting?</translation>
+    </message>
 </context>
 <context>
     <name>ChatConferenceInvitationMessage</name>
@@ -1069,6 +1074,11 @@ Server URL not configured.</translation>
         <source>conversationMenuAddContact</source>
         <extracomment>&apos;Add contact&apos; : Item menu to add the contact to address book</extracomment>
         <translation>Add contact</translation>
+    </message>
+    <message>
+        <source>conversationMenuScheduleMeeting</source>
+        <extracomment>&apos;Schedule a meeting&apos; : Item menu to schedule a meeting with the chat participants.</extracomment>
+        <translation>Schedule a meeting</translation>
     </message>
 </context>
 <context>
