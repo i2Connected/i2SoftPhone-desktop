@@ -78,7 +78,7 @@ void FileDownloader::download () {
 	setDownloading(true);
 	
 	QNetworkRequest request(mUrl);
-	request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+	request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 	mNetworkReply = mManager.get(request);
 	
 	QNetworkReply *data = mNetworkReply.data();

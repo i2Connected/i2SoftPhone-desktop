@@ -227,14 +227,22 @@ const QList<QPair<QLocale::Country, QString>> TelephoneNumbersModel::mCountryCod
 	{ QLocale::Tanzania, "255" },
 	{ QLocale::Thailand, "66" },
 	{ QLocale::Togo, "228" },
+#if QT_VERSION < QT_VERSION_CHECK(6, 2, 0)
 	{ QLocale::Tokelau, "690" },
+#else
+	{ QLocale::TokelauTerritory, "690" },
+#endif
 	{ QLocale::Tonga, "676" },
 	{ QLocale::TrinidadAndTobago, "1" },
 	{ QLocale::Tunisia, "216" },
 	{ QLocale::Turkey, "90" },
 	{ QLocale::Turkmenistan, "993" },
 	{ QLocale::TurksAndCaicosIslands, "1" },
+#if QT_VERSION < QT_VERSION_CHECK(6, 2, 0)
 	{ QLocale::Tuvalu, "688" },
+#else
+	{ QLocale::TuvaluTerritory, "688" },
+#endif
 	{ QLocale::Uganda, "256" },
 	{ QLocale::Ukraine, "380" },
 	{ QLocale::UnitedArabEmirates, "971" },

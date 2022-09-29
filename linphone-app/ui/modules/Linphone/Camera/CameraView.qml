@@ -1,6 +1,6 @@
 import QtQuick 2.7
 import QtQuick.Layouts 1.3
-import QtGraphicalEffects 1.12
+//import QtGraphicalEffects 1.12
 
 import App.Styles 1.0
 import Common 1.0
@@ -31,7 +31,7 @@ Item{
 	MouseArea{
 		anchors.fill: parent
 		onClicked: camera.resetActive()
-	}
+	}/*
 	 RectangularGlow {
         id: effect
         anchors.fill: backgroundArea
@@ -40,7 +40,7 @@ Item{
         color: CameraViewStyle.border.color
         cornerRadius: backgroundArea.radius + glowRadius
         visible: mainItem.showActiveSpeakerOverlay && mainItem.currentDevice && mainItem.currentDevice.isSpeaking
-    }
+    }*/
 	Rectangle {
         id: backgroundArea
         color: mainItem.color
@@ -80,6 +80,7 @@ Item{
 		visible: false
 		onVideoDefinitionChanged: mainItem.videoDefinitionChanged()
 	}
+	/*
 	OpacityMask{
 		id: renderedCamera
 		anchors.fill: parent
@@ -88,24 +89,24 @@ Item{
 		invert:false
 		visible: true
 		
-		/*	In case we need transformations.
-		property Matrix4x4 mirroredRotationMatrix : Matrix4x4 {// 180 rotation + mirror
-							matrix: Qt.matrix4x4(-Math.cos(Math.PI), -Math.sin(Math.PI), 0, 0,
-								 Math.sin(Math.PI),  Math.cos(Math.PI), 0, camera.height,
-								 0,           0,            1, 0,
-								 0,           0,            0, 1)
-							}
-		property Matrix4x4 rotationMatrix : Matrix4x4 {// 180 rotation only
-							matrix: Qt.matrix4x4(Math.cos(Math.PI), -Math.sin(Math.PI), 0, camera.width,
-								 Math.sin(Math.PI),  Math.cos(Math.PI), 0, camera.height,
-								 0,           0,            1, 0,
-								 0,           0,            0, 1)
-							}
-							
-		//transform: ( camera.isPreview ?  mirroredRotationMatrix : rotationMatrix)
-		*/
+//			In case we need transformations.
+//		property Matrix4x4 mirroredRotationMatrix : Matrix4x4 {// 180 rotation + mirror
+//							matrix: Qt.matrix4x4(-Math.cos(Math.PI), -Math.sin(Math.PI), 0, 0,
+//								 Math.sin(Math.PI),  Math.cos(Math.PI), 0, camera.height,
+//								 0,           0,            1, 0,
+//								 0,           0,            0, 1)
+//							}
+//		property Matrix4x4 rotationMatrix : Matrix4x4 {// 180 rotation only
+//							matrix: Qt.matrix4x4(Math.cos(Math.PI), -Math.sin(Math.PI), 0, camera.width,
+//								 Math.sin(Math.PI),  Math.cos(Math.PI), 0, camera.height,
+//								 0,           0,            1, 0,
+//								 0,           0,            0, 1)
+//							}
+//							
+//		//transform: ( camera.isPreview ?  mirroredRotationMatrix : rotationMatrix)
+		
 	}
-	
+	*/
 	Rectangle{
 		id: hideView
 		anchors.fill: parent
@@ -140,6 +141,7 @@ Item{
 		font.weight: CameraViewStyle.contactDescription.weight
 		color: CameraViewStyle.contactDescription.color
 	}
+	/*
 	Glow {
 		anchors.fill: username
 		//spread: 1
@@ -148,6 +150,7 @@ Item{
 		color: "#80000000"
 		source: username
 	}
+	*/
 	ActionButton{
 		visible: mainItem.showCloseButton && camera.isPreview && mainItem.callModel && mainItem.callModel.videoEnabled
 		anchors.right: parent.right

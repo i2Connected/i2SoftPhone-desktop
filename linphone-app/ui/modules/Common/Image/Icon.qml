@@ -1,5 +1,5 @@
 import QtQuick 2.7
-import QtGraphicalEffects 1.12
+//import QtGraphicalEffects 1.12
 
 import Common 1.0
 import Linphone 1.0
@@ -45,6 +45,7 @@ Item {
 		fillMode: !qtIsNewer_5_15_0 ? Image.PreserveAspectFit : Image.Stretch // Stretch is default from Qt's doc
 		// Keep aspect ratio is done by ImagePovider that use directly SVG scalings (=no loss quality).
 		source: width != 0 && height != 0 ?  Utils.resolveImageUri(icon) : ''	// Do not load image with unknown requested size
+                +(colorOverwriteEnabled ? 'fg='+mainItem.overwriteColor : '')
 		sourceSize.width: qtIsNewer_5_15_0
 							? fillMode == Image.TileHorizontally
 								? height
@@ -55,12 +56,12 @@ Item {
 								? width
 								: height
 							: 0
-		
+		/*
 		layer {
 			enabled: image.colorOverwriteEnabled
 			effect: ColorOverlay {
 				color: mainItem.overwriteColor
 			}
-		}
+		}*/
 	}
 }

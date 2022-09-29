@@ -144,6 +144,8 @@ private:
 	std::shared_ptr<linphone::Account> mSelectedAccount;
 };
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 Q_DECLARE_METATYPE(std::shared_ptr<linphone::Account>);
+#endif
 
 #endif // ACCOUNT_SETTINGS_MODEL_H_

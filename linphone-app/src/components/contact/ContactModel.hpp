@@ -28,6 +28,7 @@
 // =============================================================================
 
 class VcardModel;
+Q_DECLARE_OPAQUE_POINTER(VcardModel*)
 
 class ContactModel : public QObject {
   // Grant access to `mLinphoneFriend`.

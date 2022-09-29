@@ -1,5 +1,5 @@
 import QtQuick 2.7
-import QtGraphicalEffects 1.0
+//import QtGraphicalEffects 1.0
 
 import Linphone 1.0
 
@@ -27,9 +27,10 @@ Item {
 		sourceSize.width: parent.width
 		sourceSize.height: parent.height
 		layer.enabled: true
+		/*
 		layer.effect: OpacityMask {
 			maskSource: backgroundArea
-		}
+		}*/
 	}
 	Rectangle {
 		id: foregroundArea

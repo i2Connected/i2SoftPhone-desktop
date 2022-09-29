@@ -40,7 +40,7 @@ private:
 	static int computeEntryWeight (const QString& filter, const SearchResultModel *entry);
 	static int computeStringWeight (const QString& filter, const QString &string);
 	
-	static const QRegExp SearchSeparators;
+	static const QRegularExpression SearchSeparators;
 };
 
 #endif

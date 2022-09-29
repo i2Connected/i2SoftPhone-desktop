@@ -56,7 +56,7 @@ QPluginLoader * PluginsManager::getPlugin(const QString &pluginIdentity){
 		for(int i = 0 ; i < pluginPaths.size() ; ++i) {
 			QString pluginPath = pluginPaths[i] +gPluginsMap[pluginIdentity];
 			QPluginLoader * loader = new QPluginLoader(pluginPath);
-			loader->setLoadHints(0);	// this force Qt to unload the plugin from memory when we request it. Be carefull by not having a plugin instance or data created inside the plugin after the unload.
+			loader->setLoadHints(QLibrary::ExportExternalSymbolsHint);	// this force Qt to unload the plugin from memory when we request it. Be carefull by not having a plugin instance or data created inside the plugin after the unload.
 			if( auto instance = loader->instance()) {
 				auto plugin = qobject_cast< LinphonePlugin* >(instance);
 				if (plugin )
@@ -80,7 +80,7 @@ void * PluginsManager::createInstance(const QString &pluginIdentity){
 		for(int i = 0 ; i < pluginPaths.size() ; ++i) {
 			QString pluginPath = pluginPaths[i] +gPluginsMap[pluginIdentity];
 			QPluginLoader * loader = new QPluginLoader(pluginPath);
-			loader->setLoadHints(0);	// this force Qt to unload the plugin from memory when we request it. Be carefull by not having a plugin instance or data created inside the plugin after the unload.
+			loader->setLoadHints(QLibrary::ExportExternalSymbolsHint);	// this force Qt to unload the plugin from memory when we request it. Be carefull by not having a plugin instance or data created inside the plugin after the unload.
 			if( auto instance = loader->instance()) {
 				plugin = qobject_cast< LinphonePlugin* >(instance);
 				if (plugin) {
@@ -141,7 +141,7 @@ void PluginsManager::openNewPlugin(const QString &pTitle){
 			QMessageBox::information(nullptr, pTitle, "The file is not a plugin");
 		}else{
 			QPluginLoader loader(fileName);
-			loader.setLoadHints(0);
+			loader.setLoadHints(QLibrary::ExportExternalSymbolsHint);
 			QJsonObject metaData = loader.metaData()["MetaData"].toObject();
 			if( metaData.contains("ID") && metaData.contains("Capabilities")){
 				capabilities = metaData["Capabilities"].toString().toUpper().remove(' ').split(",");
@@ -209,7 +209,7 @@ QVariantList PluginsManager::getPlugins(const int& capabilities) {
 		for(int i = 0 ; i < pluginFiles.size() ; ++i) {
 			if( QLibrary::isLibrary(pluginPath+pluginFiles[i])){
 				QPluginLoader loader(pluginPath+pluginFiles[i]);
-				loader.setLoadHints(0);	// this force Qt to unload the plugin from memory when we request it. Be carefull by not having a plugin instance or data created inside the plugin after the unload.
+				loader.setLoadHints(QLibrary::ExportExternalSymbolsHint);	// this force Qt to unload the plugin from memory when we request it. Be carefull by not having a plugin instance or data created inside the plugin after the unload.
 				if (auto instance = loader.instance()) {
 					LinphonePlugin * plugin = qobject_cast< LinphonePlugin* >(instance);
 					if ( plugin){
@@ -247,7 +247,9 @@ QVariantList PluginsManager::getPlugins(const int& capabilities) {
 				}
 			}
 		}
-		std::sort(plugins.begin(), plugins.end());
+		std::sort(plugins.begin(), plugins.end(), [](const QVariant& a, const QVariant& b)-> bool{
+			return a.toMap().value("pluginTitle").toString() < b.toMap().value("pluginTitle").toString();
+		});
 	}
 	return plugins;
 }

@@ -26,6 +26,8 @@
 
 #include "../search/SearchResultModel.hpp"
 
+#include <QRegularExpression>
+
 // =============================================================================
 
 namespace {
@@ -36,7 +38,7 @@ namespace {
   constexpr int WeightPosOther = 1;
 }
 
-const QRegExp SipAddressesSorter::SearchSeparators("^[^_.-;@ ][_.-;@ ]");
+const QRegularExpression SipAddressesSorter::SearchSeparators("^[^_.-;@ ][_.-;@ ]");
 
 // -----------------------------------------------------------------------------
 

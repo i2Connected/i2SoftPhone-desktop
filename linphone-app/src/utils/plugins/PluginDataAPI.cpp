@@ -13,7 +13,7 @@ PluginDataAPI::PluginDataAPI(LinphonePlugin * plugin, void* linphoneCore, QPlugi
 	QVariantMap defaultValues;	
 	QJsonDocument doc = QJsonDocument::fromJson(mPlugin->getGUIDescriptionToJson().toUtf8());
 	QVariantMap description = doc.toVariant().toMap();
-	mPluginLoader->setLoadHints(0);
+	mPluginLoader->setLoadHints(QLibrary::ExportExternalSymbolsHint);
 // First, get all fields where their target is ALL. It will be act as a "default field"
 	for(auto field : description["fields"].toList()){
 		auto details = field.toMap();

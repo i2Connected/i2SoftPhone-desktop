@@ -1,4 +1,4 @@
-import QtGraphicalEffects 1.0
+//import QtGraphicalEffects 1.0
 import QtQuick 2.7
 import QtQuick.Layouts 1.3
 
@@ -108,7 +108,7 @@ Window {
 					Layout.preferredHeight: CallsWindowStyle.callsList.header.height
 					
 					visible: SettingsModel.outgoingCallsEnabled || SettingsModel.conferenceEnabled
-					
+					/*
 					LinearGradient {
 						anchors.fill: parent
 						
@@ -119,7 +119,7 @@ Window {
 							GradientStop { position: 0.0; color: CallsWindowStyle.callsList.header.color1 }
 							GradientStop { position: 1.0; color: CallsWindowStyle.callsList.header.color2 }
 						}
-					}
+					}*/
 					RowLayout{
 						anchors.fill: parent
 						ActionBar {

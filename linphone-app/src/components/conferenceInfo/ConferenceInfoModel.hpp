@@ -27,11 +27,11 @@
 #include <QSharedPointer>
 #include <QTimeZone>
 
+#include "components/other/timeZone/TimeZoneModel.hpp"
 #include "utils/LinphoneEnums.hpp"
 
 class ParticipantListModel;
 class ConferenceScheduler;
-class TimeZoneModel;
 
 class ConferenceInfoModel : public QObject {
 	Q_OBJECT

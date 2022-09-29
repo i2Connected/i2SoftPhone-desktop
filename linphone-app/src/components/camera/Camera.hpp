@@ -28,14 +28,15 @@
 #include <QMutex>
 #include <QTimer>
 
+#include "components/call/CallModel.hpp"
+#include "components/participant/ParticipantDeviceModel.hpp"
+
 // =============================================================================
 
 namespace linphone {
 	class Call;
 }
 
-class CallModel;
-class ParticipantDeviceModel;
 // -----------------------------------------------------------------------------
 
 class Camera : public QQuickFramebufferObject {

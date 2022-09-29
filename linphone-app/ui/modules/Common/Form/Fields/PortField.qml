@@ -1,4 +1,4 @@
-import QtQuick 2.7
+import QtQuick
 
 import Common.Styles 1.0
 import Utils 1.0
@@ -60,12 +60,9 @@ Item {
 
   TextField {
     id: textField
-
-    validator: RegExpValidator {
-      regExp: wrapper.supportsRange
+    validator: RegularExpressionValidator { regularExpression: wrapper.supportsRange
         ? Utils.PORT_RANGE_REGEX
-        : Utils.PORT_REGEX
-    }
+        : Utils.PORT_REGEX }
 
     width: parent.width
 

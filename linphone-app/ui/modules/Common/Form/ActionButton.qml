@@ -1,7 +1,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
-import QtGraphicalEffects 1.12
+//import QtGraphicalEffects 1.12
 
 import Common 1.0
 
@@ -284,7 +284,7 @@ Item {
 			iconWidth: wrappedButton.iconWidth
 			visible: !iconIsCustom
 		}
-		
+		/*
 		OpacityMask{
 			anchors.fill: icon
 			source: foregroundColor
@@ -297,8 +297,8 @@ Item {
 				acceptedButtons: Qt.NoButton
 				cursorShape: containsMouse ? Qt.PointingHandCursor : Qt.ArrowCursor
 			}
-		}
-	 
+		}*/
+	 /*
 		OpacityMask{
 			id: mask
 			anchors.fill: icon
@@ -306,20 +306,14 @@ Item {
 			maskSource: icon
 
 			visible: iconIsCustom && percentageDisplayed != 100
-			/*
-			layer {
-				enabled: true
-				effect: ColorOverlay {
-					color: "#80FFFFFF"
-				}
-			}*/
+			
 			MouseArea{
 				anchors.fill:parent
 				hoverEnabled: true
 				acceptedButtons: Qt.NoButton
 				cursorShape: containsMouse ? Qt.PointingHandCursor : Qt.ArrowCursor
 			}
-		}
+		}*/
 		TooltipArea {
 			id:tooltip
 			text: ''

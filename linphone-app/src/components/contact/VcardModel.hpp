@@ -113,7 +113,8 @@ private:
 
   std::shared_ptr<linphone::Vcard> mVcard;
 };
-
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 Q_DECLARE_METATYPE(VcardModel *);
+#endif
 
 #endif // VCARD_MODEL_H_

@@ -1,6 +1,6 @@
 import QtQuick 2.7
 import QtQuick.Layouts 1.3
-import QtGraphicalEffects 1.12
+//import QtGraphicalEffects 1.12
 
 import App.Styles 1.0
 import Common 1.0
@@ -70,6 +70,7 @@ DecorationSticker{
 			visible: false
 			onVideoDefinitionChanged: mainItem.videoDefinitionChanged()
 		}
+		/*
 		OpacityMask{
 			id: renderedCamera
 			anchors.fill: parent
@@ -78,22 +79,22 @@ DecorationSticker{
 			invert:false
 			visible: true
 			
-			/*	In case we need transformations.
-		property Matrix4x4 mirroredRotationMatrix : Matrix4x4 {// 180 rotation + mirror
-							matrix: Qt.matrix4x4(-Math.cos(Math.PI), -Math.sin(Math.PI), 0, 0,
-								 Math.sin(Math.PI),  Math.cos(Math.PI), 0, camera.height,
-								 0,           0,            1, 0,
-								 0,           0,            0, 1)
-							}
-		property Matrix4x4 rotationMatrix : Matrix4x4 {// 180 rotation only
-							matrix: Qt.matrix4x4(Math.cos(Math.PI), -Math.sin(Math.PI), 0, camera.width,
-								 Math.sin(Math.PI),  Math.cos(Math.PI), 0, camera.height,
-								 0,           0,            1, 0,
-								 0,           0,            0, 1)
-							}
-							
-		//transform: ( camera.isPreview ?  mirroredRotationMatrix : rotationMatrix)
-		*/
+//				In case we need transformations.
+//		property Matrix4x4 mirroredRotationMatrix : Matrix4x4 {// 180 rotation + mirror
+//							matrix: Qt.matrix4x4(-Math.cos(Math.PI), -Math.sin(Math.PI), 0, 0,
+//								 Math.sin(Math.PI),  Math.cos(Math.PI), 0, camera.height,
+//								 0,           0,            1, 0,
+//								 0,           0,            0, 1)
+//							}
+//		property Matrix4x4 rotationMatrix : Matrix4x4 {// 180 rotation only
+//							matrix: Qt.matrix4x4(Math.cos(Math.PI), -Math.sin(Math.PI), 0, camera.width,
+//								 Math.sin(Math.PI),  Math.cos(Math.PI), 0, camera.height,
+//								 0,           0,            1, 0,
+//								 0,           0,            0, 1)
+//							}
+//							
+//		//transform: ( camera.isPreview ?  mirroredRotationMatrix : rotationMatrix)
 		}
+		*/
 	}
 }

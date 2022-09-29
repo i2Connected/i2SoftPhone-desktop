@@ -25,19 +25,24 @@
 #include "app/proxyModel/ProxyListModel.hpp"
 #include <QDateTime>
 
+//#include "components/chat-events/ChatMessageModel.hpp"
+
+
 // =============================================================================
 // Fetch all N messages of a ChatRoom.
 // =============================================================================
 
 class CoreHandlers;
 class ParticipantModel;
-class ParticipantListModel;
 class ChatEvent;
 class ContactModel;
-class ChatRoomModel;
 class ChatMessageModel;
+Q_DECLARE_OPAQUE_POINTER(ChatMessageModel*)
 class ChatNoticeModel;
 class ChatRoomListener;
+class ParticipantListModel;
+Q_DECLARE_OPAQUE_POINTER(ParticipantListModel*)
+//#include "components/participant/ParticipantListModel.hpp"
 
 class ChatRoomModel : public ProxyListModel {
 	
@@ -309,6 +314,6 @@ private:
 	QWeakPointer<ChatRoomModel> mSelf;
 };
 
-Q_DECLARE_METATYPE(QSharedPointer<ChatRoomModel>)
+//Q_DECLARE_METATYPE(QSharedPointer<ChatRoomModel>)
 
 #endif // CHAT_ROOM_MODEL_H_

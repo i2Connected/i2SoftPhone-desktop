@@ -8,7 +8,7 @@ PluginNetworkHelper::~PluginNetworkHelper(){}
 void PluginNetworkHelper::request(){	// Create QNetworkReply and make network requests
 	QNetworkRequest request(prepareRequest());
 	
-	request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+	request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 	mNetworkReply = mManager.get(request);
 
 #if QT_CONFIG(ssl)
@@ -19,7 +19,12 @@ void PluginNetworkHelper::request(){	// Create QNetworkReply and make network re
 
 	QObject::connect(data, &QNetworkReply::readyRead, this, &PluginNetworkHelper::handleReadyData);
 	QObject::connect(data, &QNetworkReply::finished, this, &PluginNetworkHelper::handleFinished);
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
 	QObject::connect(data, QNonConstOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &PluginNetworkHelper::handleError);
+#else
+	QObject::connect(data, &QNetworkReply::errorOccurred, this, &PluginNetworkHelper::handleError);
+#endif
+	
 
 #if QT_CONFIG(ssl)
 	QObject::connect(data, &QNetworkReply::sslErrors, this, &PluginNetworkHelper::handleSslErrors);

@@ -21,6 +21,8 @@
 #ifndef CHAT_EVENT_H
 #define CHAT_EVENT_H
 
+#include <QObject>
+#include <QDateTime>
 #include "components/chat-room/ChatRoomModel.hpp"
 
 // =============================================================================

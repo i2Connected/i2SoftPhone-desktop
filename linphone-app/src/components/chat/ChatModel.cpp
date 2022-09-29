@@ -31,7 +31,6 @@
 
 #include "components/chat-events/ChatMessageModel.hpp"
 
-#include "utils/QExifImageHeader.hpp"
 #include "utils/Utils.hpp"
 #include "utils/Constants.hpp"
 #include "components/Components.hpp"

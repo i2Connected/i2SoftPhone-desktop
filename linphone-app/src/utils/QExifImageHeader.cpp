@@ -47,7 +47,13 @@
 #include <QBuffer>
 #include <QDateTime>
 #include <QtDebug>
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QTextCodec>
+#else
+#include <QStringDecoder>
+#include <QStringEncoder>
+#endif
 
 #include "Utils.hpp"
 
@@ -275,16 +281,26 @@ QExifValue::QExifValue (const QString &value, TextEncoding encoding)
     case AsciiEncoding:
       d = new QExifUndefinedValuePrivate(QByteArray::fromRawData("ASCII\0\0\0", 8) + value.toUtf8());
       break;
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+// This is a regression.
     case JisEncoding: {
+
       QTextCodec *codec = QTextCodec::codecForName("JIS X 0208");
       if (codec)
         d = new QExifUndefinedValuePrivate(QByteArray::fromRawData("JIS\0\0\0\0\0", 8) + codec->fromUnicode(value));
     }
                       break;
+#endif
     case UnicodeEncoding: {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
       QTextCodec *codec = QTextCodec::codecForName("UTF-16");
       if (codec)
         d = new QExifUndefinedValuePrivate(QByteArray::fromRawData("UNICODE\0", 8) + codec->fromUnicode(value));
+        
+#else
+		auto fromUnicode = QStringEncoder(QStringEncoder::Utf16);
+		d = new QExifUndefinedValuePrivate(QByteArray::fromRawData("UNICODE\0", 8) + fromUnicode(value));
+#endif
     }
                           break;
     case UndefinedEncoding:
@@ -482,16 +498,24 @@ QString QExifValue::toString () const {
       switch (encoding()) {
         case AsciiEncoding:
           return QString::fromUtf8(string.constData(), string.length());
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+// This is a regression on Qt6
         case JisEncoding: {
           QTextCodec *codec = QTextCodec::codecForName("JIS X 0208");
           if (codec)
             return codec->toUnicode(string);
         } break;
+#endif
         case UnicodeEncoding: {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
           QTextCodec *codec = QTextCodec::codecForName("UTF-16");
           if (codec)
             return codec->toUnicode(string);
           return QString::fromLocal8Bit(string.constData(), string.length());
+#else
+			auto toUnicode = QStringDecoder(QStringDecoder::Utf16);
+			return toUnicode(string);
+#endif
         }
         case UndefinedEncoding:
           return QString::fromLocal8Bit(string.constData(), string.length());

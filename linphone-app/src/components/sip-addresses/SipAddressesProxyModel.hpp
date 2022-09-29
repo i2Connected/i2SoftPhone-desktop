@@ -43,7 +43,7 @@ private:
 
   QString mFilter;
 
-  static const QRegExp SearchSeparators;
+  static const QRegularExpression SearchSeparators;
 };
 
 #endif // SIP_ADDRESSES_PROXY_MODEL_H_

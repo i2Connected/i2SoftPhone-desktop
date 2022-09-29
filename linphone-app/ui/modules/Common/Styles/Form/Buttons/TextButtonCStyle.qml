@@ -1,5 +1,6 @@
 // TextButtonCStyle		(Green)
 pragma Singleton
+import QtQuick 2.15
 import QtQml 2.2
 import ColorsList 1.0
 // =============================================================================

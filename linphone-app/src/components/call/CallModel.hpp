@@ -28,12 +28,14 @@
 
 #include "utils/LinphoneEnums.hpp"
 
+#include "components/conference/ConferenceModel.hpp"
+#include "components/conferenceInfo/ConferenceInfoModel.hpp"
+#include "components/contact/ContactModel.hpp"
+#include "components/chat-room/ChatRoomModel.hpp"
 // =============================================================================
 class CallListener;
 class ConferenceInfoModel;
 class ConferenceModel;
-class ContactModel;
-class ChatRoomModel;
 
 class CallModel : public QObject {
 	Q_OBJECT

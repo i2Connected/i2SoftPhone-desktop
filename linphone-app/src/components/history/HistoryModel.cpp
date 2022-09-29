@@ -38,7 +38,6 @@
 #include "components/core/CoreManager.hpp"
 #include "components/notifier/Notifier.hpp"
 #include "components/settings/SettingsModel.hpp"
-#include "utils/QExifImageHeader.hpp"
 #include "utils/Utils.hpp"
 
 #include "HistoryModel.hpp"
@@ -231,7 +230,7 @@ void HistoryModel::insertCall (const shared_ptr<linphone::CallLog> &callLog) {
 	const QList<HistoryEntryData>::iterator *start = nullptr
 	) {
 		auto it = lower_bound(start ? *start : mEntries.begin(), mEntries.end(), entry, [](const HistoryEntryData &a, const HistoryEntryData &b) {
-			return a.first["timestamp"] < b.first["timestamp"];
+			return a.first["timestamp"].toDateTime() < b.first["timestamp"].toDateTime();
 		});
 		
 		int row = int(distance(mEntries.begin(), it));
