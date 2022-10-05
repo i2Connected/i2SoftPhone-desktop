@@ -63,7 +63,6 @@
 #include "components/timeline/TimelineModel.hpp"
 #include "components/timeline/TimelineListModel.hpp"
 #include "components/core/event-count-notifier/AbstractEventCountNotifier.hpp"
-#include "utils/QExifImageHeader.hpp"
 #include "utils/Utils.hpp"
 #include "utils/Constants.hpp"
 #include "utils/LinphoneEnums.hpp"

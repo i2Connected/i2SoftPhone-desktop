@@ -431,14 +431,22 @@ QString Utils::getCountryName(const QLocale::Country& p_country)
 		case QLocale::Tanzania: if((countryName = QCoreApplication::translate("country", "Tanzania"))== "Tanzania") countryName = "";break;
 		case QLocale::Thailand: if((countryName = QCoreApplication::translate("country", "Thailand"))== "Thailand") countryName = "";break;
 		case QLocale::Togo: if((countryName = QCoreApplication::translate("country", "Togo"))== "Togo") countryName = "";break;
+#if QT_VERSION < QT_VERSION_CHECK(6, 2, 0)
 		case QLocale::Tokelau: if((countryName = QCoreApplication::translate("country", "Tokelau"))== "Tokelau") countryName = "";break;
+#else
+		case QLocale::TokelauTerritory: if((countryName = QCoreApplication::translate("country", "Tokelau"))== "Tokelau") countryName = "";break;
+#endif
 		case QLocale::Tonga: if((countryName = QCoreApplication::translate("country", "Tonga"))== "Tonga") countryName = "";break;
 		case QLocale::TrinidadAndTobago: if((countryName = QCoreApplication::translate("country", "TrinidadAndTobago"))== "TrinidadAndTobago") countryName = "";break;
 		case QLocale::Tunisia: if((countryName = QCoreApplication::translate("country", "Tunisia"))== "Tunisia") countryName = "";break;
 		case QLocale::Turkey: if((countryName = QCoreApplication::translate("country", "Turkey"))== "Turkey") countryName = "";break;
 		case QLocale::Turkmenistan: if((countryName = QCoreApplication::translate("country", "Turkmenistan"))== "Turkmenistan") countryName = "";break;
 		case QLocale::TurksAndCaicosIslands: if((countryName = QCoreApplication::translate("country", "TurksAndCaicosIslands"))== "TurksAndCaicosIslands") countryName = "";break;
+#if QT_VERSION < QT_VERSION_CHECK(6, 2, 0)
 		case QLocale::Tuvalu: if((countryName = QCoreApplication::translate("country", "Tuvalu"))== "Tuvalu") countryName = "";break;
+#else
+		case QLocale::TuvaluTerritory: if((countryName = QCoreApplication::translate("country", "Tuvalu"))== "Tuvalu") countryName = "";break;
+#endif
 		case QLocale::Uganda: if((countryName = QCoreApplication::translate("country", "Uganda"))== "Uganda") countryName = "";break;
 		case QLocale::Ukraine: if((countryName = QCoreApplication::translate("country", "Ukraine"))== "Ukraine") countryName = "";break;
 		case QLocale::UnitedArabEmirates: if((countryName = QCoreApplication::translate("country", "UnitedArabEmirates"))== "UnitedArabEmirates") countryName = "";break;

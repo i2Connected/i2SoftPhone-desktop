@@ -1,5 +1,5 @@
 import QtQuick 2.7
-import QtQuick.Dialogs 1.3
+import QtQuick.Dialogs
 import QtQuick.Layouts 1.3
 
 import Common 1.0
@@ -75,7 +75,7 @@ TabContainer {
 									//: 'Select a new font' : Popup title for choosing new fonts
 									title: qsTr('fontsPopupTitle')
 									visible:false
-									font: SettingsModel.textMessageFont
+									//font: SettingsModel.textMessageFont
 									onAccepted: {
 										SettingsModel.textMessageFont = fontDialog.font
 									}

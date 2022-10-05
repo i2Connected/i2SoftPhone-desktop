@@ -24,6 +24,7 @@
 #include <QScreen>
 #include <QSvgRenderer>
 #include <QQmlPropertyMap>
+#include <QRegularExpression>
 
 #include "app/App.hpp"
 
@@ -56,16 +57,16 @@ static QByteArray buildByteArrayAttribute (const QByteArray &name, const QByteAr
 }
 
 static QByteArray parseFillAndStroke (QXmlStreamAttributes &readerAttributes, const ColorListModel *colors) {
-	static QRegExp regex("^color-([^-]+)-(fill|stroke)$");
+	static QRegularExpression regex("^color-([^-]+)-(fill|stroke)$");
 	
 	QByteArray attributes;
 	
 	for (const auto &classValue : readerAttributes.value("class").toLatin1().split(' ')) {
-		regex.indexIn(classValue.trimmed());
-		if (Q_LIKELY(regex.pos() == -1))
+		QRegularExpressionMatch match = regex.match(classValue.trimmed());
+		if (!match.hasMatch())
 			continue;
 		
-		const QStringList list = regex.capturedTexts();
+		const QStringList list = match.capturedTexts();
 		
 		const QVariant colorValue = colors->getQmlData()->value(list[1]);
 		if (Q_UNLIKELY(!colorValue.isValid())) {
@@ -81,17 +82,17 @@ static QByteArray parseFillAndStroke (QXmlStreamAttributes &readerAttributes, co
 }
 
 static QByteArray parseStyle (QXmlStreamAttributes &readerAttributes, const ColorListModel *colors) {
-	static QRegExp regex("^color-([^-]+)-style-(fill|stroke)$");
+	static QRegularExpression regex("^color-([^-]+)-style-(fill|stroke)$");
 	
 	QByteArray attribute;
 	
 	QSet<QString> overrode;
 	for (const auto &classValue : readerAttributes.value("class").toLatin1().split(' ')) {
-		regex.indexIn(classValue.trimmed());
-		if (Q_LIKELY(regex.pos() == -1))
+		QRegularExpressionMatch match = regex.match(classValue.trimmed());
+		if( !match.hasMatch())
 			continue;
 		
-		const QStringList list = regex.capturedTexts();
+		const QStringList list = match.capturedTexts();
 		
 		overrode.insert(list[2]);
 		
@@ -243,9 +244,10 @@ ImageProvider::ImageProvider () : QQuickImageProvider(
 									  ) {}
 
 // -----------------------------------------------------------------------------
-
+// id = "path/image.svg?bg=#color1&fg=#color2"
 QImage ImageProvider::requestImage (const QString &id, QSize *size, const QSize &requestedSize) {
-	ImageModel * model = App::getInstance()->getImageListModel()->getImageModel(id);
+	QStringList request = id.split('?');
+	ImageModel * model = App::getInstance()->getImageListModel()->getImageModel(request[0]);
 	if(!model)
 		return QImage();
 	const QString path = model->getPath();
@@ -300,12 +302,29 @@ QImage ImageProvider::requestImage (const QString &id, QSize *size, const QSize 
 					  .arg(path);
 		return QImage(); // Memory cannot be allocated.
 	}
-	image.fill(Qt::transparent);// Fill with transparent to set alpha channel
+	QColor backgroundColor("transparent");
+	QColor foregroundColor;
+	if(request.size() > 1){
+		QStringList parameters = request[1].split('&');
+		for(int i = 0 ; i < parameters.size() ;++i){
+			QStringList fields = parameters[i].split('=');
+			if(fields.size() > 1){
+				if(fields[0] == "bg")
+					backgroundColor = QColor(fields[1]);
+				else if(fields[0] == "fg")
+					foregroundColor = QColor(fields[1]);
+			}
+		}
+	}
+		
+	image.fill(backgroundColor);// Fill with transparent to set alpha channel
 	
 	*size = image.size();
 	
-	// 4. Paint!
+	// 5. Paint!
 	QPainter painter(&image);
+	if(foregroundColor.isValid())
+		painter.setPen(foregroundColor);
 	renderer.render(&painter);
 	
 	//  qDebug() << QStringLiteral("Image `%1` loaded in %2 milliseconds.").arg(path).arg(timer.elapsed());

@@ -224,11 +224,14 @@ endif()
 include(FindPkgConfig)
 
 set(APP_DEPENDS sdk)
-find_package(Qt5 5.10 COMPONENTS Core REQUIRED)
-
-if ( NOT Qt5_FOUND )
-	message(FATAL_ERROR "Minimum supported Qt5 version is 5.10!")
+find_package(Qt6 COMPONENTS Core)
+if (NOT Qt6_FOUND)
+    find_package(Qt5 5.10 REQUIRED COMPONENTS Core)
+    if ( NOT Qt5_FOUND )
+		message(FATAL_ERROR "Qt6 has not been found. Minimum supported Qt5 version is 5.10!")
+	endif()
 endif()
+
 
 find_package(LinphoneCxx CONFIG QUIET)
 find_package(Linphone CONFIG QUIET)

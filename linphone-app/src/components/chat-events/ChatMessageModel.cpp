@@ -50,7 +50,6 @@
 #include "components/participant-imdn/ParticipantImdnStateProxyModel.hpp"
 #include "components/settings/AccountSettingsModel.hpp"
 #include "components/settings/SettingsModel.hpp"
-#include "utils/QExifImageHeader.hpp"
 #include "utils/Utils.hpp"
 #include "utils/Constants.hpp"
 

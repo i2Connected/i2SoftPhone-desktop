@@ -1,6 +1,6 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
-import QtQuick.Dialogs 1.2
+import QtQuick.Dialogs
 import QtQuick.Layouts 1.12
 
 import Common 1.0
@@ -81,7 +81,7 @@ Item {
 						FileDialog {
 							id: fileDialog
 							
-							folder: shortcuts.home
+							//folder: shortcuts.home
 							title: qsTr('fileChooserTitle')
 							
 							onAccepted: {_emitFiles(fileDialog.fileUrls);fileDialogLoader.active = false}

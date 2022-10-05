@@ -1,5 +1,4 @@
 import QtQuick 2.7
-import QtGraphicalEffects 1.12
 
 import Common 1.0
 import Linphone 1.0

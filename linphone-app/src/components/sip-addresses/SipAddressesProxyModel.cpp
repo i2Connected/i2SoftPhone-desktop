@@ -25,6 +25,8 @@
 #include "SipAddressesModel.hpp"
 #include "SipAddressesProxyModel.hpp"
 
+#include <QRegularExpression>
+
 // =============================================================================
 
 namespace {
@@ -35,7 +37,7 @@ namespace {
   constexpr int WeightPosOther = 1;
 }
 
-const QRegExp SipAddressesProxyModel::SearchSeparators("^[^_.-;@ ][_.-;@ ]");
+const QRegularExpression SipAddressesProxyModel::SearchSeparators("^[^_.-;@ ][_.-;@ ]");
 
 // -----------------------------------------------------------------------------
 

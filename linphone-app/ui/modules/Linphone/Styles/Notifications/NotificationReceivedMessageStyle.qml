@@ -1,5 +1,6 @@
 pragma Singleton
 import QtQml 2.2
+import QtQuick 2.15
 
 import Units 1.0
 import ColorsList 1.0

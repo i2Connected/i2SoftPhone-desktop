@@ -109,8 +109,8 @@ private:
 
   static QMap<QString, Command> mCommands;
 
-  static QRegExp mRegExpArgs;
-  static QRegExp mRegExpFunctionName;
+  static QRegularExpression mRegExpArgs;
+  static QRegularExpression mRegExpFunctionName;
 };
 
 #endif // CLI_H_

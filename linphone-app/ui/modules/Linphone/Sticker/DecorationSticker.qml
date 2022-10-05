@@ -1,6 +1,6 @@
 import QtQuick 2.7
 import QtQuick.Layouts 1.3
-import QtGraphicalEffects 1.12
+//import QtGraphicalEffects 1.12
 
 import App.Styles 1.0
 import Common 1.0
@@ -18,7 +18,8 @@ import 'qrc:/ui/scripts/Utils/utils.js' as Utils
 Item{
 	id: mainItem
 	default property alias _content: content.data
-	property alias speakingOverlayDisplayed: effect.visible
+	//property alias speakingOverlayDisplayed: effect.visible
+	property bool speakingOverlayDisplayed: false 
 	property string username: mainItem._currentDevice ? mainItem._currentDevice.displayName : ''
 	property bool showUsername: true
 	
@@ -43,6 +44,7 @@ Item{
 		anchors.fill: parent
 		onClicked: mainItem.backgroundClicked()
 	}
+	/*
 	 RectangularGlow {
         id: effect
         anchors.fill: content
@@ -51,7 +53,7 @@ Item{
         color: DecorationStickerStyle.border.color
         cornerRadius: (mainItem.radius? mainItem.radius : 0) + glowRadius
         visible: mainItem._showActiveSpeakerOverlay && mainItem._currentDevice && mainItem._currentDevice.isSpeaking
-    }
+    }*/
     Item{
 		id: content
 		anchors.fill: parent
@@ -92,6 +94,7 @@ Item{
 		font.weight: DecorationStickerStyle.contactDescription.weight
 		color: DecorationStickerStyle.contactDescription.color
 	}
+	/*
 	Glow {
 		anchors.fill: usernameItem
 		visible: usernameItem.visible
@@ -100,7 +103,7 @@ Item{
 		samples: 25
 		color: "#80000000"
 		source: usernameItem
-	}
+	}*/
 	ActionButton{
 		visible: mainItem._showCloseButton && mainItem._isPreview && mainItem._callModel && mainItem._callModel.videoEnabled
 		anchors.right: parent.right

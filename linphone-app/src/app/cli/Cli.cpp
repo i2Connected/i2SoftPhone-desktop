@@ -21,6 +21,7 @@
 #include <iostream>
 
 #include <QQuickWindow>
+#include <QRegularExpression>
 
 #include "config.h"
 
@@ -231,6 +232,8 @@ static QString indentedWord (QString word, int &curPos, const int lineLength, co
 }
 
 static string multilineIndent (const QString &str, int indentationNumber = 0) {
+	return Utils::appStringToCoreString(str);
+/*
 	constexpr int lineLength(80);
 
 	static const QRegExp spaceRegexp("(\\s)");
@@ -273,7 +276,7 @@ static string multilineIndent (const QString &str, int indentationNumber = 0) {
 	out += indentedWord(word, indentedTextCurPos, lineLength, padding);
 	out += "\n";
 
-	return Utils::appStringToCoreString(out);
+	return Utils::appStringToCoreString(out);*/
 }
 
 // =============================================================================
@@ -410,8 +413,8 @@ QString Cli::Command::getFunctionSyntax () const {
 
 // FIXME: Do not accept args without value like: cmd toto.
 // In the future `toto` could be a boolean argument.
-QRegExp Cli::mRegExpArgs("(?:(?:([\\w-]+)\\s*)=\\s*(?:\"([^\"\\\\]*(?:\\\\.[^\"\\\\]*)*)\"|([^\\s]+)\\s*))");
-QRegExp Cli::mRegExpFunctionName("^\\s*([a-z-]+)\\s*");
+QRegularExpression Cli::mRegExpArgs("(?:(?:([\\w-]+)\\s*)=\\s*(?:\"([^\"\\\\]*(?:\\\\.[^\"\\\\]*)*)\"|([^\\s]+)\\s*))");
+QRegularExpression Cli::mRegExpFunctionName("^\\s*([a-z-]+)\\s*");
 
 QMap<QString, Cli::Command> Cli::mCommands = {
 	createCommand("show", QT_TR_NOOP("showFunctionDescription"), cliShow, QHash<QString, Argument>(), true),
@@ -571,13 +574,16 @@ pair<QString, Cli::Command> Cli::createCommand (
 // -----------------------------------------------------------------------------
 
 QString Cli::parseFunctionName (const QString &command) {
-	mRegExpFunctionName.indexIn(command.toLower());
-	if (mRegExpFunctionName.pos(1) == -1) {
+	QRegularExpressionMatch match = mRegExpFunctionName.match(command.toLower());
+	//mRegExpFunctionName.indexIn(command.toLower());
+	//if (mRegExpFunctionName.pos(1) == -1) {
+	if(!match.hasMatch()){
 		qWarning() << QStringLiteral("Unable to parse function name of command: `%1`.").arg(command);
 		return QString("");
 	}
 
-	const QStringList texts = mRegExpFunctionName.capturedTexts();
+	//const QStringList texts = mRegExpFunctionName.capturedTexts();
+	const QStringList texts = match.capturedTexts();
 
 	const QString functionName = texts[1];
 	if (!mCommands.contains(functionName)) {
@@ -591,11 +597,20 @@ QString Cli::parseFunctionName (const QString &command) {
 QHash<QString, QString> Cli::parseArgs (const QString &command) {
 	QHash<QString, QString> args;
 	int pos = 0;
-
-	while ((pos = mRegExpArgs.indexIn(command.toLower(), pos)) != -1) {
+	QRegularExpressionMatchIterator it = mRegExpFunctionName.globalMatch(command.toLower());
+	while (it.hasNext()) {
+		QRegularExpressionMatch match = it.next();
+		if (match.hasMatch()) {
+			args[match.captured(1)] = (match.captured(2).isEmpty() ? match.captured(3) : match.captured(2));
+		}
+    }
+  /*
+	QRegularExpressionMatch match = mRegExpFunctionName.match(command.toLower());
+	if( match.hasMatch()){
+	//while ((pos = mRegExpArgs.indexIn(command.toLower(), pos)) != -1) {
 		pos += mRegExpArgs.matchedLength();
 		args[mRegExpArgs.cap(1)] = (mRegExpArgs.cap(2).isEmpty() ? mRegExpArgs.cap(3) : mRegExpArgs.cap(2));
 	}
-
+*/
 	return args;
 }

@@ -1,6 +1,5 @@
 import QtQuick 2.7
 import QtQuick.Layouts 1.3
-import QtGraphicalEffects 1.12
 
 import App.Styles 1.0
 import Common 1.0

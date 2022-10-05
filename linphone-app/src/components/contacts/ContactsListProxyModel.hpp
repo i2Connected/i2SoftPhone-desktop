@@ -63,7 +63,7 @@ private:
   // and reused by `lessThan`.
   mutable QHash<const ContactModel *, unsigned int> mWeights;
 
-  static const QRegExp SearchSeparators;
+  static const QRegularExpression SearchSeparators;
 };
 
 #endif // CONTACTS_LIST_PROXY_MODEL_H_

@@ -1,5 +1,5 @@
 import QtQuick 2.7
-import QtQuick.Dialogs 1.2
+import QtQuick.Dialogs
 
 import Common 1.0
 import Common.Styles 1.0
@@ -12,8 +12,11 @@ TextField {
 
   // ---------------------------------------------------------------------------
 
-  property alias selectExisting: fileDialog.selectExisting
-  property alias selectFolder: fileDialog.selectFolder
+  //property alias selectExisting: fileDialog.selectExisting
+  //property alias selectFolder: fileDialog.selectFolder
+  property bool selectExisting: false
+  property bool selectFolder: false
+  
   property alias title: fileDialog.title
 
   property string selectedFile: ''
@@ -61,7 +64,7 @@ TextField {
 
   FileDialog {
     id: fileDialog
-
+/*
     folder: {
       var selectedFile = textField.selectedFile
 
@@ -74,7 +77,7 @@ TextField {
           ? selectedFile
           : Utils.dirname(selectedFile)
       )
-    }
+    }*/
 
     onAccepted: {
       var selectedFile = Utils.getSystemPathFromUri(fileUrl)

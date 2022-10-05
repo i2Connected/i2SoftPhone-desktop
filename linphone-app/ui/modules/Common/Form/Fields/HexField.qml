@@ -1,4 +1,4 @@
-import QtQuick 2.7
+import QtQuick
 
 import Common.Styles 1.0
 
@@ -38,8 +38,7 @@ Item {
   TextField {
     id: textField
 
-    validator: RegExpValidator {
-      regExp: /[0-9A-Fa-f]*/
+    validator: RegularExpressionValidator { regularExpression: /[0-9A-Fa-f]*/
     }
 
     width: parent.width

@@ -33,8 +33,13 @@ if (POLICY CMP0079)
   cmake_policy(SET CMP0079 NEW)
 endif ()
 
-
-set(QT_PATH "${Qt5Core_DIR}/../../..")
+if(Qt5Core_DIR)
+	set(QT_PATH "${Qt5Core_DIR}/../../..")
+elseif(Qt6Core_DIR)
+set(QT_PATH "${Qt6Core_DIR}/../../..")
+else()
+	message(FATAL_ERROR "No Qt dir")
+endif()
 
 # ==============================================================================
 # Build package version.
@@ -465,8 +470,11 @@ endif()
 
 
 function(deployqt_hack target qml_dir)
-	find_package(Qt5 COMPONENTS Core REQUIRED)
-	get_target_property(qmake_executable Qt5::qmake IMPORTED_LOCATION)
+	find_package(Qt6 COMPONENTS Core)
+	if(NOT Qt6_FOUND)
+		find_package(Qt5 COMPONENTS Core REQUIRED)
+	endif()
+	get_target_property(qmake_executable Qt::qmake IMPORTED_LOCATION)
 	get_filename_component(_qt_bin_dir "${qmake_executable}" DIRECTORY)
 #Note: CMAKE_CURRENT_SOURCE_DIR point to linphone-app because deployqt_hack is called there.
 	add_custom_command(TARGET ${target} POST_BUILD 

@@ -28,6 +28,8 @@
 #include "ContactsListModel.hpp"
 #include "ContactsListProxyModel.hpp"
 
+#include <QRegularExpression>
+
 // =============================================================================
 
 using namespace std;
@@ -52,7 +54,7 @@ namespace {
 // a separator like ` word`.
 //
 // - [_.-;@ ] is the main pattern (a separator).
-const QRegExp ContactsListProxyModel::SearchSeparators("^[^_.-;@ ][_.-;@ ]");
+const QRegularExpression ContactsListProxyModel::SearchSeparators("^[^_.-;@ ][_.-;@ ]");
 
 // -----------------------------------------------------------------------------
 

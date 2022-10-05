@@ -504,7 +504,7 @@ void CallModel::handleCallStateChanged (const shared_ptr<linphone::Call> &call, 
 			break;
 			
 		case linphone::Call::State::UpdatedByRemote:
-			qDebug() << "UpdatedByRemote : " << (mCall ? QString( "Video enabled ? CurrentParams:") + mCall->getCurrentParams()->videoEnabled() + QString(", RemoteParams:")+mCall->getRemoteParams()->videoEnabled() : " call NULL");
+			qDebug() << "UpdatedByRemote : " << (mCall ? QString( "Video enabled ? CurrentParams:") + QString::number(mCall->getCurrentParams()->videoEnabled()) + QString(", RemoteParams:")+QString::number(mCall->getRemoteParams()->videoEnabled()) : " call NULL");
 			if (mCall && !mCall->getCurrentParams()->videoEnabled() && mCall->getRemoteParams()->videoEnabled()) {
 				mCall->deferUpdate();
 				emit videoRequested();
