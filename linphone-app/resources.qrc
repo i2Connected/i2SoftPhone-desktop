@@ -62,6 +62,7 @@
 		<file>assets/images/conference_audio_only_custom.svg</file>
 		<file>assets/images/conference_layout_grid_custom.svg</file>
 		<file>assets/images/conference_layout_active_speaker_custom.svg</file>
+		<file>assets/images/conference_merge_custom.svg</file>
 		<file>assets/images/contact_add_custom.svg</file>
 		<file>assets/images/contact_card_photo_custom.svg</file>
 		<file>assets/images/contact_custom.svg</file>
@@ -348,6 +349,7 @@
 		<file>ui/modules/Linphone/Dialog/OnlineInstallerDialog.qml</file>
 		<file>ui/modules/Linphone/Dialog/SipAddressDialog.qml</file>
 		<file>ui/modules/Linphone/Dialog/MultimediaParametersDialog.qml</file>
+		<file>ui/modules/Linphone/Dialog/ZrtpTokenAuthenticationDialog.qml</file>
 		<file>ui/modules/Linphone/File/FileView.qml</file>
 		<file>ui/modules/Linphone/History/History.qml</file>
 		<file>ui/modules/Linphone/History/History.js</file>
@@ -393,6 +395,7 @@
 		<file>ui/modules/Linphone/Styles/Dialog/MultimediaParametersDialogStyle.qml</file>
 		<file>ui/modules/Linphone/Styles/Dialog/OnlineInstallerDialogStyle.qml</file>
 		<file>ui/modules/Linphone/Styles/Dialog/SipAddressDialogStyle.qml</file>
+		<file>ui/modules/Linphone/Styles/Dialog/ZrtpTokenAuthenticationDialogStyle.qml</file>
 		<file>ui/modules/Linphone/Styles/History/HistoryStyle.qml</file>
 		<file>ui/modules/Linphone/Styles/Menus/SipAddressesMenuStyle.qml</file>
 		<file>ui/modules/Linphone/Styles/Menus/IncallMenuStyle.qml</file>
@@ -440,7 +443,6 @@
 		<file>ui/views/App/Calls/IncallGrid.qml</file>
 		<file>ui/views/App/Calls/IncomingCall.qml</file>
 		<file>ui/views/App/Calls/WaitingRoom.qml</file>
-		<file>ui/views/App/Calls/ZrtpTokenAuthentication.qml</file>
 		<file>ui/views/App/Dialog/NewConference.qml</file>
 		<file>ui/views/App/Main/Assistant/ActivateAppSipAccountWithEmail.qml</file>
 		<file>ui/views/App/Main/Assistant/ActivateAppSipAccountWithPhoneNumber.qml</file>

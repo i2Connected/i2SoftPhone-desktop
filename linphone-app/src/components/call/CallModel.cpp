@@ -61,6 +61,9 @@ CallModel::CallModel (shared_ptr<linphone::Call> call){
 	SettingsModel *settings = coreManager->getSettingsModel();
 	
 	connect(this, &CallModel::callIdChanged, this, &CallModel::chatRoomModelChanged);// When the call Id change, the chat room change.
+	connect(this, &CallModel::encryptionChanged, this, &CallModel::securityUpdated);
+	connect(this, &CallModel::isPQZrtpChanged, this, &CallModel::securityUpdated);
+	
 	mCall = call;
 	if(mCall)
 		mCall->setData("call-model", *this);
@@ -70,6 +73,9 @@ CallModel::CallModel (shared_ptr<linphone::Call> call){
 		connectTo(mCallListener.get());
 		mCall->addListener(mCallListener);
 		auto callParams = mCall->getParams();
+		auto currentParams = mCall->getCurrentParams();
+		if(currentParams)
+			mEncryption = static_cast<CallEncryption>(currentParams->getMediaEncryption());
 		mConferenceVideoLayout = LinphoneEnums::fromLinphone(callParams->getConferenceVideoLayout());
 		if(mConferenceVideoLayout == LinphoneEnums::ConferenceLayoutGrid && !callParams->videoEnabled())
 			mConferenceVideoLayout = LinphoneEnums::ConferenceLayoutAudioOnly;
@@ -80,6 +86,7 @@ CallModel::CallModel (shared_ptr<linphone::Call> call){
 				settings->setCameraMode(settings->getActiveSpeakerCameraMode());
 		}else
 			settings->setCameraMode(settings->getCallCameraMode());
+			
 	}
 		
 	// Deal with auto-answer.
@@ -109,8 +116,10 @@ CallModel::CallModel (shared_ptr<linphone::Call> call){
 
 	if(mCall) {
 		mRemoteAddress = mCall->getRemoteAddress()->clone();
-		if(mCall->getConference())
+		if(mCall->getConference()) {
 			mConferenceModel = ConferenceModel::create(mCall->getConference());
+			connect(mConferenceModel.get(), &ConferenceModel::participantAdminStatusChanged, this, &CallModel::onParticipantAdminStatusChanged);
+		}
 		auto conferenceInfo = CoreManager::getInstance()->getCore()->findConferenceInformationFromUri(getConferenceAddress());
 		if(	conferenceInfo ){
 			mConferenceInfoModel = ConferenceInfoModel::create(conferenceInfo);
@@ -232,7 +241,8 @@ ConferenceInfoModel * CallModel::getConferenceInfoModel(){
 
 QSharedPointer<ConferenceModel> CallModel::getConferenceSharedModel(){
 	if(mCall->getConference() && !mConferenceModel){
-		mConferenceModel = ConferenceModel::create(mCall->getConference());	
+		mConferenceModel = ConferenceModel::create(mCall->getConference());
+		connect(mConferenceModel.get(), &ConferenceModel::participantAdminStatusChanged, this, &CallModel::onParticipantAdminStatusChanged);
 		emit conferenceModelChanged();
 	}
 	return mConferenceModel;
@@ -292,6 +302,8 @@ void CallModel::updateStats (const shared_ptr<const linphone::CallStats> &callSt
 			break;
 			
 		case linphone::StreamType::Audio:
+			if( callStats)
+				isPQZrtp(callStats->isZrtpKeyAgreementAlgoPostQuantum() ? CallPQStateOn : CallPQStateOff);
 			updateStats(callStats, mAudioStats);
 			updateEncrypionStats(callStats, mEncryptionStats);
 			break;
@@ -467,8 +479,10 @@ void CallModel::stopRecording () {
 // -----------------------------------------------------------------------------
 
 void CallModel::handleCallEncryptionChanged (const shared_ptr<linphone::Call> &call) {
-	if (call == mCall)
-		emit securityUpdated();
+	if (call == mCall){
+		if(!setEncryption(static_cast<CallEncryption>(mCall->getCurrentParams()->getMediaEncryption())))
+			emit securityUpdated();
+	}
 }
 
 void CallModel::handleCallStateChanged (const shared_ptr<linphone::Call> &call, linphone::Call::State state) {
@@ -501,6 +515,7 @@ void CallModel::handleCallStateChanged (const shared_ptr<linphone::Call> &call, 
 			mPausedByRemote = false;
 			updateConferenceVideoLayout();
 			setCallId(QString::fromStdString(mCall->getCallLog()->getCallId()));
+			updateEncryption();
 			break;
 		}
 		case linphone::Call::State::Connected: getConferenceSharedModel();
@@ -977,6 +992,12 @@ void CallModel::onChatRoomInitialized(int state){
 	emit chatRoomModelChanged();
 }
 
+void CallModel::onParticipantAdminStatusChanged(const std::shared_ptr<const linphone::Participant> & participant){
+	if(mConferenceModel && participant == mConferenceModel->getConference()->getMe()) {
+		emit meAdminChanged();
+	}
+}
+
 void CallModel::setRemoteDisplayName(const std::string& name){
 	mRemoteAddress->setDisplayName(name);
 	if(mCall) {
@@ -1054,19 +1075,33 @@ void CallModel::updateConferenceVideoLayout(){
 // -----------------------------------------------------------------------------
 
 CallModel::CallEncryption CallModel::getEncryption () const {
-	if(mCall)
-		return static_cast<CallEncryption>(mCall->getCurrentParams()->getMediaEncryption());
-	else
-		return CallEncryptionNone;
+	return mEncryption;
+}
+
+bool CallModel::setEncryption(const CallModel::CallEncryption& encryption){
+	if( encryption != mEncryption){
+		mEncryption = encryption;
+		emit encryptionChanged();
+		return true;
+	}else
+		return false;
+}
+
+void CallModel::updateEncryption(){
+	if(mCall){
+		auto currentParams =  mCall->getCurrentParams();
+		if( currentParams){
+			setEncryption(static_cast<CallEncryption>(currentParams->getMediaEncryption()));
+		}
+	}	
 }
 
 bool CallModel::isSecured () const {
 	if(mCall){
-		shared_ptr<const linphone::CallParams> params = mCall->getCurrentParams();
-		linphone::MediaEncryption encryption = params->getMediaEncryption();
-		return (
-					encryption == linphone::MediaEncryption::ZRTP && mCall->getAuthenticationTokenVerified()
-					) || encryption == linphone::MediaEncryption::SRTP || encryption == linphone::MediaEncryption::DTLS;
+		auto encryption = getEncryption();
+		return  (encryption == CallEncryptionZrtp && mCall->getAuthenticationTokenVerified())
+					|| encryption == CallEncryptionSrtp
+					|| encryption == CallEncryptionDtls;
 	}else
 		return false;
 }
@@ -1100,16 +1135,16 @@ QString CallModel::getRemoteSas () const {
 
 QString CallModel::getSecuredString (const shared_ptr<const linphone::CallStats> &callStats) const {
 	if(mCall){
-		switch (mCall->getCurrentParams()->getMediaEncryption()) {
-			case linphone::MediaEncryption::SRTP:
+		switch (getEncryption()) {
+			case CallEncryptionSrtp:
 				return QStringLiteral("SRTP");
-			case linphone::MediaEncryption::ZRTP:
-				return (callStats && callStats->isZrtpKeyAgreementAlgoPostQuantum() || (!callStats && CoreManager::getInstance()->getCore()->getPostQuantumAvailable()) )
+			case CallEncryptionZrtp:
+				return (callStats && callStats->isZrtpKeyAgreementAlgoPostQuantum() || (!callStats && mIsPQZrtp == CallPQStateOn) )
 						? QStringLiteral("Post Quantum ZRTP")
 						: QStringLiteral("ZRTP");
-			case linphone::MediaEncryption::DTLS:
+			case CallEncryptionDtls:
 				return QStringLiteral("DTLS");
-			case linphone::MediaEncryption::None:
+			case CallEncryptionNone:
 				break;
 		}
 	}
@@ -1233,6 +1268,13 @@ void CallModel::updateEncrypionStats (const shared_ptr<const linphone::CallStats
 				statsList << createStat(tr("callStatsSasAlgo"), Utils::coreStringToAppString(callStats->getZrtpSasAlgo()));
 			}
 		}
+	}
+}
+
+void CallModel::isPQZrtp(const CallPQState& isPQ){
+	if(mIsPQZrtp != isPQ){
+		mIsPQZrtp = isPQ;
+		emit isPQZrtpChanged();
 	}
 }
 
