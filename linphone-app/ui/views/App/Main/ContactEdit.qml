@@ -1,6 +1,5 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
-import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.3
 
 import Common 1.0
@@ -75,7 +74,7 @@ ColumnLayout  {
 		folder: shortcuts.home
 		title: qsTr('avatarChooserTitle')
 		
-		onAccepted: Logic.setAvatar(fileUrls[0])
+		onAccepted: Logic.setAvatar(getFileUrls()[0])
 	}
 	
 	// ---------------------------------------------------------------------------

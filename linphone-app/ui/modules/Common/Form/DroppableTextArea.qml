@@ -1,12 +1,13 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
-import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.12
 
 import Common 1.0
 import Linphone 1.0
 import Common.Styles 1.0
 import Utils 1.0
+
+import 'qrc:/ui/scripts/Utils/utils.js' as Utils
 
 // =============================================================================
 
@@ -45,7 +46,6 @@ Item {
 			
 			return files
 		}, [])
-		
 		if (files.length > 0) {
 			dropped(files)
 		}
@@ -84,7 +84,7 @@ Item {
 							folder: shortcuts.home
 							title: qsTr('fileChooserTitle')
 							
-							onAccepted: {_emitFiles(fileDialog.fileUrls);fileDialogLoader.active = false}
+							onAccepted: {_emitFiles(getFileUrls());fileDialogLoader.active = false}
 							onRejected: fileDialogLoader.active = false
 							Component.onCompleted: fileDialog.open()
 						}

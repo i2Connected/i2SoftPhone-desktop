@@ -175,6 +175,7 @@
 		<file>ui/modules/Common/Dialog/DialogDescription.qml</file>
 		<file>ui/modules/Common/Dialog/DialogPlus.qml</file>
 		<file>ui/modules/Common/Dialog/DialogTitle.qml</file>
+		<file>ui/modules/Common/Dialog/FileDialog.qml</file>
 		<file>ui/modules/Common/Form/ActionBar.qml</file>
 		<file>ui/modules/Common/Form/ActionButton.qml</file>
 		<file>ui/modules/Common/Form/ActionSwitch.qml</file>

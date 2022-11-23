@@ -12,10 +12,11 @@ singleton Constants     1.0 Constants/Constants.qml
 
 BusyIndicator           1.0 Animations/BusyIndicator.qml
 
+ConfirmDialog           1.0 Dialog/ConfirmDialog.qml
 DateTimeDialog          1.0 Dialog/DateTimeDialog.qml
 DialogDescription       1.0 Dialog/DialogDescription.qml
-ConfirmDialog           1.0 Dialog/ConfirmDialog.qml
 DialogPlus              1.0 Dialog/DialogPlus.qml
+FileDialog              1.0 Dialog/FileDialog.qml
 
 ActionBar               1.0 Form/ActionBar.qml
 ActionButton            1.0 Form/ActionButton.qml

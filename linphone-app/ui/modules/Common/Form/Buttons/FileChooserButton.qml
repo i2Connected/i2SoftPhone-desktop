@@ -1,5 +1,4 @@
 import QtQuick 2.7
-import QtQuick.Dialogs 1.2
 
 import Common 1.0
 import Common.Styles 1.0
@@ -77,7 +76,7 @@ TextField {
     }
 
     onAccepted: {
-      var selectedFile = Utils.getSystemPathFromUri(fileUrl)
+      var selectedFile = Utils.getSystemPathFromUri(getFileUrl())
 
       textField.selectedFile = selectedFile
       textField.accepted(selectedFile)

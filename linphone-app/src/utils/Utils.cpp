@@ -605,3 +605,7 @@ QString Utils::getFileChecksum(const QString& filePath){
     }
     return QString();
 }
+
+QString Utils::decodePercentFromUtf8(const QString& utf8){
+	return QUrl::fromPercentEncoding(utf8.toUtf8());
+}
