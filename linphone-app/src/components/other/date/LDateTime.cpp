@@ -34,7 +34,7 @@ LDateTime::LDateTime(const QDateTime& dateTime, QObject *parent) : QObject(paren
 	, mDateTime(dateTime){	
 }
 LDateTime::LDateTime(LDate * date, LTime * time, QObject *parent) : QObject(parent)
-	, mDateTime(date->getDate(), time->getTime()){	
+	, mDateTime(date->getDate(), time->getTime(), Qt::OffsetFromUTC ){
 }
 LDateTime::LDateTime(const int& year, const int& month, const int& day, const int& hour, const int& minute, const int& second, QObject *parent) : QObject(parent)
 	, mDateTime(QDate(year, month, day), QTime(hour, minute, second)){
