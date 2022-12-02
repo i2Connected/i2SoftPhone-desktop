@@ -21,6 +21,7 @@
 #include "LDate.hpp"
 
 #include "app/App.hpp"
+#include "utils/Utils.hpp"
 
 #include <QLocale>
 
@@ -40,7 +41,7 @@ LDate * LDate::create(){
 }
 
 LDate * LDate::create(const QDateTime& dateTime){
-	return new LDate(dateTime.date());
+	return new LDate(Utils::getOffsettedUTC(dateTime).date());
 }
 
 LDate * LDate::create(const int& year, const int& month, const int& day){

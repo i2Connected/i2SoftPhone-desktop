@@ -21,6 +21,7 @@
 #include "LTime.hpp"
 
 #include "app/App.hpp"
+#include "utils/Utils.hpp"
 
 #include <QLocale>
 
@@ -40,7 +41,7 @@ LTime * LTime::create(){
 }
 
 LTime * LTime::create(const QDateTime& dateTime){
-	return new LTime(dateTime.time());
+	return new LTime(Utils::getOffsettedUTC(dateTime).time());
 }
 
 LTime * LTime::create(const int& hour, const int& minute, const int& second){

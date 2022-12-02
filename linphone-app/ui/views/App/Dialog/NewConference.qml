@@ -304,7 +304,8 @@ DialogPlus {
 								currentDate = date
 								text = date.toDateString()
 							}
-							text: conferenceManager.conferenceInfoModel && conferenceManager.conferenceInfoModel.isScheduled ? conferenceManager.conferenceInfoModel.dateTime.toLocaleDateString(scheduleForm.locale, Qt.ISODate) : DateTools.create().toDateString()
+							//text: conferenceManager.conferenceInfoModel && conferenceManager.conferenceInfoModel.isScheduled ? conferenceManager.conferenceInfoModel.dateTime.toLocaleDateString(scheduleForm.locale, Qt.ISODate) : DateTools.create().toDateString()
+							text: currentDate.toDateString()
 							
 							icon: 'drop_down_custom'
 							MouseArea{
@@ -331,7 +332,9 @@ DialogPlus {
 								text = time.toTimeString('hh:mm')
 							}
 							
-							text: conferenceManager.conferenceInfoModel && conferenceManager.conferenceInfoModel.isScheduled ? UtilsCpp.toTimeString(conferenceManager.conferenceInfoModel.dateTimeUtc, 'hh:mm') : TimeTools.create().toTimeString('hh:mm')
+							//text: conferenceManager.conferenceInfoModel && conferenceManager.conferenceInfoModel.isScheduled ? UtilsCpp.toTimeString(conferenceManager.conferenceInfoModel.dateTimeUtc, 'hh:mm') : TimeTools.create().toTimeString('hh:mm')
+							
+							text: currentTime.toTimeString('hh:mm')
 							
 							icon: 'drop_down_custom'
 							onEditingFinished: if(rightStackView.currentItemType === 2) {
