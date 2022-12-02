@@ -3,7 +3,12 @@ import QtQuick.Layouts 1.3
 
 import Common 1.0
 import Common.Styles 1.0
+import Linphone 1.0
 import Units 1.0
+
+import DateTools 1.0
+
+import 'qrc:/ui/scripts/Utils/utils.js' as Utils
 
 Item{
 	id: mainItem
@@ -11,7 +16,7 @@ Item{
 	property alias selectedDate: monthList.selectedDate
 	property bool hideOldDates : false
 	
-	signal clicked(date date);
+	signal clicked(var date);
 	
 	RowLayout {
 		id: headerRow
@@ -33,7 +38,8 @@ Item{
 			Layout.fillWidth: true
 			Layout.alignment: Qt.AlignCenter
 			horizontalAlignment: Qt.AlignCenter
-			text: new Date(monthList.currentYear, monthList.currentMonth, 1).toLocaleString(Qt.locale(), 'MMMM yyyy')
+			text: DateTools.create(monthList.currentYear, monthList.currentMonth, 1).toDateString('MMMM yyyy')
+			onTextChanged: console.log(monthList.currentYear + "/"+monthList.currentMonth + " => " + text)
 			color: DatePickerStyle.title.color
 			font.pointSize: DatePickerStyle.title.pointSize
 		}
@@ -56,28 +62,29 @@ Item{
 		property int maxYears: 5	// Max years to be requested.
 		
 		function set(date) {
-			selectedDate = new Date(date)
-			var moveTo = (selectedDate.getFullYear()-minYear) * 12 + selectedDate.getMonth()
+			selectedDate = date
+			var moveTo = (selectedDate.year-minYear) * 12 + (selectedDate.month-1)
 			currentIndex = moveTo
 		}
 		
-		property date selectedDate: new Date()
-		property int minYear: mainItem.allYears ? new Date(0,0,0).getFullYear() : new Date().getFullYear()
+		property var selectedDate: DateTools.create()
+		property int minYear: mainItem.allYears ? DateTools.create(0,0,0).year : DateTools.create().year
 		
 		snapMode:    ListView.SnapOneItem
 		orientation: Qt.Horizontal
 		clip:        true
 		
 		// One model per month
-		model: (new Date().getFullYear()- minYear + maxYears) * 12
+		model: (DateTools.create().year- minYear + maxYears) * 12
 		
 		property int currentYear:      Math.floor(currentIndex / 12) + minYear
-		property int currentMonth:     currentIndex % 12
+		property int currentMonth:     currentIndex % 12 + 1
 		
 		highlightFollowsCurrentItem: true
 		highlightRangeMode: ListView.StrictlyEnforceRange
 		highlightMoveDuration: 100
 		
+				
 		Component.onCompleted:  monthList.set(mainItem.selectedDate)
 		
 		delegate: Item {
@@ -85,8 +92,8 @@ Item{
 			height: monthList.height == 0 ? 100 : monthList.height
 			
 			property int year:      Math.floor(index / 12) + monthList.minYear 
-			property int month:     index % 12
-			property int firstDay:  new Date(year, month, 1).getDay()
+			property int month:     index % 12 + 1
+			property int firstDay:  DateTools.create(year, month, 1).weekday % 7
 				
 			GridLayout { // 1 month calender
 				id: grid
@@ -107,7 +114,9 @@ Item{
 						id: cellItem
 						property int day:  index - 7 // 0 = top left below Sunday (-7 to 41)
 						property int date: day - firstDay + 1 // 1-31
-						property bool selected : text.text != '-' && new Date(year, month, date).toDateString() == monthList.selectedDate.toDateString()  &&  text.text  &&  day >= 0
+						property var currentDate: DateTools.create(year, month, date)
+						
+						property bool selected : text.text != '-' && currentDate.isEqual(monthList.selectedDate)  &&  text.text  &&  day >= 0
 						width: grid.cellMinSize
 						height: width
 						
@@ -132,12 +141,12 @@ Item{
 													: cellItem.day < 0 
 														? DatePickerStyle.cell.dayHeaderPointSize
 														: DatePickerStyle.cell.dayPointSize
-								font.bold: cellItem.day < 0 || cellItem.selected || new Date(year, month, cellItem.date).toDateString() == new Date().toDateString() // today
+								font.bold: cellItem.day < 0 || cellItem.selected || cellItem.currentDate.isToday()
 								text: {
-									if(cellItem.day < 0)
+									if(cellItem.day < 0){
 										// Magic date to set day names in this order : 'S', 'M', 'T', 'W', 'T', 'F', 'S' in Locale
-										return new Date(1,3,index).toLocaleString(Qt.locale(), 'ddd')[0]
-									else if(new Date(year, month, cellItem.date).getMonth() == month && (!hideOldDates || new Date(year, month, cellItem.date+1) >= new Date()))	// new Date use time too
+										return DateTools.create(2000,10,index+1).toDateString("ddd")[0].toUpperCase()
+									}else if(cellItem.currentDate.month == month && (!hideOldDates || cellItem.currentDate.isFuture() || cellItem.currentDate.isToday() ))	// new Date use time too
 										return cellItem.date
 									else
 										return '-'
@@ -152,7 +161,7 @@ Item{
 							enabled:    text.text && text.text != '-' &&  cellItem.day >= 0
 							
 							onClicked: {
-								monthList.selectedDate = new Date(year, month, cellItem.date)
+								monthList.selectedDate = cellItem.currentDate
 								mainItem.clicked(monthList.selectedDate)
 							}
 						}

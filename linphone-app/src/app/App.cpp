@@ -653,12 +653,20 @@ void App::registerTypes () {
 	qRegisterMetaType<QSharedPointer<ChatCallModel>>();
 	qRegisterMetaType<QSharedPointer<ConferenceInfoModel>>();
 	//qRegisterMetaType<std::shared_ptr<ChatEvent>>();
+	
 	LinphoneEnums::registerMetaTypes();
 	
 	registerType<AssistantModel>("AssistantModel");
 	registerType<AuthenticationNotifier>("AuthenticationNotifier");
 	registerType<CallsListProxyModel>("CallsListProxyModel");
 	registerType<Camera>("Camera");
+	registerType<LDate>("LDate");
+	qRegisterMetaType<LDate*>();
+	registerType<LDate>("LDateTime");
+	qRegisterMetaType<LDateTime*>();
+	registerType<LDate>("LTime");
+	qRegisterMetaType<LTime*>();
+
 	registerType<ChatRoomProxyModel>("ChatRoomProxyModel");
 	registerType<ConferenceHelperModel>("ConferenceHelperModel");
 	registerType<ConferenceProxyModel>("ConferenceProxyModel");
@@ -753,6 +761,9 @@ void App::registerToolTypes () {
 	qInfo() << QStringLiteral("Registering tool types...");
 	
 	registerToolType<Clipboard>("Clipboard");
+	registerToolType<LDate>("DateTools");
+	registerToolType<LDateTime>("DateTimeTools");
+	registerToolType<LTime>("TimeTools");
 	registerToolType<DesktopTools>("DesktopTools");
 	registerToolType<TextToSpeech>("TextToSpeech");
 	registerToolType<Units>("Units");

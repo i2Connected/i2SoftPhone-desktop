@@ -216,6 +216,9 @@ set(SOURCES
 	src/components/other/colors/ColorListModel.cpp
 	src/components/other/colors/ColorProxyModel.cpp
 	src/components/other/colors/ImageColorsProxyModel.cpp
+	src/components/other/date/LDate.cpp
+	src/components/other/date/LDateTime.cpp
+	src/components/other/date/LTime.cpp
 	src/components/other/images/ImageModel.cpp
 	src/components/other/images/ImageListModel.cpp
 	src/components/other/images/ImageProxyModel.cpp
@@ -351,6 +354,9 @@ set(HEADERS
 	src/components/other/colors/ColorListModel.hpp
 	src/components/other/colors/ColorProxyModel.hpp
 	src/components/other/colors/ImageColorsProxyModel.hpp
+	src/components/other/date/LDate.hpp
+	src/components/other/date/LDateTime.hpp
+	src/components/other/date/LTime.hpp
 	src/components/other/images/ImageModel.hpp
 	src/components/other/images/ImageListModel.hpp
 	src/components/other/images/ImageProxyModel.hpp

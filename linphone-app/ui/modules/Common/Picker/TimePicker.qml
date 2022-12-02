@@ -5,27 +5,31 @@ import Common 1.0
 import Common.Styles 1.0
 import Units 1.0
 
+import TimeTools 1.0
+
+import 'qrc:/ui/scripts/Utils/utils.js' as Utils
+
 Item{
 	id: mainItem
 		
-	property date selectedTime
+	property var selectedTime: TimeTools.create()
 	property int border: 25
 	
 	property int centerPosition: Math.min(height, width)/2
 	property int middleMinSize: centerPosition - border	// Minus border
 	
-	signal newDate(date date)
-	signal clicked(date date)
+	signal newDate(var date)
+	signal clicked(var date)
 	
 	onNewDate: selectedTime = date
 	
 	function getDate(hText, mText){
-		var d = new Date()
+		var d = TimeTools.create()
 		if(hText || outer.currentItem)
-			d.setHours(hText ? hText : outer.currentItem.text)
+			d.hour = (hText ? hText : outer.currentItem.text)
 		if(mText || inner.currentItem)
-			d.setMinutes(mText ? mText : inner.currentItem.text)
-		d.setSeconds(0)
+			d.minute = (mText ? mText : inner.currentItem.text)
+		d.second = 0
 		return d;
 	}
 	
@@ -39,9 +43,9 @@ Item{
 		currentIndex:	0
 		Connections{// startX/Y begin from currentIndex. It must be set to 0 at first.
 			target: mainItem
-			onSelectedTimeChanged: outer.currentIndex = mainItem.selectedTime.getHours() % 24
+			onSelectedTimeChanged: outer.currentIndex = mainItem.selectedTime.hour % 24
 		}
-		Component.onCompleted: currentIndex = mainItem.selectedTime.getHours() % 24
+		Component.onCompleted: currentIndex = mainItem.selectedTime.hour % 24
 		
 		highlight: Rectangle {
 			id: rect
@@ -100,9 +104,9 @@ Item{
 		currentIndex:	0
 		Connections{// startX/Y begin from currentIndex. It must be set to 0 at first.
 			target: mainItem
-			onSelectedTimeChanged: inner.currentIndex = mainItem.selectedTime.getMinutes() / 5
+			onSelectedTimeChanged: inner.currentIndex = mainItem.selectedTime.minute / 5
 		}
-		Component.onCompleted: currentIndex = mainItem.selectedTime.getMinutes() / 5
+		Component.onCompleted: currentIndex = mainItem.selectedTime.minute / 5
 		
 		highlight: Rectangle {
 			width: 30 * 1.5
