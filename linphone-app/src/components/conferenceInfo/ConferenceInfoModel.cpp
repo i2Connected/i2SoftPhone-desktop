@@ -143,7 +143,7 @@ std::shared_ptr<linphone::ConferenceInfo> ConferenceInfoModel::findConferenceInf
 
 //Note conferenceInfo->getDateTime uses system timezone.
 QDateTime ConferenceInfoModel::getDateTimeUtc() const{
-	return QDateTime::fromMSecsSinceEpoch(mConferenceInfo->getDateTime() * 1000).toUTC();
+	return QDateTime::fromMSecsSinceEpoch(mConferenceInfo->getDateTime() * 1000);//.toUTC();
 }
 
 QDateTime ConferenceInfoModel::getDateTimeSystem() const{
@@ -234,7 +234,8 @@ LinphoneEnums::ConferenceSchedulerState ConferenceInfoModel::getConferenceSchedu
 void ConferenceInfoModel::setDateTime(const QDateTime& dateTime){
 	QDateTime utc = dateTime.addSecs( -mTimeZone.offsetFromUtc(dateTime));
 	QDateTime system = utc.addSecs(QTimeZone::systemTimeZone().offsetFromUtc(utc));
-	mConferenceInfo->setDateTime(system.toMSecsSinceEpoch() / 1000);
+	qWarning() << dateTime.toMSecsSinceEpoch() << "/" << utc.toMSecsSinceEpoch() << "/" << system.toMSecsSinceEpoch();
+	mConferenceInfo->setDateTime(utc.toMSecsSinceEpoch() / 1000);
 	emit dateTimeChanged();
 }
 

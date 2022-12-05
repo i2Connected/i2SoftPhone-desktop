@@ -34,7 +34,15 @@ LDateTime::LDateTime(const QDateTime& dateTime, QObject *parent) : QObject(paren
 	, mDateTime(dateTime){	
 }
 LDateTime::LDateTime(LDate * date, LTime * time, QObject *parent) : QObject(parent)
-	, mDateTime(date->getDate(), time->getTime(), Qt::OffsetFromUTC ){
+	, mDateTime(date->getDate(), time->getTime(), Qt::UTC ){
+		
+	QDateTime a(date->getDate(), time->getTime());
+	QDateTime b(date->getDate(), time->getTime(), Qt::OffsetFromUTC);
+	qWarning() << time->toTimeString("hh:mm") << "/" << mDateTime.time().toString("hh:mm:") << mDateTime.toString("hh:mm") << "/" << mDateTime.toMSecsSinceEpoch()
+		<< " == " << a.time().toString("hh:mm") << "/" << a.toString("hh:mm")<< "/" << a.toMSecsSinceEpoch()
+		<< " == " << b.time().toString("hh:mm") << "/" << b.toString("hh:mm")<< "/" << b.toMSecsSinceEpoch()
+	;
+		
 }
 LDateTime::LDateTime(const int& year, const int& month, const int& day, const int& hour, const int& minute, const int& second, QObject *parent) : QObject(parent)
 	, mDateTime(QDate(year, month, day), QTime(hour, minute, second)){
