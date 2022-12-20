@@ -528,12 +528,20 @@ void App::smartShowWindow (QQuickWindow *window) {
 		window->show();
 	window->raise();// Raise ensure to get focus on Mac
 	window->requestActivate();
+	QSettings settings;
+	if(settings.contains("geometry"))
+		window->setGeometry(settings.value("geometry").toRect());
 }
 
 // -----------------------------------------------------------------------------
 bool App::hasFocus () const {
 	return getMainWindow()->isActive() || (mCallsWindow && mCallsWindow->isActive());
 }
+void App::saveGeometry(){
+	QSettings settings;
+	settings.setValue("geometry", getMainWindow()->geometry());
+}
+
 void App::stateChanged(Qt::ApplicationState pState) {
 	DesktopTools::applicationStateChanged(pState);
 	auto core = CoreManager::getInstance();
