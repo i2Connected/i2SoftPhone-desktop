@@ -19,11 +19,17 @@
  */
 
 #include "DesktopToolsLinux.hpp"
+#include "notifications/NotificationsDBus.hpp"
 
 // =============================================================================
+DesktopTools gDesktopTools;
 
 DesktopTools::~DesktopTools () {
   setScreenSaverStatus(true);
+}
+
+void DesktopTools::init(){
+	NotificationsDBus::init();
 }
 
 bool DesktopTools::getScreenSaverStatus () const {
