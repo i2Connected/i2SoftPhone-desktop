@@ -4,14 +4,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
 ## 5.1.0 - undefined
 
 ### Added
 - VFS Encryption
 - File viewer in chats (Image/Animated Image/Video/Texts) with the option to export the file.
 
-## 5.0.4 - undefined
+## 5.0.8 - 2023-01-20
+
+### Fixed
+- Qt 5.12 compatibility on recordings.
+
+## 5.0.7 - 2023-01-19
+
+### Added
+- Interactive preview in call:
+	* Movable on holding mouse's left click.
+	* Resizeable on mouse's wheel.
+	* Reset on mouse's right click (first for size if changed, second for position)
+- Hide the active speaker from the mini views.
+- Display recordings list from the burger menu.
+
+### Fixed
+- Mini views layout on actives speaker.
+- Set 1 month to default message expires.
+- User-agent format compliance
+- Update SDK to 5.2.15
+
+## 5.0.6 - 2023-01-10
+
+### Fixed
+- URI Handlers to a conference.
+- Display application icon and estimated size in Windows programs list.
+
+## 5.0.5 - 2023-01-09
+
+### Fixed
+- Crash at startup.
+- Deploy missing OpenSSL libraries on Windows (fix blank message on image url).
+- Update SDK to 5.2.10
+
+## 5.0.4 - 2022-12-28
 
 ### Fixed
 - Volume gauge in multimedia parameters while being in call.

@@ -18,6 +18,8 @@ Item {
 		menu.close()
 	}
 	
+	signal displayRecordings()
+	
 	// ---------------------------------------------------------------------------
 	// Shortcuts.
 	// ---------------------------------------------------------------------------
@@ -50,6 +52,11 @@ Item {
 		}
 	}
 	
+	Shortcut {
+		id: recordingsShortcut
+		onActivated: menuParent.displayRecordings()
+	}
+	
 	// ---------------------------------------------------------------------------
 	// Menu.
 	// ---------------------------------------------------------------------------
@@ -64,8 +71,14 @@ Item {
 			onTriggered: settingsShortcut.onActivated()
 		}
 		
+		MenuItem{
+			//: 'Recordings' : Label for the recordings menu.
+			text: qsTr('recordings')
+			onTriggered: recordingsShortcut.onActivated()
+		}
+		
 		MenuItem {
-			visible: SettingsModel.isCheckForUpdateAvailable()
+			visible: CoreManager.initialized && SettingsModel.isCheckForUpdateAvailable()
 			//: 'Check for updates' : Item menu for checking updates
 			text: qsTr('checkForUpdates')
 			

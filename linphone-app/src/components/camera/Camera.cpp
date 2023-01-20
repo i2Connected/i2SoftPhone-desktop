@@ -27,6 +27,7 @@
 #include "components/core/CoreManager.hpp"
 #include "components/participant/ParticipantDeviceModel.hpp"
 #include "components/settings/SettingsModel.hpp"
+#include "components/sound-player/SoundPlayer.hpp"
 
 #include "Camera.hpp"
 #include "CameraDummy.hpp"
@@ -104,6 +105,9 @@ void Camera::resetWindowId() const{
 			oldRenderer = (QQuickFramebufferObject::Renderer *)core->getNativeVideoWindowId();
 			if(oldRenderer)
 				core->setNativeVideoWindowId(NULL);
+		}else if(mWindowIdLocation == Player){
+			if(mLinphonePlayer && mLinphonePlayer->getLinphonePlayer())
+				mLinphonePlayer->getLinphonePlayer()->setWindowId(nullptr);
 		}
 		qDebug() << "[Camera] Removed " << oldRenderer << " at " << mWindowIdLocation << " for " << this;
 		mIsWindowIdSet = false;
@@ -148,6 +152,9 @@ void Camera::updateWindowIdLocation(){
 				setWindowIdLocation(WindowIdLocation::Device);
 				useDefaultWindow = false;
 			}
+		}else if( mLinphonePlayer){
+			setWindowIdLocation(WindowIdLocation::Player);
+			useDefaultWindow = false;
 		}
 		if(useDefaultWindow){
 			setWindowIdLocation(WindowIdLocation::Core);
@@ -157,6 +164,14 @@ void Camera::updateWindowIdLocation(){
 
 void Camera::removeParticipantDeviceModel(){
 	mParticipantDeviceModel = nullptr;
+}
+
+void Camera::removeCallModel(){
+	mCallModel = nullptr;
+}
+
+void Camera::removeLinphonePlayer(){
+	mLinphonePlayer = nullptr;
 }
 
 QQuickFramebufferObject::Renderer *Camera::createRenderer () const {
@@ -190,6 +205,14 @@ QQuickFramebufferObject::Renderer *Camera::createRenderer () const {
 		renderer = (QQuickFramebufferObject::Renderer *) CoreManager::getInstance()->getCore()->createNativeVideoWindowId();
 		if(renderer)
 			CoreManager::getInstance()->getCore()->setNativeVideoWindowId(renderer);
+	}else if( mWindowIdLocation == Player){
+		auto player = mLinphonePlayer->getLinphonePlayer();
+		if(player){
+			qDebug() << "[Camera] Setting Camera to Player";
+			renderer = (QQuickFramebufferObject::Renderer *) player->createWindowId();
+			if(renderer)
+				player->setWindowId(renderer);
+		}
 	}
 	if( !renderer){
 		QTimer::singleShot(1, this, &Camera::isNotReady);// Workaround for const createRenderer
@@ -223,12 +246,19 @@ ParticipantDeviceModel * Camera::getParticipantDeviceModel() const{
 	return mParticipantDeviceModel;
 }
 
+SoundPlayer * Camera::getLinphonePlayer() const{
+	return mLinphonePlayer;
+}
+
 void Camera::setCallModel (CallModel *callModel) {
 	if (mCallModel != callModel) {
-		if( mCallModel)
+		if( mCallModel){
 			disconnect(mCallModel, &CallModel::statusChanged, this, &Camera::onCallStateChanged);
+			disconnect(mCallModel, &QObject::destroyed, this, &Camera::removeCallModel);
+		}
 		mCallModel = callModel;
 		connect(mCallModel, &CallModel::statusChanged, this, &Camera::onCallStateChanged);
+		connect(mCallModel, &QObject::destroyed, this, &Camera::removeCallModel);
 		updateWindowIdLocation();
 		update();
 		
@@ -258,7 +288,7 @@ void Camera::setIsReady(bool status) {
 }
 
 void Camera::setParticipantDeviceModel(ParticipantDeviceModel * participantDeviceModel){
-if (mParticipantDeviceModel != participantDeviceModel) {
+	if (mParticipantDeviceModel != participantDeviceModel) {
 		if( mParticipantDeviceModel)
 			disconnect(mParticipantDeviceModel, &QObject::destroyed, this, &Camera::removeParticipantDeviceModel);
 		mParticipantDeviceModel = participantDeviceModel;
@@ -266,6 +296,17 @@ if (mParticipantDeviceModel != participantDeviceModel) {
 		updateWindowIdLocation();
 		update();
 		emit participantDeviceModelChanged(mParticipantDeviceModel);
+	}
+}
+void Camera::setLinphonePlayer(SoundPlayer *player){
+	if (mLinphonePlayer!= player) {
+		if( mLinphonePlayer)
+			disconnect(mLinphonePlayer, &QObject::destroyed, this, &Camera::removeLinphonePlayer);
+		mLinphonePlayer = player;
+		connect(mLinphonePlayer, &QObject::destroyed, this, &Camera::removeLinphonePlayer);
+		updateWindowIdLocation();
+		update();
+		emit linphonePlayerChanged(mLinphonePlayer);
 	}
 }
 

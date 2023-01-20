@@ -6,10 +6,12 @@ import Linphone 1.0
 // =============================================================================
 
 MenuBar {
+	id: menuBar
 	function open () {
 		menu.open()
 	}
-
+	signal displayRecordings()
+	
 	// ---------------------------------------------------------------------------
 	// Menu.
 	// ---------------------------------------------------------------------------
@@ -25,9 +27,15 @@ MenuBar {
 			shortcut: StandardKey.Preferences
 		}
 		
+		MenuItem {
+			//: 'Recordings' : Label for the recordings menu.
+			text: qsTr('recordings')
+			role: MenuItem.ApplicationSpecificRole
+			onTriggered: menuBar.displayRecordings()
+		}
 
 		MenuItem {
-			visible: SettingsModel.isCheckForUpdateAvailable()
+			visible: CoreManager.initialized && SettingsModel.isCheckForUpdateAvailable()
 			//: 'Check for updates' : Item menu for checking updates
 			text: qsTr('checkForUpdates')
 			role: MenuItem.ApplicationSpecificRole
