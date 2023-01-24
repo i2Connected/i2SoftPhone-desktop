@@ -53,6 +53,7 @@ ScrollableListView {
 	// ---------------------------------------------------------------------------
 	
 	header: MouseArea {
+		objectName: '__MouseArea'
 		height: {
 			var height = headerButton.visible ? SipAddressesViewStyle.header.button.height : 0
 			if (defaultContact.visible) {
@@ -78,6 +79,7 @@ ScrollableListView {
 			
 			Loader {
 				id: defaultContact
+				objectName: '__DefaultContact'
 				
 				height: SipAddressesViewStyle.entry.height
 				width: parent.width
@@ -85,6 +87,7 @@ ScrollableListView {
 				visible: sipAddressesView.interpretableSipAddress.length > 0
 				
 				sourceComponent: Rectangle {
+					objectName: '__Rectangle'
 					anchors.fill: parent
 					color: SipAddressesViewStyle.entry.color.normal.color
 					
@@ -111,13 +114,16 @@ ScrollableListView {
 						
 						ActionBar {
 							id: defaultContactActionBar
+							objectName: '__ActionBar'
 							
 							iconSize: SipAddressesViewStyle.entry.iconSize
 							
 							Repeater {
 								model: sipAddressesView.actions
-								
+								objectName: '__Repeater'
+								delegate:Component{
 								ActionButton {
+									objectName: (sipAddressesView.actions[index].objectName ? sipAddressesView.actions[index].objectName : '')
 									isCustom: true
 									backgroundRadius: 90
 									colorSet: modelData.colorSet
@@ -138,6 +144,7 @@ ScrollableListView {
 										anchors.top:parent.top
 										anchors.horizontalCenter: parent.right
 									}
+								}
 								}
 							}
 						}

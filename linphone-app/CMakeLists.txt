@@ -45,7 +45,7 @@ include(CheckCXXCompilerFlag)
 set(TARGET_NAME linphone-qt)
 set(LINPHONE_QML_DIR "WORK/qml_files/ui")
 set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS true)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 if(UNIX AND NOT APPLE)
 	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
@@ -60,6 +60,7 @@ list(APPEND CMAKE_PREFIX_PATH "${QTKEYCHAIN_OUTPUT_DIR}/lib/cmake")
 
 set(APP_LIBRARY app-library)
 set(APP_PLUGIN app-plugin)
+#set(APP_TESTER app-tester)
 include(application_info.cmake)
 string(TIMESTAMP CURRENT_YEAR "%Y")
 if(NOT APPLICATION_START_LICENCE OR  "${CURRENT_YEAR}" STREQUAL "${APPLICATION_START_LICENCE}")
@@ -129,6 +130,8 @@ endif()
 if( WIN32)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_WINSOCKAPI_")#remove error from windows headers order
 	add_definitions(-DNOMINMAX)
+else()
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 endif()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)#useful for config.h
 
@@ -292,6 +295,8 @@ set(PLUGIN_SOURCES src/utils/plugins/PluginDataAPI.cpp
 	src/utils/plugins/PluginNetworkHelper.cpp
 	src/utils/plugins/LinphonePlugin.cpp
 	)
+set(TESTER_SOURCES src/tester/utils_tester.cpp
+	)
 
 set(HEADERS
 	src/app/App.hpp
@@ -432,9 +437,13 @@ set(HEADERS
 set(PLUGIN_HEADERS 
 	include/LinphoneApp/PluginDataAPI.hpp
 	include/LinphoneApp/PluginNetworkHelper.hpp
-	include/LinphoneApp/LinphonePlugin.hpp)
+	include/LinphoneApp/LinphonePlugin.hpp
+	)
+set(TESTER_HEADERS src/tester/utils_tester.hpp
+	)
+	
 list(APPEND SOURCES include/LinphoneApp/PluginExample.json)
-set(MAIN_FILE src/app/main.cpp)
+#set(MAIN_FILE src/app/main.cpp)
 
 if (APPLE)
 	list(APPEND SOURCES
@@ -511,6 +520,8 @@ PREPEND(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/")
 PREPEND(HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/")
 PREPEND(PLUGIN_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/")
 PREPEND(PLUGIN_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/")
+PREPEND(TESTER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/")
+PREPEND(TESTER_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/")
 
 # ------------------------------------------------------------------------------
 # Compute QML files list.
@@ -603,7 +614,8 @@ if(WIN32)
 endif()
 
 add_library(${APP_PLUGIN} SHARED ${PLUGIN_SOURCES} ${PLUGIN_HEADERS})
-add_library(${APP_LIBRARY} OBJECT ${SOURCES} ${HEADERS} ${QML_SOURCES} ${QRC_RESOURCES} ${QRC_WEBVIEW_RESOURCES} ${PLUGIN_HEADERS})#Need to add Headers to resolve moc Qt symbols
+add_library(${APP_LIBRARY} OBJECT ${SOURCES} ${HEADERS} ${QML_SOURCES} ${QRC_RESOURCES} ${QRC_WEBVIEW_RESOURCES} ${TESTER_SOURCES} ${TESTER_HEADERS} ${PLUGIN_HEADERS})#Need to add Headers to resolve moc Qt symbols
+##add_executable(${APP_TESTER} ${TESTER_SOURCES} ${TESTER_HEADERS})
 
 if (WIN32)
 	add_executable(${TARGET_NAME} WIN32 $<TARGET_OBJECTS:${APP_LIBRARY}> ${MAIN_FILE} ${QRC_BIG_RESOURCES} ${RC_FILE})
@@ -622,12 +634,14 @@ endif ()
 
 set_property(TARGET ${APP_LIBRARY} PROPERTY POSITION_INDEPENDENT_CODE ON)   #Need by Qt
 set_property(TARGET ${APP_PLUGIN} PROPERTY POSITION_INDEPENDENT_CODE ON)   #Need by Qt
+#set_property(TARGET ${APP_TESTER} PROPERTY POSITION_INDEPENDENT_CODE ON)   #Need by Qt
 
 
 #Turn on automatic resources compilation by cmake
 #Instead of excplicitely calling qt5_add_resources
 set_property(TARGET ${APP_LIBRARY} PROPERTY AUTORCC ON)
 set_property(TARGET ${APP_PLUGIN} PROPERTY AUTORCC ON)
+#set_property(TARGET ${APP_TESTER} PROPERTY AUTORCC ON)
 
 
 
@@ -640,6 +654,10 @@ endif()
 
 target_compile_definitions(${APP_PLUGIN} PUBLIC "-DENABLE_APP_EXPORT_PLUGIN")
 set_target_properties(${APP_PLUGIN} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+#set_target_properties(${APP_TESTER} PROPERTIES WIN32_EXECUTABLE TRUE)
+#set_target_properties(${APP_TESTER} PROPERTIES MACOSX_BUNDLE TRUE)
+
 
 set(INCLUDED_DIRECTORIES "${LINPHONECXX_INCLUDE_DIRS}" "${MEDIASTREAMER2_INCLUDE_DIRS}")
 list(APPEND INCLUDED_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/include")
@@ -676,6 +694,7 @@ foreach (package ${QT5_PACKAGES})
 	#	list(APPEND LIBRARIES ${Qt5${package}_LIBRARIES})
 		target_link_libraries(${APP_LIBRARY} Qt5::${package})
 		target_link_libraries(${APP_PLUGIN} Qt5::${package})
+		#target_link_libraries(${APP_TESTER} Qt5::${package})
 		target_link_libraries(${TARGET_NAME} Qt5::${package})
 	endif ()
 endforeach ()
@@ -696,6 +715,7 @@ endforeach ()
 if(ENABLE_QT_KEYCHAIN)
 	target_link_libraries(${APP_LIBRARY} ${QTKEYCHAIN_TARGET_NAME})
 	target_link_libraries(${APP_PLUGIN} ${QTKEYCHAIN_TARGET_NAME})
+	#target_link_libraries(${APP_TESTER} ${QTKEYCHAIN_TARGET_NAME})
 	target_link_libraries(${TARGET_NAME} ${QTKEYCHAIN_TARGET_NAME})
 endif()
 
@@ -707,6 +727,7 @@ endif ()
 
 target_include_directories(${APP_LIBRARY} SYSTEM PUBLIC ${INCLUDED_DIRECTORIES})
 target_include_directories(${APP_PLUGIN} SYSTEM PUBLIC ${INCLUDED_DIRECTORIES})
+#target_include_directories(${APP_TESTER} SYSTEM PUBLIC ${INCLUDED_DIRECTORIES})
 target_include_directories(${TARGET_NAME} SYSTEM PUBLIC ${INCLUDED_DIRECTORIES})
 
 target_link_libraries(${APP_LIBRARY} ${LIBRARIES})
@@ -714,6 +735,7 @@ target_link_libraries(${APP_PLUGIN} ${LIBRARIES})
 target_link_libraries(${APP_LIBRARY} ${APP_PLUGIN})
 target_link_libraries(${TARGET_NAME} ${LIBRARIES})
 target_link_libraries(${TARGET_NAME} ${APP_PLUGIN})
+#target_link_libraries(${APP_TESTER} ${LIBRARIES})
 
 if(WIN32)
 	find_library(LDAP_LIBRARIES NAMES ldap libldap HINTS "${LINPHONE_OUTPUT_DIR}/${CMAKE_INSTALL_LIBDIR}")
@@ -721,8 +743,11 @@ if(WIN32)
 	target_link_libraries(${TARGET_NAME} wsock32 ws2_32 ${LDAP_LIBRARIES} ${LBER_LIBRARIES})
 endif()
 
+#target_link_libraries(${APP_TESTER} ${TARGET_NAME})
+
 add_dependencies(${APP_LIBRARY}  update_translations ${TARGET_NAME}-git-version ${APP_PLUGIN})
 add_dependencies(${TARGET_NAME} ${APP_LIBRARY} ${APP_PLUGIN})
+#add_dependencies(${APP_TESTER} ${TARGET_NAME} ${APP_LIBRARY})
 
 
 # ------------------------------------------------------------------------------
@@ -736,11 +761,6 @@ add_custom_command(TARGET ${APP_PLUGIN} POST_BUILD COMMAND ${CMAKE_COMMAND} -E m
 add_custom_command(TARGET ${APP_PLUGIN} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${APP_PLUGIN}> "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/")
 add_custom_command(TARGET ${APP_PLUGIN} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_LINKER_FILE:${APP_PLUGIN}> "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/")
 #add_custom_command(TARGET ${TARGET_NAME} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/include/LinphoneApp/*" "${CMAKE_INSTALL_PREFIX}/include/LinphoneApp/")
-
-
-
-
-
 
 
 #configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/*" "${CMAKE_INSTALL_PREFIX}/include/LinphoneApp/" COPYONLY)

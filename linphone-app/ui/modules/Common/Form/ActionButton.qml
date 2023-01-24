@@ -11,7 +11,7 @@ import Common 1.0
 
 Item {
 	id: wrappedButton
-	objectName: '__internalActionButton'
+	//objectName: '__internalActionButton'
 	
 	property color defaultBackgroundColor: 'white'
 	property color defaultForegroundColor: 'black'

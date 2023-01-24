@@ -11,6 +11,7 @@ import Linphone.Styles 1.0
 
 SearchBox {
 	id: searchBox
+	objectName: '__SmartSearchBar'
 	
 	// ---------------------------------------------------------------------------
 	
@@ -61,8 +62,10 @@ SearchBox {
 	
 	SipAddressesView {
 		id: view
+		objectName: '__SipAddressesView'
 		
 		actions: [{
+				objectName: '__videoCallButton',
 				colorSet: SipAddressesViewStyle.videoCall,
 				secure: 0,
 				visible: true,
@@ -72,6 +75,7 @@ SearchBox {
 				},
 				visible: SettingsModel.videoSupported && SettingsModel.outgoingCallsEnabled && SettingsModel.showStartVideoCallButton
 			}, {
+				objectName: '__audioCallButton',
 				colorSet: SipAddressesViewStyle.call,
 				secure: 0,
 				visible: true,
@@ -81,6 +85,7 @@ SearchBox {
 				},
 				visible: SettingsModel.outgoingCallsEnabled
 			}, {
+				objectName: '__chatButton',
 				colorSet: SettingsModel.getShowStartChatButton() ? SipAddressesViewStyle.chat : SipAddressesViewStyle.history,
 				secure: 0,
 				handler: function (entry) {
@@ -90,6 +95,7 @@ SearchBox {
 				visible: SettingsModel.standardChatEnabled,
 				zz: 'toto'
 			}, {
+				objectName: '__secureChatButton',
 				colorSet: SettingsModel.getShowStartChatButton() ? SipAddressesViewStyle.chat : SipAddressesViewStyle.history,
 				secure: 1,
 				visible: SettingsModel.secureChatEnabled && AccountSettingsModel.conferenceUri != '',

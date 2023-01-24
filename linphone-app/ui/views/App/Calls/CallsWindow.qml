@@ -13,6 +13,7 @@ import 'CallsWindow.js' as Logic
 
 Window {
 	id: window
+	objectName: '__CallWindow'
 	
 	// ---------------------------------------------------------------------------
 	

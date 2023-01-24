@@ -36,6 +36,7 @@ namespace linphone {
   class Config;
 }
 
+class AppController;
 class ColorListModel;
 class DefaultTranslator;
 class ImageListModel;
@@ -53,6 +54,7 @@ class App : public SingleApplication {
   Q_PROPERTY(bool autoStart READ getAutoStart WRITE setAutoStart NOTIFY autoStartChanged)  
 
 public:
+	static int main(int argc, char *argv[]);
   App (int &argc, char *argv[]);
   ~App ();
 

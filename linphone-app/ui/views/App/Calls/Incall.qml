@@ -21,6 +21,7 @@ import 'qrc:/ui/scripts/Utils/utils.js' as Utils
 
 Rectangle {
 	id: mainItem
+	objectName: '__Incall'
 	
 	property CallModel callModel
 	property ConferenceModel conferenceModel: callModel && callModel.conferenceModel
@@ -571,6 +572,7 @@ Rectangle {
 				onClicked: callModel.pausedByUser = !callModel.pausedByUser
 			}
 			ActionButton{
+				objectName: '__hangupCallButton'
 				isCustom: true
 				backgroundRadius: width/2
 				colorSet: IncallStyle.buttons.hangup

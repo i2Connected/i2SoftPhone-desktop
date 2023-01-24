@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 Belledonne Communications SARL.
+ * Copyright (c) 2010-2023 Belledonne Communications SARL.
  *
  * This file is part of linphone-desktop
  * (see https://www.linphone.org).
@@ -17,9 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
- #include "App.hpp"
  
+ #include <QTest>
 
-int main (int argc, char *argv[]) {
-	return App::main(argc, argv);
-}
+class AppController;
+
+class UtilsTester: public QObject
+{
+    Q_OBJECT
+   std::string app;
+   char * appPtr;
+   int argc = 1;
+   QThread * mApplication;
+   AppController * mController;
+public:
+	UtilsTester(AppController * controller);
+	~UtilsTester();
+	
+private slots:
+	void initTestCase();
+	void cleanupTestCase();
+    void test_osProduct();
+    void test_register();
+    void test_call();
+    void test_call2();
+};

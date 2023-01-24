@@ -63,6 +63,7 @@
 
 // =============================================================================
 
+#include "appMain.cpp"
 using namespace std;
 
 namespace {
@@ -347,6 +348,8 @@ void App::initContentApp () {
 		configPath = getConfigPathIfExists(*mParser);
 		config = Utils::getConfigIfExists (QString::fromStdString(configPath));
 		initLocale(config);
+		// Init engine content.
+		mEngine = new QQmlApplicationEngine(this);
 	} else {
 		configPath = getConfigPathIfExists(*mParser);
 		config = Utils::getConfigIfExists(QString::fromStdString(configPath));
@@ -367,6 +370,8 @@ void App::initContentApp () {
 #ifndef Q_OS_MACOS
 		mustBeIconified = mParser->isSet("iconified");
 #endif // ifndef Q_OS_MACOS
+		// Init engine content.
+		mEngine = new QQmlApplicationEngine(this);
 		mColorListModel = new ColorListModel();
 		mImageListModel = new ImageListModel();
 	}
@@ -382,8 +387,7 @@ void App::initContentApp () {
 	CoreManager::init(this, Utils::coreStringToAppString(configPath));
 	
 	
-	// Init engine content.
-	mEngine = new QQmlApplicationEngine(this);
+	
 	
 	// Provide `+custom` folders for custom components and `5.9` for old components.
 	{

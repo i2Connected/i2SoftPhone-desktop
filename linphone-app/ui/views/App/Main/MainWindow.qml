@@ -17,6 +17,7 @@ import 'qrc:/ui/scripts/Utils/utils.js' as Utils
 
 ApplicationWindow {
 	id: window
+	objectName: "__MainWindow"
 	
 	property string _currentView
 	property var _lockedInfo
@@ -176,6 +177,7 @@ ApplicationWindow {
 					
 					SmartSearchBar {
 						id: smartSearchBar
+						objectName: '__mainSmartSearchBar'
 						
 						Layout.fillWidth: true
 						
