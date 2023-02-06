@@ -11,12 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - File viewer in chats (Image/Animated Image/Video/Texts) with the option to export the file.
 - Accept/decline CLI commands.
 
-## 5.0.10 - undefined
+## 5.0.11 - udnefined
+
+### Fixed
+- Display of non-Ascii avatar
+
+## 5.0.10 - 2023-02-02
 
 ### Fixed
 - Remove blank notification when declining incoming call.
 - Remove blank page when opening calls window and add a waiting step while connecting to call.
 - Camera activation issue based on call status.
+- Crash when editing contacts from chat.
+- Contacts synchronization on creation.
+- Contact menu in secure chats.
+- Remove FFMPEG from dependencies as it is no mmore needed.
 
 ## 5.0.9 - 2023-01-31
 
