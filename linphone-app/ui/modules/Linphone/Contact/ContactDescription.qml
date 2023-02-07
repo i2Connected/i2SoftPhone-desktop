@@ -52,6 +52,7 @@ Column {
 		Text{// Workaround to get implicitWidth from text without eliding
 				id: titleImplicitWidthWorkaround
 				text: title.fullText
+				font.family: SettingsModel.textMessageFont.family
 				font.weight: title.font.weight
 				font.pointSize: title.font.pointSize
 				visible: false
@@ -89,6 +90,7 @@ Column {
 		property string fullText
 		anchors.horizontalCenter: (horizontalTextAlignment == Text.AlignHCenter ? parent.horizontalCenter : undefined)
 		color: subtitleColor
+		font.family: SettingsModel.textMessageFont.family
 		font.weight: contactDescriptionStyle.subtitle.weight
 		font.pointSize: contactDescriptionStyle.subtitle.pointSize
 		horizontalAlignment: horizontalTextAlignment
