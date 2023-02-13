@@ -59,6 +59,7 @@ public:
 	Q_INVOKABLE static QString toTimeString(QDateTime date, const QString& format = "hh:mm:ss");
 	Q_INVOKABLE static QString toDateString(QDateTime date);
 	Q_INVOKABLE static QString getDisplayName(const QString& address);
+	Q_INVOKABLE static QString getInitials(const QString& username);	// Support UTF32
 	Q_INVOKABLE static QString toString(const LinphoneEnums::TunnelMode& mode);
 	Q_INVOKABLE static bool isMe(const QString& address);
 	Q_INVOKABLE static bool isAnimatedImage(const QString& path);
@@ -69,7 +70,10 @@ public:
 	Q_INVOKABLE QSize getImageSize(const QString& url);
 	Q_INVOKABLE static QPoint getCursorPosition();
 	Q_INVOKABLE static QString getFileChecksum(const QString& filePath);
-	Q_INVOKABLE static QString encodeTextToQmlRichFormat(const QString& text, const QVariantMap& options);
+	static bool codepointIsEmoji(uint code);
+	static QString replaceEmoji(const QString &body);
+	Q_INVOKABLE static bool isOnlyEmojis(const QString& text);
+	Q_INVOKABLE static QString encodeTextToQmlRichFormat(const QString& text, const QVariantMap& options = QVariantMap());
 	Q_INVOKABLE static QString getFileContent(const QString& filePath);
 	
 //----------------------------------------------------------------------------------
