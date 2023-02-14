@@ -25,6 +25,7 @@
 
 #include "app/App.hpp"
 #include "components/call/CallModel.hpp"
+#include "components/chat-events/ChatMessageModel.hpp"
 #include "components/contact/ContactModel.hpp"
 #include "components/notifier/Notifier.hpp"
 #include "components/settings/AccountSettingsModel.hpp"
@@ -225,6 +226,13 @@ void CoreHandlers::onMessagesReceived (
 	QStringList notNotifyReasons;
 	
 	for(auto message : messages){
+		if(message){
+			auto chatRoom = message->getChatRoom();
+			auto dbMessage = chatRoom->findMessage(message->getMessageId());
+			auto appdata = ChatMessageModel::AppDataManager(QString::fromStdString(dbMessage->getAppdata()));
+			appdata.mData["receivedTime"] = QString::number(QDateTime::currentMSecsSinceEpoch()/1000);
+			dbMessage->setAppdata(Utils::appStringToCoreString(appdata.toString()));
+		}
 		if( !message || message->isOutgoing()  )
 			continue;
 		
