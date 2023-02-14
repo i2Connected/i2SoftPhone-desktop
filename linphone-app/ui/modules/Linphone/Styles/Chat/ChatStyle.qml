@@ -273,7 +273,10 @@ QtObject {
 		property QtObject time: QtObject {
 			property color color: ColorsList.add(sectionName+'_time', 'd').color
 			property int pointSize: Units.dp * 10
-			property int width: 44
+			property int width: 70
+		}
+		property QtObject date: QtObject {
+			property int pointSize: Units.dp * 8
 		}
 	}
 }
