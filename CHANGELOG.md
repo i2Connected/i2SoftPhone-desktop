@@ -18,10 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Crash after showing participant devices.
 - Deactivate action buttons and menus if chat room has been left.
 - Display of non-Ascii avatar
+- Icon transparency generations on icon.ico
 - Remove duplicated nat policies.
 - Remove unadmin feature to self because of not fully supported.
 - Save Stun/Turn proxy configuration.
 - Switch off camera at startup.
+- Upgrade Qt to 5.15.12
 - Update SDK to 5.2.24 (Fix unresponsive video conference on Mac/Windows)
 
 ## 5.0.10 - 2023-02-02
