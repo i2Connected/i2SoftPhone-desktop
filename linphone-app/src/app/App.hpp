@@ -41,7 +41,6 @@ class DefaultTranslator;
 class ImageListModel;
 class Notifier;
 
-
 class App : public SingleApplication {
   Q_OBJECT
 
@@ -118,6 +117,8 @@ public:
 
   Q_INVOKABLE static void smartShowWindow (QQuickWindow *window);
   Q_INVOKABLE static void checkForUpdates(bool force = false);
+  
+  Q_INVOKABLE void saveGeometry();
   
 public slots:
   void stateChanged(Qt::ApplicationState);

@@ -48,7 +48,9 @@ ApplicationWindow {
 	// ---------------------------------------------------------------------------
 	
 	onActiveFocusItemChanged: Logic.handleActiveFocusItemChanged(activeFocusItem)
-	onClosing: Logic.handleClosing(close)
+	onClosing: {App.saveGeometry()
+				Logic.handleClosing(close)
+			}
 	
 	// ---------------------------------------------------------------------------
 	
