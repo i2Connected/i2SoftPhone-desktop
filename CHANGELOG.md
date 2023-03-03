@@ -14,8 +14,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - OAuth2 connection to retrieve remote provisioning (Experimental and not usable without configuration).
 - Add/View contact from a message.
 - Mute option for each chatrooms.
+- New Chat Layout.
 
-## 5.0.11 - undefined
+### Fixed
+- Update SDK to 5.2.29
+
+## 5.0.12 - 2023-03-01
+
+## Fixed
+- Some case of unwanted settings folders creation.
+- Replace black thumbnails that contains transparency by white color.
+- Unusable Contact sheet.
+- Update SDK to 5.2.28 (cleanup orphan NAT sections and race condition on MSTicker threads).
+
+## 5.0.11 - 2023-02-24
 
 ### Fixed
 - Display of non-Ascii avatar
