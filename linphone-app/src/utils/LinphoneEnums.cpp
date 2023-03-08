@@ -38,6 +38,11 @@ void LinphoneEnums::registerMetaTypes(){
 	qRegisterMetaType<LinphoneEnums::RecorderState>();
 	qRegisterMetaType<LinphoneEnums::TunnelMode>();
 	qRegisterMetaType<LinphoneEnums::TransportType>();
+	
+//  linphone raw access
+	qRegisterMetaType<std::shared_ptr<linphone::ChatRoom>>();
+	qRegisterMetaType<std::shared_ptr<linphone::ChatMessage>>();
+	qRegisterMetaType<std::shared_ptr<const linphone::ParticipantImdnState>>();
 }
 
 linphone::MediaEncryption LinphoneEnums::toLinphone(const LinphoneEnums::MediaEncryption& data){

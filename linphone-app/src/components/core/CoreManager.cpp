@@ -34,12 +34,13 @@
 #include "components/contact/VcardModel.hpp"
 #include "components/contacts/ContactsListModel.hpp"
 #include "components/contacts/ContactsImporterListModel.hpp"
-#include "components/core/CoreManagerGUI.hpp"
+#include "gui/core/CoreManagerGUI.hpp"
 #include "components/history/HistoryModel.hpp"
 #include "components/ldap/LdapListModel.hpp"
 #include "components/recorder/RecorderManager.hpp"
 #include "components/settings/AccountSettingsModel.hpp"
 #include "components/settings/SettingsModel.hpp"
+
 #include "components/sip-addresses/SipAddressesModel.hpp"
 #include "components/timeline/TimelineListModel.hpp"
 
@@ -97,15 +98,20 @@ CoreManager::~CoreManager(){
 void CoreManager::initCoreManager(){
 	qInfo() << "Init CoreManager";
 	mAccountSettingsModel = new AccountSettingsModel(this);
+	mAccountSettingsModelGUI = new AccountSettingsModelGUI();
+	mAccountSettingsModelGUI->moveToThread(QApplication::instance()->thread());
 	mSettingsModel = new SettingsModel(this);
-	mCallsListModel = new CallsListModel(this);
+	mSettingsModelGUI = new SettingsModelGUI();
+	mSettingsModelGUI->moveToThread(QApplication::instance()->thread());
+	//mCallsListModel = new CallsListModel(this);
 	mChatModel = new ChatModel(this);
 	mContactsListModel = new ContactsListModel(this);
 	mContactsImporterListModel = new ContactsImporterListModel(this);
 	mLdapListModel = new LdapListModel(this);
 	mSipAddressesModel = new SipAddressesModel(this);
 	mEventCountNotifier = new EventCountNotifier(this);
-	mTimelineListModel = new TimelineListModel(this);
+	mTimelineListModel = new TimelineListModel();
+	mTimelineListModel->moveToThread(QApplication::instance()->thread());
 	mEventCountNotifier->updateUnreadMessageCount();
 	QObject::connect(mEventCountNotifier, &EventCountNotifier::eventCountChanged,this, &CoreManager::eventCountChanged);
 	migrate();
@@ -146,6 +152,24 @@ RecorderManager* CoreManager::getRecorderManager(){
 		emit recorderManagerCreated(mRecorderManager);
 	}
 	return mRecorderManager;
+}
+
+SettingsModel *CoreManager::getSettingsModel () const {
+	Q_CHECK_PTR(mSettingsModel);
+	return mSettingsModel;
+}
+
+SettingsModelGUI *CoreManager::getSettingsModelGUI() const {
+	return mSettingsModelGUI;
+}
+
+AccountSettingsModel*CoreManager::getAccountSettingsModel() const {
+	Q_CHECK_PTR(mAccountSettingsModel);
+	return mAccountSettingsModel;
+}
+
+AccountSettingsModelGUI *CoreManager::getAccountSettingsModelGUI() const {
+	return mAccountSettingsModelGUI;
 }
 // -----------------------------------------------------------------------------
 

@@ -231,4 +231,8 @@ Q_DECLARE_METATYPE(LinphoneEnums::RecorderState)
 Q_DECLARE_METATYPE(LinphoneEnums::TunnelMode)
 Q_DECLARE_METATYPE(LinphoneEnums::TransportType)
 
+Q_DECLARE_METATYPE(std::shared_ptr<linphone::ChatRoom>);
+Q_DECLARE_METATYPE(std::shared_ptr<linphone::ChatMessage>);
+Q_DECLARE_METATYPE(std::shared_ptr<const linphone::ParticipantImdnState>);
+
 #endif

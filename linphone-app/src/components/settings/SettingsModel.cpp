@@ -35,7 +35,6 @@
 #include "components/assistant/AssistantModel.hpp"
 #include "components/core/CoreManager.hpp"
 #include "components/tunnel/TunnelModel.hpp"
-#include "include/LinphoneApp/PluginNetworkHelper.hpp"
 #include "utils/Utils.hpp"
 #include "utils/Constants.hpp"
 #include "utils/MediastreamerUtils.hpp"
@@ -349,11 +348,11 @@ void SettingsModel::closeAudioSettings() {
 	emit captureGraphRunningChanged(getCaptureGraphRunning());
 }
 
-bool SettingsModel::getCaptureGraphRunning() {
+bool SettingsModel::getCaptureGraphRunning() const {
 	return mSimpleCaptureGraph && mSimpleCaptureGraph->isRunning() && !getIsInCall();
 }
 
-float SettingsModel::getMicVolume() {
+float SettingsModel::getMicVolume() const{
 	float v = 0.0;
 
 	if (mSimpleCaptureGraph && mSimpleCaptureGraph->isRunning()) {
@@ -860,7 +859,8 @@ void SettingsModel::setStandardChatEnabled (bool status) {
 }
 
 bool SettingsModel::getSecureChatEnabled () const {
-	return !!mConfig->getInt(UiSection, getEntryFullName(UiSection, "secure_chat_enabled"), 1)
+	return CoreManager::getInstance() && CoreManager::getInstance()->getCore()
+		&& !!mConfig->getInt(UiSection, getEntryFullName(UiSection, "secure_chat_enabled"), 1)
 		&& getLimeIsSupported()
 		&& CoreManager::getInstance()->getCore()->getDefaultAccount() && !CoreManager::getInstance()->getCore()->getDefaultAccount()->getParams()->getLimeServerUrl().empty()
 		//&& !CoreManager::getInstance()->getCore()->getLimeX3DhServerUrl().empty()
@@ -1442,7 +1442,8 @@ bool SettingsModel::tunnelAvailable() const{
 }
 
 TunnelModel* SettingsModel::getTunnel() const{
-	return new TunnelModel(CoreManager::getInstance()->getCore()->getTunnel());
+	//return new TunnelModel(CoreManager::getInstance()->getCore()->getTunnel());
+	return nullptr;
 }
 
 // =============================================================================
@@ -1763,11 +1764,11 @@ void SettingsModel::setLogsEmail (const QString &email) {
 	emit logsEmailChanged(email);
 }
 
-bool SettingsModel::isLdapAvailable(){
+bool SettingsModel::isLdapAvailable() const{
 	return CoreManager::getInstance()->getCore()->ldapAvailable();
 }
 
-bool SettingsModel::isOAuth2Available(){
+bool SettingsModel::isOAuth2Available() const{
 	return AssistantModel::isOAuth2Available();
 }
 
@@ -1833,7 +1834,7 @@ bool SettingsModel::getLogsEnabled (const shared_ptr<linphone::Config> &config) 
 
 // ---------------------------------------------------------------------------
 
-bool SettingsModel::getVfsEncrypted (){
+bool SettingsModel::getVfsEncrypted () const{
 	return mConfig->getBool(UiSection, "vfs_encryption_enabled", false);
 }
 
@@ -1898,3 +1899,128 @@ bool SettingsModel::isReadOnly(const std::string& section, const std::string& na
 std::string SettingsModel::getEntryFullName(const std::string& section, const std::string& name) const {
 	return isReadOnly(section, name)?name+"/readonly" : name;
 }
+
+//-------------------------------------------------------------
+//					SYNC SLOTS
+//-------------------------------------------------------------
+
+
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getCreateAppSipAccountEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getFetchRemoteConfigurationEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getUseAppSipAccountEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getUseOtherSipAccountEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getAssistantSupportsPhoneNumbers, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, useWebview, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getAssistantRegistrationUrl, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getAssistantLoginUrl, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getAssistantLogoutUrl, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, isCguAccepted, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getDeviceName, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(float, getMicVolume, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(float, getPlaybackGain, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(float, getCaptureGain, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getCaptureGraphRunning, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QStringList, getCaptureDevices, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QStringList, getPlaybackDevices, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getCaptureDevice, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getPlaybackDevice, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getRingerDevice, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getRingPath, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getEchoCancellationEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getShowAudioCodecs, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QStringList, getVideoDevices, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getVideoDevice, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getVideoPreset, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(int, getVideoFramerate, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QVariantList, getSupportedVideoDefinitions, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QVariantMap, getVideoDefinition, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QVariantMap, getCurrentPreviewVideoDefinition, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getVideoSupported, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getShowVideoCodecs, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(CameraMode, getGridCameraMode, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(CameraMode, getActiveSpeakerCameraMode, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(CameraMode, getCallCameraMode, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(LinphoneEnums::ConferenceLayout, getVideoConferenceLayout, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getAutoAnswerStatus, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getAutoAnswerVideoStatus, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(int, getAutoAnswerDelay, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getShowTelKeypadAutomatically, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getKeepCallsWindowInBackground, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getOutgoingCallsEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getCallRecorderEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getAutomaticallyRecordCalls, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(int, getAutoDownloadMaxSize, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getCallPauseEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getMuteMicrophoneEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getStandardChatEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getSecureChatEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getHideEmptyChatRooms, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getWaitRegistrationForCall, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getIncallScreenshotEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getGroupChatEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getConferenceEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getVideoConferenceEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getChatNotificationsEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getChatNotificationSoundEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getChatNotificationSoundPath, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getFileTransferUrl, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getLimeIsSupported, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QVariantList, getSupportedMediaEncryptions, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(MediaEncryption, getMediaEncryption, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, mandatoryMediaEncryptionEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getPostQuantumAvailable, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getLimeState, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getContactsEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getShowNetworkSettings, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getUseSipInfoForDtmfs, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getUseRfc2833ForDtmfs, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getIpv6Enabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(int, getDownloadBandwidth, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(int, getUploadBandwidth, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getAdaptiveRateControlEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(int, getTcpPort, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(int, getUdpPort, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QList<int>, getAudioPortRange, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QList<int>, getVideoPortRange, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getIceEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getTurnEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getStunServer, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getTurnUser, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getTurnPassword, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(int, getDscpSip, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(int, getDscpAudio, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(int, getDscpVideo, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getRlsUriEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, tunnelAvailable, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(TunnelModel *, getTunnel, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QFont, getTextMessageFont, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(int, getTextMessageFontSize, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QFont, getEmojiFont, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(int, getEmojiFontSize, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getSavedScreenshotsFolder, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getSavedCallsFolder, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getDownloadFolder, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getRemoteProvisioning, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, isQRCodeAvailable, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getFlexiAPIUrl, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getExitOnClose, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, isCheckForUpdateEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT(QString, getVersionCheckUrl, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(VersionCheckType, getVersionCheckType, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, haveVersionNightlyUrl, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getShowLocalSipAccount, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getShowStartChatButton, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getShowStartVideoCallButton, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, isMipmapEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, useMinimalTimelineFilter, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getLogText, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getLogsFolder, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getLogsUploadUrl, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getLogsEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getLogsEmail, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getVfsEncrypted, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, isLdapAvailable, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, isOAuth2Available, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, isDeveloperSettingsAvailable, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getDeveloperSettingsEnabled, SettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(bool, getIsInCall, SettingsModel)

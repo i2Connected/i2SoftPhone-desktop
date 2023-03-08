@@ -138,7 +138,7 @@ bool AccountSettingsModel::addOrUpdateAccount (std::shared_ptr<linphone::Account
 	return true;
 }
 
-QVariantMap AccountSettingsModel::getAccountDescription (const shared_ptr<linphone::Account> &account) {
+QVariantMap AccountSettingsModel::getAccountDescription (const shared_ptr<linphone::Account> &account) const{
 	QVariantMap map;
 	auto accountParams = account->getParams();
 	
@@ -570,3 +570,32 @@ void AccountSettingsModel::handleRegistrationStateChanged (
 		emit defaultRegistrationChanged();
 	emit registrationStateChanged();
 }
+
+//-------------------------------------------------------------
+//					SYNC SLOTS
+//-------------------------------------------------------------
+
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getUsedSipAddressAsStringUriOnly, AccountSettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getUsedSipAddressAsString, AccountSettingsModel)
+void AccountSettingsModel::getAccountDescriptionSlot(QVariantMap* result, const std::shared_ptr<linphone::Account> &account) const{
+	*result = getAccountDescription(account);
+}
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getConferenceUri, AccountSettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getVideoConferenceUri, AccountSettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getLimeServerUrl, AccountSettingsModel)
+void AccountSettingsModel::addOrUpdateAccountSlot (bool * result, const std::shared_ptr<linphone::Account> &account, const QVariantMap &data){
+	*result = addOrUpdateAccount(account, data);
+}
+void AccountSettingsModel::addOrUpdateAccountSlot (bool * result, const QVariantMap &data){
+	*result = addOrUpdateAccount(data);
+}
+void AccountSettingsModel::createAccountSlot(std::shared_ptr<linphone::Account> * result, const QString& assistantFile){
+	*result = createAccount(assistantFile);
+}
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getPrimaryUsername, AccountSettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getPrimaryDisplayName, AccountSettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getPrimarySipAddress, AccountSettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getUsername, AccountSettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QString, getDefaultAccountDomain, AccountSettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(QVariantList, getAccounts, AccountSettingsModel)
+DECLARE_SYNC_BODY_SLOT_CONST(RegistrationState, getRegistrationState, AccountSettingsModel)

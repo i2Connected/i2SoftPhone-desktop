@@ -81,7 +81,7 @@ Item {
 		}
 		
 		MenuItem {
-			visible: CoreManager.initialized && SettingsModel.isCheckForUpdateAvailable()
+			visible: true//CoreManager.initialized && SettingsModel.isCheckForUpdateAvailable()
 			//: 'Check for updates' : Item menu for checking updates
 			text: qsTr('checkForUpdates')
 			

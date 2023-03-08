@@ -24,6 +24,7 @@
 #include <QSortFilterProxyModel>
 #include "components/participant/ParticipantModel.hpp"
 #include "components/chat-room/ChatRoomModel.hpp"
+#include "components/chat-room/ChatRoomModelGUI.hpp"
 #include "app/proxyModel/ProxyListModel.hpp"
 
 class ConferenceModel;
@@ -37,10 +38,6 @@ public:
 	ParticipantListModel (ConferenceModel * conferenceModel, QObject *parent = Q_NULLPTR);
 	virtual ~ParticipantListModel();
 	
-	Q_PROPERTY(ChatRoomModel* chatRoomModel READ getChatRoomModel CONSTANT)
-	Q_PROPERTY(QString addressesToString READ addressesToString NOTIFY participantsChanged)
-	Q_PROPERTY(QString displayNamesToString READ displayNamesToString NOTIFY participantsChanged)
-	Q_PROPERTY(QString usernamesToString READ usernamesToString NOTIFY participantsChanged)
     
     void reset();
 	void update();
@@ -54,9 +51,10 @@ public:
 	void updateParticipants();	// Update list from Chat Room
 
 // Remove a chatroom
-	Q_INVOKABLE void remove (ParticipantModel *importer);
-	Q_INVOKABLE ChatRoomModel* getChatRoomModel() const;
-	Q_INVOKABLE ConferenceModel* getConferenceModel() const;
+	void remove (ParticipantModel *importer);
+	ChatRoomModel* getChatRoomModel() const;
+	ChatRoomModelGUI* getChatRoomModelGUI() const;
+	ConferenceModel* getConferenceModel() const;
 	std::list<std::shared_ptr<linphone::Address>> getParticipants()const;
 	
 	Q_INVOKABLE QString addressesToString()const;	
@@ -93,6 +91,12 @@ signals:
 private:
 	ChatRoomModel* mChatRoomModel = nullptr;
 	ConferenceModel *mConferenceModel = nullptr;
+	
+public slots:
+	DECLARE_SYNC_SLOT_CONST(ChatRoomModelGUI*, getChatRoomModelGUI)
+	DECLARE_SYNC_SLOT_CONST(QString, addressesToString)
+	DECLARE_SYNC_SLOT_CONST(QString, displayNamesToString)
+	DECLARE_SYNC_SLOT_CONST(QString, usernamesToString)
 };
 Q_DECLARE_METATYPE(QSharedPointer<ParticipantListModel>);
 #endif // PARTICIPANT_LIST_MODEL_H_

@@ -198,4 +198,5 @@ private:
   bool mIsOpened = false;
 };
 
+
 #endif // APP_H_

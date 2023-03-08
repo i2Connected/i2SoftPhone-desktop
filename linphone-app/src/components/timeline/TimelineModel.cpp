@@ -22,6 +22,7 @@
 #include "components/settings/AccountSettingsModel.hpp"
 #include "components/sip-addresses/SipAddressesModel.hpp"
 #include "components/chat-room/ChatRoomModel.hpp"
+#include "components/chat-room/ChatRoomModelGUI.hpp"
 #include "components/chat-room/ChatRoomListener.hpp"
 #include "utils/Utils.hpp"
 #include "app/App.hpp"
@@ -151,6 +152,10 @@ bool TimelineModel::isUpdating() const{
 
 ChatRoomModel *TimelineModel::getChatRoomModel() const{
 	return mChatRoomModel.get();
+}
+
+ChatRoomModelGUI *TimelineModel::getChatRoomModelGUI() const{
+	return new ChatRoomModelGUI(mChatRoomModel.get());
 }
 
 void TimelineModel::setSelected(const bool& selected){

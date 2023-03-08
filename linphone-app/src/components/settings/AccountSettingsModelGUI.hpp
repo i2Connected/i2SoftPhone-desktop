@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 Belledonne Communications SARL.
+ * Copyright (c) 2010-2023 Belledonne Communications SARL.
  *
  * This file is part of linphone-desktop
  * (see https://www.linphone.org).
@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ACCOUNT_SETTINGS_MODEL_H_
-#define ACCOUNT_SETTINGS_MODEL_H_
+#ifndef ACCOUNT_SETTINGS_MODEL_GUI_H_
+#define ACCOUNT_SETTINGS_MODEL_GUI_H_
 
 #include <linphone++/linphone.hh>
 #include <QObject>
@@ -29,10 +29,11 @@
 #include <QVector>
 
 #include "utils/CodeHelpersGUI.hpp"
+#include "AccountSettingsModel.hpp"
 
 // =============================================================================
 
-class AccountSettingsModel : public QObject {
+class AccountSettingsModelGUI : public QObject {
 	Q_OBJECT
 	
 	// Selected account.
@@ -63,17 +64,12 @@ public:
 	};
 	Q_ENUM(RegistrationState);
 	
-	AccountSettingsModel (QObject *parent = Q_NULLPTR);
+	AccountSettingsModelGUI (QObject *parent = Q_NULLPTR);
+	~AccountSettingsModelGUI();
 	
-	std::shared_ptr<const linphone::Address> getUsedSipAddress () const;
-	void setUsedSipAddress (const std::shared_ptr<const linphone::Address> &address);
-	
-	// Update account with parameters or add a new one in core.
-	bool addOrUpdateAccount (std::shared_ptr<linphone::Account> account, const std::shared_ptr<linphone::AccountParams>& accountParams);
-		
 	QString getUsedSipAddressAsStringUriOnly () const;
 	QString getUsedSipAddressAsString () const;
-	Q_INVOKABLE QVariantMap getAccountDescription (const std::shared_ptr<linphone::Account> &account) const;
+	Q_INVOKABLE QVariantMap getAccountDescription (const std::shared_ptr<linphone::Account> &account);
 	QString getConferenceUri() const;
 	QString getVideoConferenceUri() const;
 	QString getLimeServerUrl() const;
@@ -86,9 +82,9 @@ public:
 	QString getUsername () const;
 	QString getDefaultAccountDomain () const;
 	QVariantList getAccounts () const;
-	RegistrationState getRegistrationState () const;
+	AccountSettingsModelGUI::RegistrationState getRegistrationState () const;
 	
-
+signals:
 	Q_INVOKABLE void setDefaultAccount (const std::shared_ptr<linphone::Account> &account = nullptr);
 	Q_INVOKABLE void setDefaultAccountFromSipAddress (const QString &sipAddress);
 	Q_INVOKABLE void removeAccount (const std::shared_ptr<linphone::Account> &account);
@@ -111,46 +107,35 @@ signals:
 	void conferenceUriChanged();
 	void videoConferenceUriChanged();
 	void limeServerUrlChanged();
-	
 	void primaryDisplayNameChanged();
 	void primaryUsernameChanged();
 	void primarySipAddressChanged();
-	
 	void accountsChanged();
-	
-	void accountSettingsUpdated ();
+	void accountSettingsUpdated();
 	void defaultAccountChanged();
 	void publishPresenceChanged();
 	void defaultRegistrationChanged();
-
-private:
 	
-	void handleRegistrationStateChanged (
-			const std::shared_ptr<linphone::Account> &account,
-			linphone::RegistrationState state
-			);
+// Sync
+	DECLARE_SYNC_SIGNAL(QString, getUsedSipAddressAsStringUriOnly)
+	DECLARE_SYNC_SIGNAL(QString, getUsedSipAddressAsString)
+	void getAccountDescriptionSync(QVariantMap * result, const std::shared_ptr<linphone::Account> &account);
+	DECLARE_SYNC_SIGNAL(QString, getConferenceUri)
+	DECLARE_SYNC_SIGNAL(QString, getVideoConferenceUri)
+	DECLARE_SYNC_SIGNAL(QString, getLimeServerUrl)
+	void addOrUpdateAccountSync (bool * result, const std::shared_ptr<linphone::Account> &account, const QVariantMap &data);
+	void addOrUpdateAccountSync (bool * result, const QVariantMap &data);
+	void createAccountSync (std::shared_ptr<linphone::Account>* result, const QString& assistantFile);
+	DECLARE_SYNC_SIGNAL(QString, getPrimaryUsername)
+	DECLARE_SYNC_SIGNAL(QString, getPrimaryDisplayName)
+	DECLARE_SYNC_SIGNAL(QString, getPrimarySipAddress)
+	DECLARE_SYNC_SIGNAL(QString, getUsername)
+	DECLARE_SYNC_SIGNAL(QString, getDefaultAccountDomain)
+	DECLARE_SYNC_SIGNAL(QVariantList, getAccounts)
+	DECLARE_SYNC_SIGNAL_ENUM(RegistrationState, getRegistrationState, AccountSettingsModel)
 	
-	QVector<std::shared_ptr<linphone::Account> > mRemovingAccounts;
-	std::shared_ptr<linphone::Account> mSelectedAccount;
-	
-public slots:
-
-	DECLARE_SYNC_SLOT_CONST(QString, getUsedSipAddressAsStringUriOnly)
-	DECLARE_SYNC_SLOT_CONST(QString, getUsedSipAddressAsString)
-	void getAccountDescriptionSlot(QVariantMap* result, const std::shared_ptr<linphone::Account> &account) const;
-	DECLARE_SYNC_SLOT_CONST(QString, getConferenceUri)
-	DECLARE_SYNC_SLOT_CONST(QString, getVideoConferenceUri)
-	DECLARE_SYNC_SLOT_CONST(QString, getLimeServerUrl)
-	void addOrUpdateAccountSlot (bool * result, const std::shared_ptr<linphone::Account> &account, const QVariantMap &data);
-	void addOrUpdateAccountSlot (bool * result, const QVariantMap &data);
-	void createAccountSlot(std::shared_ptr<linphone::Account> * result, const QString& assistantFile);
-	DECLARE_SYNC_SLOT_CONST(QString, getPrimaryUsername)
-	DECLARE_SYNC_SLOT_CONST(QString, getPrimaryDisplayName)
-	DECLARE_SYNC_SLOT_CONST(QString, getPrimarySipAddress)
-	DECLARE_SYNC_SLOT_CONST(QString, getUsername)
-	DECLARE_SYNC_SLOT_CONST(QString, getDefaultAccountDomain)
-	DECLARE_SYNC_SLOT_CONST(QVariantList, getAccounts)
-	DECLARE_SYNC_SLOT_CONST(RegistrationState, getRegistrationState)
 };
+
+Q_DECLARE_METATYPE(std::shared_ptr<linphone::Account>);
 
 #endif

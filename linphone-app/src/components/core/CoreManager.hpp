@@ -28,6 +28,9 @@
 #include <QMutex>
 #include <QSharedPointer>
 
+#include "components/settings/AccountSettingsModelGUI.hpp"
+#include "components/settings/SettingsModelGUI.hpp"
+
 // =============================================================================
 
 class QTimer;
@@ -56,11 +59,6 @@ class LinphoneThread;
 class CoreManager : public QObject {
 	Q_OBJECT
 	
-	Q_PROPERTY(QString version READ getVersion CONSTANT)
-	Q_PROPERTY(QString downloadUrl READ getDownloadUrl CONSTANT)
-	Q_PROPERTY(int eventCount READ getEventCount NOTIFY eventCountChanged)
-	Q_PROPERTY(int callLogsCount READ getCallLogsCount NOTIFY callLogsCountChanged)
-	Q_PROPERTY(bool initialized READ isInitialized NOTIFY coreManagerInitialized)
 public:
 	bool started () const {
 		return mStarted;
@@ -118,15 +116,12 @@ public:
 		return mSipAddressesModel;
 	}
 	
-	SettingsModel *getSettingsModel () const {
-		Q_CHECK_PTR(mSettingsModel);
-		return mSettingsModel;
-	}
+	SettingsModel *getSettingsModel () const;
+	SettingsModelGUI *getSettingsModelGUI () const;
 	
-	AccountSettingsModel *getAccountSettingsModel () const {
-		Q_CHECK_PTR(mAccountSettingsModel);
-		return mAccountSettingsModel;
-	}
+	AccountSettingsModel *getAccountSettingsModel () const;
+	AccountSettingsModelGUI *getAccountSettingsModelGUI () const;
+	
 	LdapListModel *getLdapListModel() const{
 		return mLdapListModel;
 	}
@@ -155,14 +150,14 @@ public:
 	
 	// Must be used in a qml scene.
 	// Warning: The ownership of `VcardModel` is `QQmlEngine::JavaScriptOwnership` by default.
-	Q_INVOKABLE VcardModel *createDetachedVcardModel () const;
+	VcardModel *createDetachedVcardModel () const;
 	
 	Q_INVOKABLE void forceRefreshRegisters ();
 	void updateUnreadMessageCount();
 	void stateChanged(Qt::ApplicationState pState);
 	
-	Q_INVOKABLE void sendLogs () const;
-	Q_INVOKABLE void cleanLogs () const;
+	void sendLogs () const;
+	void cleanLogs () const;
 	
 	int getCallLogsCount() const;
 	int getMissedCallCount(const QString &peerAddress, const QString &localAddress) const;// Get missed call count from a chat (useful for showing bubbles on Timelines)
@@ -173,8 +168,8 @@ public:
 	static bool isInstanciated(){return mInstance!=nullptr;}
 	bool isInitialized() const;
 	
-	Q_INVOKABLE bool isLastRemoteProvisioningGood();
-	Q_INVOKABLE QString getUserAgent()const;
+	bool isLastRemoteProvisioningGood();
+	QString getUserAgent()const;
 	void updateUserAgent();
 	void addingAccount(const std::shared_ptr<const linphone::AccountParams> params);
 	
@@ -228,7 +223,9 @@ private:
 	
 	SipAddressesModel *mSipAddressesModel = nullptr;
 	SettingsModel *mSettingsModel = nullptr;
+	SettingsModelGUI *mSettingsModelGUI = nullptr;
 	AccountSettingsModel *mAccountSettingsModel = nullptr;
+	AccountSettingsModelGUI *mAccountSettingsModelGUI = nullptr;
 	
 	EventCountNotifier *mEventCountNotifier = nullptr;
 

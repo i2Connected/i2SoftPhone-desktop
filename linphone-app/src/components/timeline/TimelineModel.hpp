@@ -32,6 +32,7 @@
 #include "../contact/ContactModel.hpp"
 
 class ChatRoomModel;
+class ChatRoomModelGUI;
 class ChatRoomListener;
 class TimelineListModel;
 
@@ -49,7 +50,7 @@ public:
 	
 	Q_PROPERTY(QString fullPeerAddress READ getFullPeerAddress NOTIFY fullPeerAddressChanged)
 	Q_PROPERTY(QString fullLocalAddress READ getFullLocalAddress NOTIFY fullLocalAddressChanged)
-	Q_PROPERTY(ChatRoomModel* chatRoomModel READ getChatRoomModel CONSTANT)
+	Q_PROPERTY(ChatRoomModelGUI* chatRoomModel READ getChatRoomModelGUI CONSTANT)
 	
 	Q_PROPERTY(bool selected MEMBER mSelected WRITE setSelected NOTIFY selectedChanged)
 	Q_PROPERTY(bool updating READ isUpdating NOTIFY updatingChanged) 
@@ -67,7 +68,8 @@ public:
 	void setSelected(const bool& selected);
 	void delaySelected();
 	
-	Q_INVOKABLE ChatRoomModel* getChatRoomModel() const;
+	ChatRoomModel* getChatRoomModel() const;
+	Q_INVOKABLE ChatRoomModelGUI* getChatRoomModelGUI() const;
 	
 	void disconnectChatRoomListener();
 

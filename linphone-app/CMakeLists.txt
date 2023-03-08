@@ -214,6 +214,7 @@ set(SOURCES
 	src/components/chat-room/ChatRoomInitializer.cpp
 	src/components/chat-room/ChatRoomListener.cpp
 	src/components/chat-room/ChatRoomModel.cpp
+	src/components/chat-room/ChatRoomModelGUI.cpp
 	src/components/chat-room/ChatRoomProxyModel.cpp
 	src/components/codecs/AbstractCodecsModel.cpp
 	src/components/codecs/AudioCodecsModel.cpp
@@ -241,7 +242,7 @@ set(SOURCES
 	src/components/content/ContentProxyModel.cpp
 	src/components/core/CoreHandlers.cpp
 	src/components/core/CoreManager.cpp
-	src/components/core/CoreManagerGUI.cpp
+	src/gui/core/CoreManagerGUI.cpp
 	src/components/core/event-count-notifier/AbstractEventCountNotifier.cpp
 	src/components/file/FileDownloader.cpp
 	src/components/file/FileExtractor.cpp
@@ -289,7 +290,9 @@ set(SOURCES
 	src/components/search/SearchSipAddressesModel.cpp
 	src/components/search/SearchSipAddressesProxyModel.cpp
 	src/components/settings/AccountSettingsModel.cpp
+	src/components/settings/AccountSettingsModelGUI.cpp
 	src/components/settings/SettingsModel.cpp
+	src/components/settings/SettingsModelGUI.cpp
 	src/components/sip-addresses/SipAddressesModel.cpp
 	src/components/sip-addresses/SipAddressesProxyModel.cpp
 	src/components/sip-addresses/SipAddressesSorter.cpp
@@ -355,6 +358,7 @@ set(HEADERS
 	src/components/chat-room/ChatRoomInitializer.hpp
 	src/components/chat-room/ChatRoomListener.hpp
 	src/components/chat-room/ChatRoomModel.hpp
+	src/components/chat-room/ChatRoomModelGUI.hpp
 	src/components/chat-room/ChatRoomProxyModel.hpp
 	src/components/codecs/AbstractCodecsModel.hpp
 	src/components/codecs/AudioCodecsModel.hpp
@@ -383,7 +387,7 @@ set(HEADERS
 	src/components/content/ContentProxyModel.hpp
 	src/components/core/CoreHandlers.hpp
 	src/components/core/CoreManager.hpp
-	src/components/core/CoreManagerGUI.hpp
+	src/gui/core/CoreManagerGUI.hpp
 	src/components/core/event-count-notifier/AbstractEventCountNotifier.hpp
 	src/components/file/FileDownloader.hpp
 	src/components/file/FileExtractor.hpp
@@ -432,7 +436,9 @@ set(HEADERS
 	src/components/search/SearchSipAddressesModel.hpp
 	src/components/search/SearchSipAddressesProxyModel.hpp
 	src/components/settings/AccountSettingsModel.hpp
+	src/components/settings/AccountSettingsModelGUI.hpp
 	src/components/settings/SettingsModel.hpp
+	src/components/settings/SettingsModelGUI.hpp
 	src/components/sip-addresses/SipAddressesModel.hpp
 	src/components/sip-addresses/SipAddressesProxyModel.hpp
 	src/components/sip-addresses/SipAddressesSorter.hpp
@@ -447,6 +453,7 @@ set(HEADERS
 	src/components/tunnel/TunnelConfigListModel.hpp
 	src/components/tunnel/TunnelConfigProxyModel.hpp
 	src/components/url-handlers/UrlHandlers.hpp
+	src/utils/CodeHelpersGUI.hpp
 	src/utils/Constants.hpp
 	src/utils/LinphoneEnums.hpp
 	src/utils/MediastreamerUtils.hpp
