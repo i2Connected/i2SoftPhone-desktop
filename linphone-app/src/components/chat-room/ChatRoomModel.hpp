@@ -26,10 +26,12 @@
 #include <QDateTime>
 
 #include "utils/LinphoneEnums.hpp"
-
+#include "utils/CodeHelpersGUI.hpp"
 // =============================================================================
 // Fetch all N messages of a ChatRoom.
 // =============================================================================
+
+#include "components/participant/ParticipantListModelGUI.hpp"
 
 class CoreHandlers;
 class ParticipantModel;
@@ -59,44 +61,6 @@ public:
 	};
 	Q_ENUM(EntryType)
 	
-	Q_PROPERTY(QString subject READ getSubject WRITE setSubject NOTIFY subjectChanged)
-	Q_PROPERTY(QDateTime lastUpdateTime MEMBER mLastUpdateTime WRITE setLastUpdateTime NOTIFY lastUpdateTimeChanged)
-	Q_PROPERTY(int unreadMessagesCount MEMBER mUnreadMessagesCount WRITE setUnreadMessagesCount NOTIFY unreadMessagesCountChanged)
-	Q_PROPERTY(int missedCallsCount MEMBER mMissedCallsCount WRITE setMissedCallsCount NOTIFY missedCallsCountChanged)
-	
-	Q_PROPERTY(int securityLevel READ getSecurityLevel NOTIFY securityLevelChanged)
-	Q_PROPERTY(bool groupEnabled READ isGroupEnabled NOTIFY groupEnabledChanged)
-	Q_PROPERTY(bool isConference READ isConference CONSTANT)
-	Q_PROPERTY(bool isOneToOne READ isOneToOne CONSTANT)
-	Q_PROPERTY(bool haveEncryption READ haveEncryption CONSTANT)
-	Q_PROPERTY(bool isMeAdmin READ isMeAdmin NOTIFY isMeAdminChanged)
-	Q_PROPERTY(bool canHandleParticipants READ canHandleParticipants CONSTANT)
-	
-	Q_PROPERTY(bool isComposing READ getIsRemoteComposing NOTIFY isRemoteComposingChanged)
-	Q_PROPERTY(QList<QString> composers READ getComposers NOTIFY isRemoteComposingChanged)
-	Q_PROPERTY(bool isReadOnly READ isReadOnly NOTIFY isReadOnlyChanged)
-	Q_PROPERTY(bool updating READ isUpdating NOTIFY updatingChanged)
-	
-	Q_PROPERTY(QString sipAddress READ getFullPeerAddress NOTIFY fullPeerAddressChanged)
-	Q_PROPERTY(QString sipAddressUriOnly READ getPeerAddress NOTIFY fullPeerAddressChanged)
-	Q_PROPERTY(QString username READ getUsername NOTIFY usernameChanged)
-	Q_PROPERTY(QString avatar READ getAvatar NOTIFY avatarChanged)
-	Q_PROPERTY(int presenceStatus READ getPresenceStatus NOTIFY presenceStatusChanged)
-	Q_PROPERTY(LinphoneEnums::ChatRoomState state READ getState NOTIFY stateChanged)
-	
-	Q_PROPERTY(long ephemeralLifetime READ getEphemeralLifetime WRITE setEphemeralLifetime NOTIFY ephemeralLifetimeChanged)
-	Q_PROPERTY(bool ephemeralEnabled READ isEphemeralEnabled WRITE setEphemeralEnabled NOTIFY ephemeralEnabledChanged)
-	Q_PROPERTY(bool canBeEphemeral READ canBeEphemeral NOTIFY canBeEphemeralChanged)
-	Q_PROPERTY(bool markAsReadEnabled READ markAsReadEnabled WRITE enableMarkAsRead NOTIFY markAsReadEnabledChanged)
-	Q_PROPERTY(bool notificationsEnabled READ isNotificationsEnabled WRITE enableNotifications NOTIFY notificationsEnabledChanged)
-	
-	Q_PROPERTY(ParticipantListModel* participants READ getParticipantListModel CONSTANT)
-	
-	Q_PROPERTY(ChatMessageModel * reply READ getReply WRITE setReply NOTIFY replyChanged)
-	
-	Q_PROPERTY(bool entriesLoading READ isEntriesLoading WRITE setEntriesLoading NOTIFY entriesLoadingChanged)
-	
-	
 	static QSharedPointer<ChatRoomModel> create(const std::shared_ptr<linphone::ChatRoom>& chatRoom, const std::list<std::shared_ptr<linphone::CallLog>>& callLogs = std::list<std::shared_ptr<linphone::CallLog>>());
 	ChatRoomModel (const std::shared_ptr<linphone::ChatRoom>& chatRoom, const std::list<std::shared_ptr<linphone::CallLog>>& callLogs = std::list<std::shared_ptr<linphone::CallLog>>(), QObject * parent = nullptr);
 	
@@ -124,7 +88,7 @@ public:
 	bool isReadOnly() const;
 	bool isEphemeralEnabled() const;
 	long getEphemeralLifetime() const;
-	bool canBeEphemeral();
+	bool canBeEphemeral() const;
 	bool haveEncryption() const;
 	bool haveConferenceAddress() const;
 	bool markAsReadEnabled() const;
@@ -141,11 +105,14 @@ public:
 	bool isBasic() const;
 	bool isUpdating() const;
 	bool isNotificationsEnabled() const;
+	QDateTime getLastUpdateTime() const;
+	int getUnreadMessagesCount() const;
+	int getMissedCallsCount() const;
 	
-	ParticipantListModel* getParticipantListModel() const;
+	ParticipantListModelGUI* getParticipantListModel() const;
 	std::list<std::shared_ptr<linphone::Participant>> getParticipants(const bool& withMe = true) const;
 	std::shared_ptr<linphone::ChatRoom> getChatRoom();
-	QList<QString> getComposers();
+	QList<QString> getComposers() const;
 	QString getParticipantAddress();	// return peerAddress if not secure else return the first participant SIP address.
 	int getAllUnreadCount();	// Return unread messages and missed call.
 		
@@ -322,6 +289,42 @@ private:
 	bool mPostModelChangedEvents = true;
 	
 	QWeakPointer<ChatRoomModel> mSelf;
+	
+public slots:
+
+	DECLARE_SYNC_SLOT_CONST(QString, getPeerAddress)
+	DECLARE_SYNC_SLOT_CONST(QString, getLocalAddress)
+	DECLARE_SYNC_SLOT_CONST(QString, getFullPeerAddress)
+	DECLARE_SYNC_SLOT_CONST(QString, getFullLocalAddress)
+	DECLARE_SYNC_SLOT_CONST(QString, getConferenceAddress)
+	DECLARE_SYNC_SLOT_CONST(QString, getSubject)
+	DECLARE_SYNC_SLOT_CONST(QString, getUsername)
+	DECLARE_SYNC_SLOT_CONST(QString, getAvatar)
+	DECLARE_SYNC_SLOT_CONST(int, getPresenceStatus)
+	DECLARE_SYNC_SLOT_CONST(LinphoneEnums::ChatRoomState , getState)
+	DECLARE_SYNC_SLOT_CONST(bool, isReadOnly)
+	DECLARE_SYNC_SLOT_CONST(bool, isEphemeralEnabled)
+	DECLARE_SYNC_SLOT_CONST(long, getEphemeralLifetime)
+	DECLARE_SYNC_SLOT_CONST(bool, canBeEphemeral)
+	DECLARE_SYNC_SLOT_CONST(bool, haveEncryption)
+	DECLARE_SYNC_SLOT_CONST(bool, markAsReadEnabled)
+	DECLARE_SYNC_SLOT_CONST(bool, isSecure)
+	DECLARE_SYNC_SLOT_CONST(int, getSecurityLevel)
+	DECLARE_SYNC_SLOT_CONST(bool, isGroupEnabled)
+	DECLARE_SYNC_SLOT_CONST(bool, isConference)
+	DECLARE_SYNC_SLOT_CONST(bool, isOneToOne)
+	DECLARE_SYNC_SLOT_CONST(bool, isMeAdmin)
+	DECLARE_SYNC_SLOT_CONST(bool, canHandleParticipants)
+	DECLARE_SYNC_SLOT_CONST(bool, getIsRemoteComposing)
+	DECLARE_SYNC_SLOT_CONST(bool, isEntriesLoading)
+	DECLARE_SYNC_SLOT_CONST(bool, isUpdating)
+	DECLARE_SYNC_SLOT_CONST(bool, isNotificationsEnabled)
+	DECLARE_SYNC_SLOT_CONST(ParticipantListModelGUI*, getParticipantListModel)
+	DECLARE_SYNC_SLOT_CONST(QList<QString>, getComposers)
+	DECLARE_SYNC_SLOT_CONST(ChatMessageModel*, getReply)
+	DECLARE_SYNC_SLOT_CONST(QDateTime, getLastUpdateTime)
+	DECLARE_SYNC_SLOT_CONST(int, getUnreadMessagesCount)
+	DECLARE_SYNC_SLOT_CONST(int, getMissedCallsCount)
 };
 
 Q_DECLARE_METATYPE(QSharedPointer<ChatRoomModel>)

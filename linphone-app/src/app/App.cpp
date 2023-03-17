@@ -51,6 +51,7 @@
 #include "translator/DefaultTranslator.hpp"
 #include "utils/Utils.hpp"
 #include "utils/Constants.hpp"
+#include "components/chat-room/ChatRoomModelGUI.hpp"
 #include "components/other/desktop-tools/DesktopTools.hpp"
 
 #include "components/timeline/TimelineModel.hpp"
@@ -61,6 +62,10 @@
 #include "components/participant/ParticipantListModel.hpp"
 #include "components/participant/ParticipantProxyModel.hpp"
 
+#include <linphone++/enums.hh>
+#include <linphone++/linphone.hh>
+
+Q_DECLARE_METATYPE(linphone::ConfiguringState)
 // =============================================================================
 
 using namespace std;
@@ -200,8 +205,7 @@ bool App::setFetchConfig (QCommandLineParser *parser) {
 
 
 App::App (int &argc, char *argv[]) : SingleApplication(argc, argv, true, Mode::User | Mode::ExcludeAppPath | Mode::ExcludeAppVersion) {
-	
-	connect(this, SIGNAL(applicationStateChanged(Qt::ApplicationState)), this, SLOT(stateChanged(Qt::ApplicationState)));
+		connect(this, SIGNAL(applicationStateChanged(Qt::ApplicationState)), this, SLOT(stateChanged(Qt::ApplicationState)));
 	
 	setWindowIcon(QIcon(Constants::WindowIconPath));
 	
@@ -313,6 +317,7 @@ static QQuickWindow *createSubWindow (QQmlApplicationEngine *engine, const char 
 	Q_ASSERT(object);
 	
 	QQmlEngine::setObjectOwnership(object, QQmlEngine::CppOwnership);
+	object->moveToThread(QApplication::instance()->thread());
 	object->setParent(engine);
 	
 	return qobject_cast<QQuickWindow *>(object);
@@ -451,7 +456,7 @@ void App::initContentApp () {
 	
 	QObject::connect(
 				CoreManager::getInstance(),
-				&CoreManager::coreManagerInitialized, CoreManager::getInstance(),
+				&CoreManager::coreManagerInitialized, this,
 				[this, mustBeIconified]() mutable {
 		if(CoreManager::getInstance()->started())
 			openAppAfterInit(mustBeIconified);
@@ -658,6 +663,7 @@ void App::registerTypes () {
 	qRegisterMetaType<QSharedPointer<ChatCallModel>>();
 	qRegisterMetaType<QSharedPointer<ConferenceInfoModel>>();
 	//qRegisterMetaType<std::shared_ptr<ChatEvent>>();
+	qRegisterMetaType<linphone::ConfiguringState>();
 	LinphoneEnums::registerMetaTypes();
 	
 	registerType<AssistantModel>("AssistantModel");
@@ -667,7 +673,7 @@ void App::registerTypes () {
 	registerType<ChatRoomProxyModel>("ChatRoomProxyModel");
 	registerType<ConferenceHelperModel>("ConferenceHelperModel");
 	registerType<ConferenceProxyModel>("ConferenceProxyModel");
-	registerType<ConferenceInfoModel>("ConferenceInfoModel");
+	registerType<ConferenceInfoModelGUI>("ConferenceInfoModel");
 	registerType<ConferenceInfoProxyModel>("ConferenceInfoProxyModel");
 	registerType<ContactsListProxyModel>("ContactsListProxyModel");
 	registerType<ContactsImporterListProxyModel>("ContactsImporterListProxyModel");
@@ -705,7 +711,7 @@ void App::registerTypes () {
 	registerUncreatableType<ChatCallModel>("ChatCallModel");
 	registerUncreatableType<ChatMessageModel>("ChatMessageModel");
 	registerUncreatableType<ChatNoticeModel>("ChatNoticeModel");
-	registerUncreatableType<ChatRoomModel>("ChatRoomModel");
+	registerUncreatableType<ChatRoomModelGUI>("ChatRoomModel");
 	registerUncreatableType<ColorModel>("ColorModel");
 	registerUncreatableType<ImageModel>("ImageModel");
 	registerUncreatableType<ConferenceHelperModel::ConferenceAddModel>("ConferenceAddModel");
@@ -741,9 +747,9 @@ void App::registerSharedTypes () {
 	qInfo() << QStringLiteral("Registering shared types...");
 	
 	registerSharedSingletonType<App, &App::getInstance>("App");
-	registerSharedSingletonType<CoreManager, &CoreManager::getInstance>("CoreManager");
-	registerSharedSingletonType<SettingsModel, &CoreManager::getSettingsModel>("SettingsModel");
-	registerSharedSingletonType<AccountSettingsModel, &CoreManager::getAccountSettingsModel>("AccountSettingsModel");
+	registerSharedSingletonType<CoreManagerGUI, &CoreManager::getInstanceGUI>("CoreManager");
+	registerSharedSingletonType<SettingsModelGUI, &CoreManager::getSettingsModelGUI>("SettingsModel");
+	registerSharedSingletonType<AccountSettingsModelGUI, &CoreManager::getAccountSettingsModelGUI>("AccountSettingsModel");
 	registerSharedSingletonType<SipAddressesModel, &CoreManager::getSipAddressesModel>("SipAddressesModel");  
 	registerSharedSingletonType<CallsListModel, &CoreManager::getCallsListModel>("CallsListModel");
 	registerSharedSingletonType<ContactsListModel, &CoreManager::getContactsListModel>("ContactsListModel");
@@ -1029,7 +1035,7 @@ void App::openAppAfterInit (bool mustBeIconified) {
 	auto coreManager = CoreManager::getInstance();
 	coreManager->getSettingsModel()->updateCameraMode();
 	// Create other windows.
-	mCallsWindow = createSubWindow(mEngine, Constants::QmlViewCallsWindow);
+	//mCallsWindow = createSubWindow(mEngine, Constants::QmlViewCallsWindow);
 	mSettingsWindow = createSubWindow(mEngine, Constants::QmlViewSettingsWindow);
 	QObject::connect(mSettingsWindow, &QWindow::visibilityChanged, this, [coreManager](QWindow::Visibility visibility) {
 		if (visibility == QWindow::Hidden) {

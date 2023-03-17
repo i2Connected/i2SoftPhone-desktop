@@ -34,7 +34,8 @@
 #include "TimelineListModel.hpp"
 
 #include <QDebug>
-
+#include <QTimer>
+#include <QApplication>
 
 // =============================================================================
 
@@ -51,6 +52,8 @@ TimelineListModel::TimelineListModel (QObject *parent) : ProxyListModel(parent) 
 	
 	connect(CoreManager::getInstance()->getSettingsModel(), &SettingsModel::hideEmptyChatRoomsChanged, this, &TimelineListModel::update);
 	connect(CoreManager::getInstance()->getAccountSettingsModel(), &AccountSettingsModel::defaultRegistrationChanged, this, &TimelineListModel::update);
+	
+	//QTimer::singleShot(0,this, &TimelineListModel::updateTimelines);
 	updateTimelines ();
 }
 
@@ -301,6 +304,7 @@ void TimelineListModel::updateTimelines () {
 			QSharedPointer<TimelineModel> model = TimelineModel::create(this, dbChatRoom, callLogs);
 			if( model){
 				connect(model.get(), SIGNAL(selectedChanged(bool)), this, SLOT(onSelectedHasChanged(bool)));
+				model->moveToThread(QApplication::instance()->thread());
 				add(model);
 			}
 		}

@@ -214,6 +214,7 @@ set(SOURCES
 	src/components/chat-room/ChatRoomInitializer.cpp
 	src/components/chat-room/ChatRoomListener.cpp
 	src/components/chat-room/ChatRoomModel.cpp
+	src/components/chat-room/ChatRoomModelGUI.cpp
 	src/components/chat-room/ChatRoomProxyModel.cpp
 	src/components/codecs/AbstractCodecsModel.cpp
 	src/components/codecs/AudioCodecsModel.cpp
@@ -224,6 +225,7 @@ set(SOURCES
 	src/components/conference/ConferenceModel.cpp
 	src/components/conference/ConferenceProxyModel.cpp
 	src/components/conferenceInfo/ConferenceInfoModel.cpp
+	src/components/conferenceInfo/ConferenceInfoModelGUI.cpp
 	src/components/conferenceInfo/ConferenceInfoListModel.cpp
 	src/components/conferenceInfo/ConferenceInfoProxyModel.cpp
 	src/components/conferenceScheduler/ConferenceScheduler.cpp
@@ -241,6 +243,7 @@ set(SOURCES
 	src/components/content/ContentProxyModel.cpp
 	src/components/core/CoreHandlers.cpp
 	src/components/core/CoreManager.cpp
+	src/gui/core/CoreManagerGUI.cpp
 	src/components/core/event-count-notifier/AbstractEventCountNotifier.cpp
 	src/components/file/FileDownloader.cpp
 	src/components/file/FileExtractor.cpp
@@ -252,6 +255,7 @@ set(SOURCES
 	src/components/ldap/LdapModel.cpp
 	src/components/ldap/LdapListModel.cpp
 	src/components/ldap/LdapProxyModel.cpp
+	#src/components/linphoneObject/LinphoneThread.cpp
 	src/components/notifier/Notifier.cpp
 	src/components/other/clipboard/Clipboard.cpp
 	src/components/other/colors/ColorModel.cpp
@@ -268,6 +272,7 @@ set(SOURCES
 	src/components/other/units/Units.cpp
 	src/components/participant/ParticipantModel.cpp
 	src/components/participant/ParticipantListModel.cpp
+	src/components/participant/ParticipantListModelGUI.cpp
 	src/components/participant/ParticipantProxyModel.cpp
 	src/components/participant/ParticipantDeviceListener.cpp
 	src/components/participant/ParticipantDeviceModel.cpp
@@ -287,7 +292,9 @@ set(SOURCES
 	src/components/search/SearchSipAddressesModel.cpp
 	src/components/search/SearchSipAddressesProxyModel.cpp
 	src/components/settings/AccountSettingsModel.cpp
+	src/components/settings/AccountSettingsModelGUI.cpp
 	src/components/settings/SettingsModel.cpp
+	src/components/settings/SettingsModelGUI.cpp
 	src/components/sip-addresses/SipAddressesModel.cpp
 	src/components/sip-addresses/SipAddressesProxyModel.cpp
 	src/components/sip-addresses/SipAddressesSorter.cpp
@@ -353,6 +360,7 @@ set(HEADERS
 	src/components/chat-room/ChatRoomInitializer.hpp
 	src/components/chat-room/ChatRoomListener.hpp
 	src/components/chat-room/ChatRoomModel.hpp
+	src/components/chat-room/ChatRoomModelGUI.hpp
 	src/components/chat-room/ChatRoomProxyModel.hpp
 	src/components/codecs/AbstractCodecsModel.hpp
 	src/components/codecs/AudioCodecsModel.hpp
@@ -364,6 +372,7 @@ set(HEADERS
 	src/components/conference/ConferenceModel.hpp
 	src/components/conference/ConferenceProxyModel.hpp
 	src/components/conferenceInfo/ConferenceInfoModel.hpp
+	src/components/conferenceInfo/ConferenceInfoModelGUI.hpp
 	src/components/conferenceInfo/ConferenceInfoListModel.hpp
 	src/components/conferenceInfo/ConferenceInfoProxyModel.hpp
 	src/components/conferenceScheduler/ConferenceScheduler.hpp
@@ -381,6 +390,7 @@ set(HEADERS
 	src/components/content/ContentProxyModel.hpp
 	src/components/core/CoreHandlers.hpp
 	src/components/core/CoreManager.hpp
+	src/gui/core/CoreManagerGUI.hpp
 	src/components/core/event-count-notifier/AbstractEventCountNotifier.hpp
 	src/components/file/FileDownloader.hpp
 	src/components/file/FileExtractor.hpp
@@ -392,6 +402,7 @@ set(HEADERS
 	src/components/ldap/LdapModel.hpp
 	src/components/ldap/LdapListModel.hpp
 	src/components/ldap/LdapProxyModel.hpp
+	src/components/linphoneObject/LinphoneThread.hpp
 	src/components/notifier/Notifier.hpp
 	src/components/other/clipboard/Clipboard.hpp
 	src/components/other/colors/ColorModel.hpp
@@ -409,6 +420,7 @@ set(HEADERS
 	src/components/other/units/Units.hpp
 	src/components/participant/ParticipantModel.hpp
 	src/components/participant/ParticipantListModel.hpp
+	src/components/participant/ParticipantListModelGUI.hpp
 	src/components/participant/ParticipantProxyModel.hpp
 	src/components/participant/ParticipantDeviceListener.hpp
 	src/components/participant/ParticipantDeviceModel.hpp
@@ -428,7 +440,9 @@ set(HEADERS
 	src/components/search/SearchSipAddressesModel.hpp
 	src/components/search/SearchSipAddressesProxyModel.hpp
 	src/components/settings/AccountSettingsModel.hpp
+	src/components/settings/AccountSettingsModelGUI.hpp
 	src/components/settings/SettingsModel.hpp
+	src/components/settings/SettingsModelGUI.hpp
 	src/components/sip-addresses/SipAddressesModel.hpp
 	src/components/sip-addresses/SipAddressesProxyModel.hpp
 	src/components/sip-addresses/SipAddressesSorter.hpp
@@ -443,6 +457,7 @@ set(HEADERS
 	src/components/tunnel/TunnelConfigListModel.hpp
 	src/components/tunnel/TunnelConfigProxyModel.hpp
 	src/components/url-handlers/UrlHandlers.hpp
+	src/utils/CodeHelpersGUI.hpp
 	src/utils/Constants.hpp
 	src/utils/LinphoneEnums.hpp
 	src/utils/MediastreamerUtils.hpp

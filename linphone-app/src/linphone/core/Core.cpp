@@ -34,13 +34,12 @@
 #include "components/contact/VcardModel.hpp"
 #include "components/contacts/ContactsListModel.hpp"
 #include "components/contacts/ContactsImporterListModel.hpp"
-#include "gui/core/CoreManagerGUI.hpp"
+#include "components/core/CoreManagerGUI.hpp"
 #include "components/history/HistoryModel.hpp"
 #include "components/ldap/LdapListModel.hpp"
 #include "components/recorder/RecorderManager.hpp"
 #include "components/settings/AccountSettingsModel.hpp"
 #include "components/settings/SettingsModel.hpp"
-
 #include "components/sip-addresses/SipAddressesModel.hpp"
 #include "components/timeline/TimelineListModel.hpp"
 
@@ -70,7 +69,34 @@ CoreManager *CoreManager::mInstance=nullptr;
 CoreManagerGUI *CoreManager::mInstanceGUI=nullptr;
 QSharedPointer<LinphoneThread> CoreManager::gLinphoneThread = nullptr;
 
-CoreManager::CoreManager (QObject *parent, const QString &configPath) :
+
+void Core::connectTo(CoreListener * listener){
+	//connect(listener, &CoreListener::accountRegistrationStateChanged, this, &Core::onAccountRegistrationStateChanged);
+	connect(listener, &CoreListener::authenticationRequested, this, &Core::onAuthenticationRequested);
+	connect(listener, &CoreListener::callEncryptionChanged, this, &Core::onCallEncryptionChanged);
+	connect(listener, &CoreListener::callLogUpdated, this, &Core::onCallLogUpdated);
+	connect(listener, &CoreListener::callStateChanged, this, &Core::onCallStateChanged);
+	connect(listener, &CoreListener::callStatsUpdated, this, &Core::onCallStatsUpdated);
+	connect(listener, &CoreListener::callCreated, this, &Core::onCallCreated);
+	connect(listener, &CoreListener::chatRoomStateChanged, this, &Core::onChatRoomStateChanged);
+	connect(listener, &CoreListener::configuringStatus, this, &Core::onConfiguringStatus);
+	connect(listener, &CoreListener::dtmfReceived, this, &Core::onDtmfReceived);
+	connect(listener, &CoreListener::globalStateChanged, this, &Core::onGlobalStateChanged);
+	connect(listener, &CoreListener::isComposingReceived, this, &Core::onIsComposingReceived);
+	connect(listener, &CoreListener::logCollectionUploadStateChanged, this, &Core::onLogCollectionUploadStateChanged);
+	connect(listener, &CoreListener::logCollectionUploadProgressIndication, this, &Core::onLogCollectionUploadProgressIndication);
+	connect(listener, &CoreListener::messageReceived, this, &Core::onMessageReceived);
+	connect(listener, &CoreListener::messagesReceived, this, &Core::onMessagesReceived);
+	connect(listener, &CoreListener::notifyPresenceReceivedForUriOrTel, this, &Core::onNotifyPresenceReceivedForUriOrTel);
+	connect(listener, &CoreListener::notifyPresenceReceived, this, &Core::onNotifyPresenceReceived);
+	connect(listener, &CoreListener::qrcodeFound, this, &Core::onQrcodeFound);
+	connect(listener, &CoreListener::transferStateChanged, this, &Core::onTransferStateChanged);
+	connect(listener, &CoreListener::versionUpdateCheckResultReceived, this, &Core::onVersionUpdateCheckResultReceived);
+	connect(listener, &CoreListener::ecCalibrationResult, this, &Core::onEcCalibrationResult);
+	connect(listener, &CoreListener::conferenceInfoReceived, this, &Core::onConferenceInfoReceived);
+}
+
+Core::Core(QObject *parent, const QString &configPath) :
 	QObject(parent), mHandlers(make_shared<CoreHandlers>(this)) {
 	mCore = nullptr;
 	mLastRemoteProvisioningState = linphone::ConfiguringState::Skipped;
@@ -98,20 +124,15 @@ CoreManager::~CoreManager(){
 void CoreManager::initCoreManager(){
 	qInfo() << "Init CoreManager";
 	mAccountSettingsModel = new AccountSettingsModel(this);
-	mAccountSettingsModelGUI = new AccountSettingsModelGUI();
-	mAccountSettingsModelGUI->moveToThread(QApplication::instance()->thread());
 	mSettingsModel = new SettingsModel(this);
-	mSettingsModelGUI = new SettingsModelGUI();
-	mSettingsModelGUI->moveToThread(QApplication::instance()->thread());
-	//mCallsListModel = new CallsListModel(this);
+	mCallsListModel = new CallsListModel(this);
 	mChatModel = new ChatModel(this);
 	mContactsListModel = new ContactsListModel(this);
 	mContactsImporterListModel = new ContactsImporterListModel(this);
 	mLdapListModel = new LdapListModel(this);
 	mSipAddressesModel = new SipAddressesModel(this);
 	mEventCountNotifier = new EventCountNotifier(this);
-	mTimelineListModel = new TimelineListModel();
-	mTimelineListModel->moveToThread(QApplication::instance()->thread());
+	mTimelineListModel = new TimelineListModel(this);
 	mEventCountNotifier->updateUnreadMessageCount();
 	QObject::connect(mEventCountNotifier, &EventCountNotifier::eventCountChanged,this, &CoreManager::eventCountChanged);
 	migrate();
@@ -119,10 +140,6 @@ void CoreManager::initCoreManager(){
 	
 	qInfo() << QStringLiteral("CoreManager initialized");
 	emit coreManagerInitialized();
-}
-
-bool CoreManager::isInitialized() const{
-	return mStarted;
 }
 
 AbstractEventCountNotifier * CoreManager::getEventCountNotifier(){
@@ -152,24 +169,6 @@ RecorderManager* CoreManager::getRecorderManager(){
 		emit recorderManagerCreated(mRecorderManager);
 	}
 	return mRecorderManager;
-}
-
-SettingsModel *CoreManager::getSettingsModel () const {
-	Q_CHECK_PTR(mSettingsModel);
-	return mSettingsModel;
-}
-
-SettingsModelGUI *CoreManager::getSettingsModelGUI() const {
-	return mSettingsModelGUI;
-}
-
-AccountSettingsModel*CoreManager::getAccountSettingsModel() const {
-	Q_CHECK_PTR(mAccountSettingsModel);
-	return mAccountSettingsModel;
-}
-
-AccountSettingsModelGUI *CoreManager::getAccountSettingsModelGUI() const {
-	return mAccountSettingsModelGUI;
 }
 // -----------------------------------------------------------------------------
 
@@ -305,7 +304,6 @@ void CoreManager::createLinphoneCore (const QString &configPath) {
 				Paths::getFactoryConfigFilePath(),
 				nullptr
 				);
-	setDatabasesPaths();
 	// Enable LIME on your core to use encryption.
 	mCore->enableLimeX3Dh(mCore->limeX3DhAvailable());
 	// Now see the CoreService.CreateGroupChatRoom to see how to create a secure chat room
@@ -313,6 +311,7 @@ void CoreManager::createLinphoneCore (const QString &configPath) {
 	mCore->addListener(mHandlers);
 	mCore->setVideoDisplayFilter("MSQOGL");
 	mCore->usePreviewWindow(true);
+	mCore->enableVideoPreview(false);
 	// Force capture/display.
 	// Useful if the app was built without video support.
 	// (The capture/display attributes are reset by the core in this case.)
@@ -321,31 +320,20 @@ void CoreManager::createLinphoneCore (const QString &configPath) {
 		config->setInt("video", "capture", 1);
 		config->setInt("video", "display", 1);
 	}
-	mCore->enableVideoPreview(false);// SDK doesn't write the state in configuration if not ready.
-	config->setInt("video", "show_local", 0);// So : write ourself to turn off camera before starting the core.
 	QString userAgent = Utils::computeUserAgent(config);
 	mCore->setUserAgent(Utils::appStringToCoreString(userAgent), mCore->getVersion());
 	mCore->start();
+	setDatabasesPaths();
 	setOtherPaths();
 	mCore->enableFriendListSubscription(true);
 	mCore->enableRecordAware(true);
 	if(mCore->getAccountCreatorUrl() == "")
 		mCore->setAccountCreatorUrl(Constants::DefaultFlexiAPIURL);
-	if( mCore->getAccountList().size() == 0)
-		mCore->setLogCollectionUploadServerUrl(Constants::DefaultUploadLogsServer);
 }
 
 void CoreManager::updateUserAgent(){
 	mCore->setUserAgent(Utils::appStringToCoreString(Utils::computeUserAgent(mCore->getConfig())), mCore->getVersion());
 	forceRefreshRegisters(); 	// After setting a new device name, REGISTER need to take account it.
-}
-void CoreManager::addingAccount(const std::shared_ptr<const linphone::AccountParams> params) {
-	if( params->getDomain() == Constants::LinphoneDomain) {// Special case for Linphone
-		// It has been decided that if the core encryption is None, new Linphone accounts will reset it to SRTP.
-			if( CoreManager::getInstance()->getSettingsModel()->getMediaEncryption() == SettingsModel::MediaEncryptionNone){
-				CoreManager::getInstance()->getSettingsModel()->setMediaEncryption(SettingsModel::MediaEncryptionSrtp);
-			}
-		}
 }
 
 void CoreManager::handleChatRoomCreated(const QSharedPointer<ChatRoomModel> &chatRoomModel){
@@ -366,10 +354,7 @@ void CoreManager::migrate () {
 	
 	qInfo() << QStringLiteral("Migrate from old rc file (%1 to %2).")
 			   .arg(rcVersion).arg(Constants::RcVersionCurrent);
-	if( !oldLimeServerUrl.empty()) {
-		mCore->setLimeX3DhServerUrl("");
-		mCore->enableLimeX3Dh(true);
-	}
+	
 	bool setLimeServerUrl = false;
 	for(const auto &account : getAccountList()){
 		auto params = account->getParams();
@@ -405,17 +390,19 @@ void CoreManager::migrate () {
 				qInfo() << "Migrating" << accountIdentity << "for version 5. Video conference factory URI" << (exists ? std::string("unchanged") : std::string("= ") +Constants::DefaultVideoConferenceURI).c_str();
 				// note: using std::string.c_str() to avoid having double quotes in qInfo()
 			}
-			if(newParams->getLimeServerUrl().empty()){
-				if(!oldLimeServerUrl.empty())
-					newParams->setLimeServerUrl(oldLimeServerUrl);
-				else if( setLimeServerUrl)
-					newParams->setLimeServerUrl(Constants::DefaultLimeServerURL);
-			}
+			
+			if(!oldLimeServerUrl.empty())
+				newParams->setLimeServerUrl(oldLimeServerUrl);
+			else if( setLimeServerUrl)
+				newParams->setLimeServerUrl(Constants::DefaultLimeServerURL);
 			
 			account->setParams(newParams);
 		}
 	}
-	if( oldLimeServerUrl.empty() && setLimeServerUrl) {
+	if( !oldLimeServerUrl.empty()) {
+		mCore->setLimeX3DhServerUrl("");
+		mCore->enableLimeX3Dh(true);
+	}else if(setLimeServerUrl) {
 		mCore->enableLimeX3Dh(true);
 	}
 	

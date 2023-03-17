@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CORE_MANAGER_H_
-#define CORE_MANAGER_H_
+#ifndef CORE_H_
+#define CORE_H_
 
 #include <linphone++/linphone.hh>
 #include <QObject>
@@ -27,9 +27,6 @@
 #include <QHash>
 #include <QMutex>
 #include <QSharedPointer>
-
-#include "components/settings/AccountSettingsModelGUI.hpp"
-#include "components/settings/SettingsModelGUI.hpp"
 
 // =============================================================================
 
@@ -58,82 +55,12 @@ class LinphoneThread;
 
 class CoreManager : public QObject {
 	Q_OBJECT
-	
 public:
-	bool started () const {
-		return mStarted;
-	}
 	
 	std::shared_ptr<linphone::Core> getCore () {
 		return mCore;
 	}
 	
-	std::shared_ptr<CoreHandlers> getHandlers () {
-		Q_CHECK_PTR(mHandlers);
-		return mHandlers;
-	}
-	
-	HistoryModel* getHistoryModel();
-	RecorderManager* getRecorderManager();
-	
-	// ---------------------------------------------------------------------------
-	// Video render lock.
-	// ---------------------------------------------------------------------------
-	
-	void lockVideoRender () {
-		mMutexVideoRender.lock();
-	}
-	
-	void unlockVideoRender () {
-		mMutexVideoRender.unlock();
-	}
-	
-	// ---------------------------------------------------------------------------
-	// Singleton models.
-	// ---------------------------------------------------------------------------
-	
-	CallsListModel *getCallsListModel () const {
-		Q_CHECK_PTR(mCallsListModel);
-		return mCallsListModel;
-	}
-	
-	ContactsListModel *getContactsListModel () const {
-		Q_CHECK_PTR(mContactsListModel);
-		return mContactsListModel;
-	}
-	
-	ContactsImporterListModel *getContactsImporterListModel () const {
-		Q_CHECK_PTR(mContactsImporterListModel);
-		return mContactsImporterListModel;
-	}
-	
-	TimelineListModel *getTimelineListModel () const {
-		return mTimelineListModel;
-	}
-	
-	SipAddressesModel *getSipAddressesModel () const {
-		Q_CHECK_PTR(mSipAddressesModel);
-		return mSipAddressesModel;
-	}
-	
-	SettingsModel *getSettingsModel () const;
-	SettingsModelGUI *getSettingsModelGUI () const;
-	
-	AccountSettingsModel *getAccountSettingsModel () const;
-	AccountSettingsModelGUI *getAccountSettingsModelGUI () const;
-	
-	LdapListModel *getLdapListModel() const{
-		return mLdapListModel;
-	}
-	
-	AbstractEventCountNotifier * getEventCountNotifier();
-	
-	ChatModel * getChatModel() const{
-		return mChatModel;
-	}
-	
-	static CoreManager *getInstance ();
-	static CoreManagerGUI *getInstanceGUI();
 
 	QString getVersion () const;
 	int getEventCount () const;
@@ -150,14 +77,14 @@ public:
 	
 	// Must be used in a qml scene.
 	// Warning: The ownership of `VcardModel` is `QQmlEngine::JavaScriptOwnership` by default.
-	VcardModel *createDetachedVcardModel () const;
+	Q_INVOKABLE VcardModel *createDetachedVcardModel () const;
 	
 	Q_INVOKABLE void forceRefreshRegisters ();
 	void updateUnreadMessageCount();
 	void stateChanged(Qt::ApplicationState pState);
 	
-	void sendLogs () const;
-	void cleanLogs () const;
+	Q_INVOKABLE void sendLogs () const;
+	Q_INVOKABLE void cleanLogs () const;
 	
 	int getCallLogsCount() const;
 	int getMissedCallCount(const QString &peerAddress, const QString &localAddress) const;// Get missed call count from a chat (useful for showing bubbles on Timelines)
@@ -166,12 +93,10 @@ public:
 	std::list<std::shared_ptr<linphone::Account>> getAccountList()const;
 	
 	static bool isInstanciated(){return mInstance!=nullptr;}
-	bool isInitialized() const;
 	
-	bool isLastRemoteProvisioningGood();
-	QString getUserAgent()const;
+	Q_INVOKABLE bool isLastRemoteProvisioningGood();
+	Q_INVOKABLE QString getUserAgent()const;
 	void updateUserAgent();
-	void addingAccount(const std::shared_ptr<const linphone::AccountParams> params);
 	
 public slots:
 	void initCoreManager();
@@ -209,38 +134,11 @@ private:
 	
 	void handleLogsUploadStateChanged (linphone::Core::LogCollectionUploadState state, const std::string &info);
 	
+	void connectTo(CoreListener * listener);
 	std::shared_ptr<linphone::Core> mCore;
-	std::shared_ptr<CoreHandlers> mHandlers;	// It is used for handling linphone. Keep it to shared_ptr.
+	std::shared_ptr<CoreListener> mListener;
 	
 	bool mStarted = false;
-	linphone::ConfiguringState mLastRemoteProvisioningState;
-	
-	CallsListModel *mCallsListModel = nullptr;
-	ContactsListModel *mContactsListModel = nullptr;
-	ContactsImporterListModel *mContactsImporterListModel = nullptr;
-	TimelineListModel *mTimelineListModel = nullptr;
-	ChatModel *mChatModel = nullptr;
-	
-	SipAddressesModel *mSipAddressesModel = nullptr;
-	SettingsModel *mSettingsModel = nullptr;
-	SettingsModelGUI *mSettingsModelGUI = nullptr;
-	AccountSettingsModel *mAccountSettingsModel = nullptr;
-	AccountSettingsModelGUI *mAccountSettingsModelGUI = nullptr;
-	
-	EventCountNotifier *mEventCountNotifier = nullptr;
-
-	HistoryModel * mHistoryModel = nullptr;
-	LdapListModel *mLdapListModel = nullptr;
-	RecorderManager* mRecorderManager = nullptr;
-	
-	QTimer *mCbsTimer = nullptr;
-	
-	QMutex mMutexVideoRender;
-	
-	static CoreManager *mInstance;
-	static CoreManagerGUI *mInstanceGUI;
-
-	static QSharedPointer<LinphoneThread> gLinphoneThread;
 };
 
 #endif // CORE_MANAGER_H_

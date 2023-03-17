@@ -76,6 +76,10 @@ ChatRoomModel *ParticipantListModel::getChatRoomModel() const{
 	return mChatRoomModel;
 }
 
+ChatRoomModelGUI *ParticipantListModel::getChatRoomModelGUI() const{
+	return new ChatRoomModelGUI(mChatRoomModel);
+}
+
 ConferenceModel *ParticipantListModel::getConferenceModel() const{
 	return mConferenceModel;
 }
@@ -347,3 +351,12 @@ void ParticipantListModel::onStateChanged(){
 		}
 	}
 }
+
+//-------------------------------------------------------------
+//					SYNC SLOTS
+//-------------------------------------------------------------
+
+DEFINE_SYNC_BODY_SLOT_CONST(ChatRoomModelGUI*, getChatRoomModelGUI, ParticipantListModel)
+DEFINE_SYNC_BODY_SLOT_CONST(QString, addressesToString, ParticipantListModel)
+DEFINE_SYNC_BODY_SLOT_CONST(QString, displayNamesToString, ParticipantListModel)
+DEFINE_SYNC_BODY_SLOT_CONST(QString, usernamesToString, ParticipantListModel)

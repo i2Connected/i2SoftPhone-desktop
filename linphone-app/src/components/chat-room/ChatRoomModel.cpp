@@ -58,6 +58,7 @@
 #include "components/settings/SettingsModel.hpp"
 #include "components/participant/ParticipantModel.hpp"
 #include "components/participant/ParticipantListModel.hpp"
+#include "components/participant/ParticipantListModelGUI.hpp"
 #include "components/presence/Presence.hpp"
 #include "components/recorder/RecorderManager.hpp"
 #include "components/recorder/RecorderModel.hpp"
@@ -392,8 +393,8 @@ int ChatRoomModel::getPresenceStatus() const {
 		return -1;
 }
 
-ParticipantListModel* ChatRoomModel::getParticipantListModel() const{
-	return mParticipantListModel.get();
+ParticipantListModelGUI* ChatRoomModel::getParticipantListModel() const{
+	return new ParticipantListModelGUI(mParticipantListModel);
 }
 
 std::list<std::shared_ptr<linphone::Participant>> ChatRoomModel::getParticipants(const bool& withMe) const{
@@ -422,7 +423,7 @@ long ChatRoomModel::getEphemeralLifetime() const{
 	return mChatRoom ? mChatRoom->getEphemeralLifetime() : 0;
 }
 
-bool ChatRoomModel::canBeEphemeral(){
+bool ChatRoomModel::canBeEphemeral() const{
 	return isConference();
 }
 
@@ -499,7 +500,7 @@ std::shared_ptr<linphone::ChatRoom> ChatRoomModel::getChatRoom(){
 	return mChatRoom;
 }
 
-QList<QString> ChatRoomModel::getComposers(){
+QList<QString> ChatRoomModel::getComposers() const{
 	return mComposers.values();
 }
 
@@ -535,6 +536,18 @@ QString ChatRoomModel::getParticipantAddress(){
 
 int ChatRoomModel::getAllUnreadCount(){
 	return mUnreadMessagesCount + mMissedCallsCount;
+}
+
+QDateTime ChatRoomModel::getLastUpdateTime() const{
+	return mLastUpdateTime;
+}
+
+int ChatRoomModel::getUnreadMessagesCount() const{
+	return mUnreadMessagesCount;
+}
+
+int ChatRoomModel::getMissedCallsCount() const{
+	return mMissedCallsCount;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -1473,3 +1486,40 @@ void ChatRoomModel::onChatMessageShouldBeStored(const std::shared_ptr<linphone::
 void ChatRoomModel::onChatMessageParticipantImdnStateChanged(const std::shared_ptr<linphone::ChatRoom> & chatRoom, const std::shared_ptr<linphone::ChatMessage> & message, const std::shared_ptr<const linphone::ParticipantImdnState> & state){
 }
 
+//-------------------------------------------------------------
+//					SYNC SLOTS
+//-------------------------------------------------------------
+
+DEFINE_SYNC_BODY_SLOT_CONST(QString, getPeerAddress, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(QString, getLocalAddress, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(QString, getFullPeerAddress, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(QString, getFullLocalAddress, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(QString, getConferenceAddress, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(QString, getSubject, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(QString, getUsername, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(QString, getAvatar, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(int, getPresenceStatus, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(LinphoneEnums::ChatRoomState , getState, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(bool, isReadOnly, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(bool, isEphemeralEnabled, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(long, getEphemeralLifetime, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(bool, canBeEphemeral, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(bool, haveEncryption, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(bool, markAsReadEnabled, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(bool, isSecure, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(int, getSecurityLevel, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(bool, isGroupEnabled, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(bool, isConference, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(bool, isOneToOne, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(bool, isMeAdmin, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(bool, canHandleParticipants, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(bool, getIsRemoteComposing, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(bool, isEntriesLoading, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(bool, isUpdating, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(bool, isNotificationsEnabled, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(ParticipantListModelGUI*, getParticipantListModel, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(QList<QString>, getComposers, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(ChatMessageModel*, getReply, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(QDateTime, getLastUpdateTime, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(int, getUnreadMessagesCount, ChatRoomModel)
+DEFINE_SYNC_BODY_SLOT_CONST(int, getMissedCallsCount, ChatRoomModel)
