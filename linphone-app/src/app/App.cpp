@@ -673,7 +673,7 @@ void App::registerTypes () {
 	registerType<ChatRoomProxyModel>("ChatRoomProxyModel");
 	registerType<ConferenceHelperModel>("ConferenceHelperModel");
 	registerType<ConferenceProxyModel>("ConferenceProxyModel");
-	registerType<ConferenceInfoModel>("ConferenceInfoModel");
+	registerType<ConferenceInfoModelGUI>("ConferenceInfoModel");
 	registerType<ConferenceInfoProxyModel>("ConferenceInfoProxyModel");
 	registerType<ContactsListProxyModel>("ContactsListProxyModel");
 	registerType<ContactsImporterListProxyModel>("ContactsImporterListProxyModel");

@@ -356,7 +356,7 @@ void ParticipantListModel::onStateChanged(){
 //					SYNC SLOTS
 //-------------------------------------------------------------
 
-DECLARE_SYNC_BODY_SLOT_CONST(ChatRoomModelGUI*, getChatRoomModelGUI, ParticipantListModel)
-DECLARE_SYNC_BODY_SLOT_CONST(QString, addressesToString, ParticipantListModel)
-DECLARE_SYNC_BODY_SLOT_CONST(QString, displayNamesToString, ParticipantListModel)
-DECLARE_SYNC_BODY_SLOT_CONST(QString, usernamesToString, ParticipantListModel)
+DEFINE_SYNC_BODY_SLOT_CONST(ChatRoomModelGUI*, getChatRoomModelGUI, ParticipantListModel)
+DEFINE_SYNC_BODY_SLOT_CONST(QString, addressesToString, ParticipantListModel)
+DEFINE_SYNC_BODY_SLOT_CONST(QString, displayNamesToString, ParticipantListModel)
+DEFINE_SYNC_BODY_SLOT_CONST(QString, usernamesToString, ParticipantListModel)

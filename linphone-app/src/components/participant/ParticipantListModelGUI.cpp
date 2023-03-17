@@ -28,7 +28,8 @@
 // =============================================================================
 
 ParticipantListModelGUI::ParticipantListModelGUI(QSharedPointer<ParticipantListModel> participantListModel, QObject * parent) : ProxyListModel(parent){
-	auto appModel = participantListModel.get();
+	mParticipantListModel = participantListModel;
+	auto appModel = mParticipantListModel.get();
 	// signals
 	CONNECT_CORE_TO_GUI(securityLevelChanged, ParticipantListModel);
 	CONNECT_CORE_TO_GUI(deviceSecurityLevelChanged, ParticipantListModel);
@@ -47,9 +48,12 @@ ParticipantListModelGUI::ParticipantListModelGUI(QSharedPointer<ParticipantListM
 ParticipantListModelGUI::~ParticipantListModelGUI(){
 }
 
+QSharedPointer<ParticipantListModel> ParticipantListModelGUI::getParticipantListModel()const{
+	return mParticipantListModel;
+}
 
-DECLARE_GETTER(ChatRoomModelGUI*, getChatRoomModelGUI, ParticipantListModel)
-DECLARE_GETTER(QString, addressesToString, ParticipantListModel)
-DECLARE_GETTER(QString, displayNamesToString, ParticipantListModel)
-DECLARE_GETTER(QString, usernamesToString, ParticipantListModel)
+DEFINE_GETTER(ChatRoomModelGUI*, getChatRoomModelGUI, ParticipantListModel)
+DEFINE_GETTER(QString, addressesToString, ParticipantListModel)
+DEFINE_GETTER(QString, displayNamesToString, ParticipantListModel)
+DEFINE_GETTER(QString, usernamesToString, ParticipantListModel)
 

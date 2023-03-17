@@ -30,30 +30,16 @@
 #include "utils/LinphoneEnums.hpp"
 
 class ParticipantListModel;
+class ParticipantListModelGUI;
 class ConferenceScheduler;
 class TimeZoneModel;
+
+#include "utils/CodeHelpersGUI.hpp"
 
 class ConferenceInfoModel : public QObject {
 	Q_OBJECT
 	
 public:
-	Q_PROPERTY(TimeZoneModel * timeZoneModel READ getTimeZoneModel WRITE setTimeZoneModel NOTIFY timeZoneModelChanged)
-	Q_PROPERTY(QDateTime dateTime READ getDateTimeSystem WRITE setDateTime NOTIFY dateTimeChanged)
-	Q_PROPERTY(QDateTime dateTimeUtc READ getDateTimeUtc NOTIFY dateTimeChanged)
-	Q_PROPERTY(int duration READ getDuration WRITE setDuration NOTIFY durationChanged)
-	Q_PROPERTY(QDateTime endDateTime READ getEndDateTime NOTIFY dateTimeChanged)
-	Q_PROPERTY(QString organizer READ getOrganizer WRITE setOrganizer NOTIFY organizerChanged)
-	Q_PROPERTY(QString subject READ getSubject WRITE setSubject NOTIFY subjectChanged)
-	Q_PROPERTY(QString description READ getDescription WRITE setDescription NOTIFY descriptionChanged)
-	Q_PROPERTY(QString displayNamesToString READ displayNamesToString NOTIFY participantsChanged)
-	Q_PROPERTY(QString uri READ getUri NOTIFY uriChanged)
-	Q_PROPERTY(bool isScheduled READ isScheduled WRITE setIsScheduled NOTIFY isScheduledChanged)
-	Q_PROPERTY(int inviteMode READ getInviteMode WRITE setInviteMode NOTIFY inviteModeChanged)
-	Q_PROPERTY(int participantCount READ getParticipantCount NOTIFY participantsChanged)
-	Q_PROPERTY(int allParticipantCount READ getAllParticipantCount NOTIFY participantsChanged)
-	Q_PROPERTY(LinphoneEnums::ConferenceInfoState state READ getConferenceInfoState NOTIFY conferenceInfoStateChanged)
-	Q_PROPERTY(LinphoneEnums::ConferenceSchedulerState conferenceSchedulerState READ getConferenceSchedulerState NOTIFY conferenceSchedulerStateChanged)
-		
 	static QSharedPointer<ConferenceInfoModel> create(std::shared_ptr<linphone::ConferenceInfo> conferenceInfo);
 	ConferenceInfoModel (QObject * parent = nullptr);
 	ConferenceInfoModel (std::shared_ptr<linphone::ConferenceInfo> conferenceInfo, QObject * parent = nullptr);
@@ -74,12 +60,12 @@ public:
 	QString getUri() const;
 	bool isScheduled() const;
 	int getInviteMode() const;
-	Q_INVOKABLE QVariantList getParticipants() const;
-	Q_INVOKABLE QVariantList getAllParticipants() const;
-	Q_INVOKABLE int getParticipantCount()const;
-	Q_INVOKABLE int getAllParticipantCount()const;
-	Q_INVOKABLE TimeZoneModel* getTimeZoneModel() const;
-	Q_INVOKABLE QString getIcalendarString() const;
+	QVariantList getParticipants() const;
+	QVariantList getAllParticipants() const;
+	int getParticipantCount()const;
+	int getAllParticipantCount()const;
+	TimeZoneModel* getTimeZoneModel() const;
+	QString getIcalendarString() const;
 	LinphoneEnums::ConferenceInfoState getConferenceInfoState() const;
 	LinphoneEnums::ConferenceSchedulerState getConferenceSchedulerState() const;
 	
@@ -91,15 +77,15 @@ public:
 	void setIsScheduled(const bool& on);
 	void setInviteMode(const int& modes);
 	
-	Q_INVOKABLE void setParticipants(ParticipantListModel * participants);
-	Q_INVOKABLE void setTimeZoneModel(TimeZoneModel * model);
+	void setParticipants(ParticipantListModelGUI * participantsGUI);
+	void setTimeZoneModel(TimeZoneModel * model);
 	void setConferenceInfo(std::shared_ptr<linphone::ConferenceInfo> conferenceInfo);
 	
 // Tools
-	Q_INVOKABLE void resetConferenceInfo();// Recreate a new conference info from factory
-	Q_INVOKABLE void createConference(const int& securityLevel);
-	Q_INVOKABLE void cancelConference();
-	Q_INVOKABLE void deleteConferenceInfo();// Remove completly this conference info from DB
+	void resetConferenceInfo();// Recreate a new conference info from factory
+	void createConference(const int& securityLevel);
+	void cancelConference();
+	void deleteConferenceInfo();// Remove completly this conference info from DB
 
 // SCHEDULER
 	
@@ -135,9 +121,27 @@ private:
 	int mInviteMode = 0;
 	bool mRemoveRequested = false;// true if user has request its deletion from DB
 	linphone::ConferenceScheduler::State  mLastConferenceSchedulerState = linphone::ConferenceScheduler::State::Idle;// Workaround for missing getter in scheduler.
-};
 
-Q_DECLARE_METATYPE(QSharedPointer<ConferenceInfoModel>)
-Q_DECLARE_METATYPE(ConferenceInfoModel*)
+public slots:
+	DECLARE_SYNC_SLOT_CONST(QDateTime, getDateTimeUtc);
+	DECLARE_SYNC_SLOT_CONST(QDateTime, getDateTimeSystem);
+	DECLARE_SYNC_SLOT_CONST(int, getDuration);
+	DECLARE_SYNC_SLOT_CONST(QDateTime, getEndDateTime);
+	DECLARE_SYNC_SLOT_CONST(QString, getOrganizer);
+	DECLARE_SYNC_SLOT_CONST(QString, getSubject);
+	DECLARE_SYNC_SLOT_CONST(QString, getDescription);
+	DECLARE_SYNC_SLOT_CONST(QString, displayNamesToString);
+	DECLARE_SYNC_SLOT_CONST(QString, getUri);
+	DECLARE_SYNC_SLOT_CONST(bool, isScheduled);
+	DECLARE_SYNC_SLOT_CONST(int, getInviteMode);
+	DECLARE_SYNC_SLOT_CONST(int, getParticipantCount);
+	DECLARE_SYNC_SLOT_CONST(int, getAllParticipantCount);
+	DECLARE_SYNC_SLOT_CONST(TimeZoneModel*, getTimeZoneModel);
+	DECLARE_SYNC_SLOT_CONST(QVariantList, getParticipants);
+	DECLARE_SYNC_SLOT_CONST(QVariantList, getAllParticipants);
+	DECLARE_SYNC_SLOT_CONST(QString, getIcalendarString);
+	DECLARE_SYNC_SLOT_CONST(LinphoneEnums::ConferenceInfoState, getConferenceInfoState);
+	DECLARE_SYNC_SLOT_CONST(LinphoneEnums::ConferenceSchedulerState, getConferenceSchedulerState);
+};
 
 #endif

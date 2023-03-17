@@ -23,12 +23,12 @@
 
 #include <QSortFilterProxyModel>
 #include "components/participant/ParticipantModel.hpp"
-#include "components/chat-room/ChatRoomModel.hpp"
 #include "app/proxyModel/ProxyListModel.hpp"
 
 #include "utils/CodeHelpersGUI.hpp"
 
 class ConferenceModel;
+class ParticipantListModel;
 
 #include "components/chat-room/ChatRoomModelGUI.hpp"
 
@@ -55,6 +55,10 @@ public:
 	Q_INVOKABLE QString addressesToString()const;	
 	Q_INVOKABLE QString displayNamesToString()const;
 	Q_INVOKABLE QString usernamesToString()const;
+	
+	QSharedPointer<ParticipantListModel> getParticipantListModel()const;
+	
+	QSharedPointer<ParticipantListModel> mParticipantListModel;
 
 signals:	
 	Q_INVOKABLE void remove (ParticipantModel *importer);

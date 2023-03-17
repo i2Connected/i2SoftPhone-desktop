@@ -57,9 +57,9 @@ public:
 	ConferenceModel* getConferenceModel() const;
 	std::list<std::shared_ptr<linphone::Address>> getParticipants()const;
 	
-	Q_INVOKABLE QString addressesToString()const;	
-	Q_INVOKABLE QString displayNamesToString()const;
-	Q_INVOKABLE QString usernamesToString()const;
+	QString addressesToString()const;	
+	QString displayNamesToString()const;
+	QString usernamesToString()const;
 	
 	bool contains(const QString& address) const;
 	

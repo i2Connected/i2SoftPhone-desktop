@@ -25,6 +25,7 @@
 
 #include <QObject>
 
+#include "utils/CodeHelpersGUI.hpp"
 // =============================================================================
 
 namespace linphone {
@@ -102,8 +103,11 @@ public:
   QString encode(const QString& data)const;// Convert '\n', ',', '\' to  "\n", "\,", "\\"
   QString decode(const QString& data)const;// Convert "\n", "\,", "\\" to '\n', ',', '\'
 
+	void destruction();
 signals:
   void vcardUpdated ();
+  void requestDestruction();
+  DECLARE_THREADED_DESTRUCTOR_SIGNAL()
 
   // ---------------------------------------------------------------------------
 

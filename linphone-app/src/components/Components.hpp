@@ -37,6 +37,7 @@
 #include "conference/ConferenceModel.hpp"
 #include "conference/ConferenceProxyModel.hpp"
 #include "conferenceInfo/ConferenceInfoModel.hpp"
+#include "conferenceInfo/ConferenceInfoModelGUI.hpp"
 #include "conferenceInfo/ConferenceInfoProxyModel.hpp"
 #include "conferenceScheduler/ConferenceScheduler.hpp"
 #include "contact/ContactModel.hpp"

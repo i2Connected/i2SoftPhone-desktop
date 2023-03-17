@@ -31,6 +31,8 @@
 // Fetch all N messages of a ChatRoom.
 // =============================================================================
 
+#include "components/participant/ParticipantListModelGUI.hpp"
+
 class CoreHandlers;
 class ParticipantModel;
 class ParticipantListModel;
@@ -107,7 +109,7 @@ public:
 	int getUnreadMessagesCount() const;
 	int getMissedCallsCount() const;
 	
-	ParticipantListModel* getParticipantListModel() const;
+	ParticipantListModelGUI* getParticipantListModel() const;
 	std::list<std::shared_ptr<linphone::Participant>> getParticipants(const bool& withMe = true) const;
 	std::shared_ptr<linphone::ChatRoom> getChatRoom();
 	QList<QString> getComposers() const;
@@ -317,7 +319,7 @@ public slots:
 	DECLARE_SYNC_SLOT_CONST(bool, isEntriesLoading)
 	DECLARE_SYNC_SLOT_CONST(bool, isUpdating)
 	DECLARE_SYNC_SLOT_CONST(bool, isNotificationsEnabled)
-	DECLARE_SYNC_SLOT_CONST(ParticipantListModel*, getParticipantListModel)
+	DECLARE_SYNC_SLOT_CONST(ParticipantListModelGUI*, getParticipantListModel)
 	DECLARE_SYNC_SLOT_CONST(QList<QString>, getComposers)
 	DECLARE_SYNC_SLOT_CONST(ChatMessageModel*, getReply)
 	DECLARE_SYNC_SLOT_CONST(QDateTime, getLastUpdateTime)

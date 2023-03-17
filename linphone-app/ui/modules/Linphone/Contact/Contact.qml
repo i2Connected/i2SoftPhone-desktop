@@ -8,6 +8,8 @@ import Common 1.0
 
 import UtilsCpp 1.0
 
+import 'qrc:/ui/scripts/Utils/utils.js' as Utils
+
 // =============================================================================
 
 Rectangle {
@@ -46,6 +48,8 @@ Rectangle {
 	color: 'transparent' // No color by default.
 	height: ContactStyle.height
 	
+	//Component.onCompleted: console.log(Utils.printObject(entry))
+		
 	RowLayout {
 		anchors {
 			fill: parent
@@ -133,6 +137,20 @@ Rectangle {
 										? entry.participants.addressesToString
 										: ''
 							: ''
+			Component.onCompleted: 
+				entry && item.showSubtitle
+							? console.log("A:"+item.subtitle)
+								? item.subtitle
+								: (entry.isOneToOne == undefined || entry.isOneToOne) && (entry.haveEncryption == undefined || !entry.haveEncryption)
+									? item.organizer
+										? console.log("B:"+item.organizer)
+										: console.log("C" +(entry.sipAddress || entry.fullPeerAddress || entry.peerAddress || ''))
+									: entry.participants
+										? console.log("D:"+entry.participants.addressesToString)
+										: console.log("E")
+							: console.log("F")
+			
+			//console.log(entry + " : " +item.subject + " / " +entry.participants.addressesToString)
 		}
 		
 		ContactMessageCounter {

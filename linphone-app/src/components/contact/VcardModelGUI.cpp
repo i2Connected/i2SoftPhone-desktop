@@ -92,16 +92,18 @@ static void removeBelcardPhoto (const shared_ptr<belcard::BelCard> &belcard, boo
 
 // -----------------------------------------------------------------------------
 
-VcardModel::VcardModel (shared_ptr<linphone::Vcard> vcard, bool isReadOnly) : QObject(nullptr) {
-	Q_CHECK_PTR(vcard);
-	mVcard = vcard;
+VcardModelGUI::VcardModelGUI (VcardModel * appModel, bool isReadOnly) : QObject(nullptr) {
+	appModel->setParent(this);
+	mVcardModel = appModel;
 	mIsReadOnly = isReadOnly;
 }
 
-
-DEFINE_THREADED_DESCTRUCTOR(VcardModel)
-
-void VcardModel::destruction(){
+VcardModel::~VcardModel () {
+	
+		
+	if(mVcardModel->parent() == this){
+		
+	}
 	if (!mIsReadOnly) {
 		qInfo() << QStringLiteral("Destroy detached vcard:") << this;
 		if (!mAvatarIsReadOnly)

@@ -54,6 +54,7 @@
 #include "components/settings/SettingsModel.hpp"
 #include "components/participant/ParticipantModel.hpp"
 #include "components/participant/ParticipantListModel.hpp"
+#include "components/participant/ParticipantListModelGUI.hpp"
 #include "components/presence/Presence.hpp"
 #include "components/recorder/RecorderManager.hpp"
 #include "components/recorder/RecorderModel.hpp"
@@ -108,6 +109,9 @@ ConferenceInfoModel::ConferenceInfoModel (QObject * parent) : QObject(parent){
 	connect(this, &ConferenceInfoModel::conferenceInfoChanged, this, &ConferenceInfoModel::inviteModeChanged);
 	connect(this, &ConferenceInfoModel::conferenceInfoChanged, this, &ConferenceInfoModel::conferenceInfoStateChanged);
 	connect(this, &ConferenceInfoModel::conferenceInfoChanged, this, &ConferenceInfoModel::conferenceSchedulerStateChanged);
+	
+	
+	
 }
 
 // Callable from C++
@@ -276,9 +280,11 @@ void ConferenceInfoModel::setDescription(const QString& description){
 	emit descriptionChanged();
 }
 
-void ConferenceInfoModel::setParticipants(ParticipantListModel * participants){
-	mConferenceInfo->setParticipants(participants->getParticipants());
-	emit participantsChanged();
+void ConferenceInfoModel::setParticipants(ParticipantListModelGUI * participants){
+	if(participants && mConferenceInfo){
+		mConferenceInfo->setParticipants(participants->getParticipantListModel()->getParticipants());
+		emit participantsChanged();
+	}
 }
 
 void ConferenceInfoModel::setTimeZoneModel(TimeZoneModel * model){
@@ -383,3 +389,28 @@ void ConferenceInfoModel::onInvitationsSent(const std::list<std::shared_ptr<linp
 	qDebug() << "ConferenceInfoModel::onInvitationsSent";
 	emit invitationsSent();
 }
+
+//-------------------------------------------------------------
+//					SYNC SLOTS
+//-------------------------------------------------------------
+
+DEFINE_SYNC_BODY_SLOT_CONST(QDateTime, getDateTimeUtc, ConferenceInfoModel);
+DEFINE_SYNC_BODY_SLOT_CONST(QDateTime, getDateTimeSystem, ConferenceInfoModel);
+DEFINE_SYNC_BODY_SLOT_CONST(int, getDuration, ConferenceInfoModel);
+DEFINE_SYNC_BODY_SLOT_CONST(QDateTime, getEndDateTime, ConferenceInfoModel);
+DEFINE_SYNC_BODY_SLOT_CONST(QString, getOrganizer, ConferenceInfoModel);
+DEFINE_SYNC_BODY_SLOT_CONST(QString, getSubject, ConferenceInfoModel);
+DEFINE_SYNC_BODY_SLOT_CONST(QString, getDescription, ConferenceInfoModel);
+DEFINE_SYNC_BODY_SLOT_CONST(QString, displayNamesToString, ConferenceInfoModel);
+DEFINE_SYNC_BODY_SLOT_CONST(QString, getUri, ConferenceInfoModel);
+DEFINE_SYNC_BODY_SLOT_CONST(bool, isScheduled, ConferenceInfoModel);
+DEFINE_SYNC_BODY_SLOT_CONST(int, getInviteMode, ConferenceInfoModel);
+DEFINE_SYNC_BODY_SLOT_CONST(int, getParticipantCount, ConferenceInfoModel);
+DEFINE_SYNC_BODY_SLOT_CONST(int, getAllParticipantCount, ConferenceInfoModel);
+DEFINE_SYNC_BODY_SLOT_CONST(TimeZoneModel*, getTimeZoneModel, ConferenceInfoModel);
+DEFINE_SYNC_BODY_SLOT_CONST(QVariantList, getParticipants, ConferenceInfoModel);
+DEFINE_SYNC_BODY_SLOT_CONST(QVariantList, getAllParticipants, ConferenceInfoModel);
+DEFINE_SYNC_BODY_SLOT_CONST(QString, getIcalendarString, ConferenceInfoModel);
+DEFINE_SYNC_BODY_SLOT_CONST(LinphoneEnums::ConferenceInfoState, getConferenceInfoState, ConferenceInfoModel);
+DEFINE_SYNC_BODY_SLOT_CONST(LinphoneEnums::ConferenceSchedulerState, getConferenceSchedulerState, ConferenceInfoModel);
+

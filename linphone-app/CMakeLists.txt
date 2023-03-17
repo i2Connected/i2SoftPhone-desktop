@@ -225,6 +225,7 @@ set(SOURCES
 	src/components/conference/ConferenceModel.cpp
 	src/components/conference/ConferenceProxyModel.cpp
 	src/components/conferenceInfo/ConferenceInfoModel.cpp
+	src/components/conferenceInfo/ConferenceInfoModelGUI.cpp
 	src/components/conferenceInfo/ConferenceInfoListModel.cpp
 	src/components/conferenceInfo/ConferenceInfoProxyModel.cpp
 	src/components/conferenceScheduler/ConferenceScheduler.cpp
@@ -271,6 +272,7 @@ set(SOURCES
 	src/components/other/units/Units.cpp
 	src/components/participant/ParticipantModel.cpp
 	src/components/participant/ParticipantListModel.cpp
+	src/components/participant/ParticipantListModelGUI.cpp
 	src/components/participant/ParticipantProxyModel.cpp
 	src/components/participant/ParticipantDeviceListener.cpp
 	src/components/participant/ParticipantDeviceModel.cpp
@@ -370,6 +372,7 @@ set(HEADERS
 	src/components/conference/ConferenceModel.hpp
 	src/components/conference/ConferenceProxyModel.hpp
 	src/components/conferenceInfo/ConferenceInfoModel.hpp
+	src/components/conferenceInfo/ConferenceInfoModelGUI.hpp
 	src/components/conferenceInfo/ConferenceInfoListModel.hpp
 	src/components/conferenceInfo/ConferenceInfoProxyModel.hpp
 	src/components/conferenceScheduler/ConferenceScheduler.hpp
@@ -417,6 +420,7 @@ set(HEADERS
 	src/components/other/units/Units.hpp
 	src/components/participant/ParticipantModel.hpp
 	src/components/participant/ParticipantListModel.hpp
+	src/components/participant/ParticipantListModelGUI.hpp
 	src/components/participant/ParticipantProxyModel.hpp
 	src/components/participant/ParticipantDeviceListener.hpp
 	src/components/participant/ParticipantDeviceModel.hpp

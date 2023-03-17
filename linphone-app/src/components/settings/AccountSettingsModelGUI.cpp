@@ -79,16 +79,16 @@ AccountSettingsModelGUI::AccountSettingsModelGUI(QObject * parent) : QObject(par
 AccountSettingsModelGUI::~AccountSettingsModelGUI(){
 }
 
-DECLARE_GETTER(QString, getUsedSipAddressAsStringUriOnly, AccountSettingsModel)
-DECLARE_GETTER(QString, getUsedSipAddressAsString, AccountSettingsModel)
+DEFINE_GETTER(QString, getUsedSipAddressAsStringUriOnly, AccountSettingsModel)
+DEFINE_GETTER(QString, getUsedSipAddressAsString, AccountSettingsModel)
 QVariantMap AccountSettingsModelGUI::getAccountDescription(const std::shared_ptr<linphone::Account> &account){
 	QVariantMap result;
 	emit getAccountDescriptionSync(&result, account);
 	return result;
 }
-DECLARE_GETTER(QString, getConferenceUri, AccountSettingsModel)
-DECLARE_GETTER(QString, getVideoConferenceUri, AccountSettingsModel)
-DECLARE_GETTER(QString, getLimeServerUrl, AccountSettingsModel)
+DEFINE_GETTER(QString, getConferenceUri, AccountSettingsModel)
+DEFINE_GETTER(QString, getVideoConferenceUri, AccountSettingsModel)
+DEFINE_GETTER(QString, getLimeServerUrl, AccountSettingsModel)
 bool AccountSettingsModelGUI::addOrUpdateAccount(const std::shared_ptr<linphone::Account> &account, const QVariantMap &data){
 	bool result;
 	emit addOrUpdateAccountSync(&result, account, data);
@@ -104,13 +104,13 @@ std::shared_ptr<linphone::Account> AccountSettingsModelGUI::createAccount(const 
 	emit createAccountSync(&result, assistantFile);
 	return result;
 }
-DECLARE_GETTER(QString, getPrimaryUsername, AccountSettingsModel)
-DECLARE_GETTER(QString, getPrimaryDisplayName, AccountSettingsModel)
-DECLARE_GETTER(QString, getPrimarySipAddress, AccountSettingsModel)
-DECLARE_GETTER(QString, getUsername, AccountSettingsModel)
-DECLARE_GETTER(QString, getDefaultAccountDomain, AccountSettingsModel)
-DECLARE_GETTER(QVariantList, getAccounts, AccountSettingsModel)
-DECLARE_GETTER_ENUM(RegistrationState, getRegistrationState, AccountSettingsModel)
+DEFINE_GETTER(QString, getPrimaryUsername, AccountSettingsModel)
+DEFINE_GETTER(QString, getPrimaryDisplayName, AccountSettingsModel)
+DEFINE_GETTER(QString, getPrimarySipAddress, AccountSettingsModel)
+DEFINE_GETTER(QString, getUsername, AccountSettingsModel)
+DEFINE_GETTER(QString, getDefaultAccountDomain, AccountSettingsModel)
+DEFINE_GETTER(QVariantList, getAccounts, AccountSettingsModel)
+DEFINE_GETTER_ENUM(RegistrationState, getRegistrationState, AccountSettingsModel)
 
 /*
 bool SettingsModelGUI::isCheckForUpdateAvailable(){

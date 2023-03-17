@@ -33,7 +33,7 @@
 // Fetch all N messages of a ChatRoom.
 // =============================================================================
 
-class ParticipantListModel;
+class ParticipantListModelGUI;
 class ChatRoomModel;
 class ChatMessageModel;
 
@@ -86,7 +86,7 @@ public:
 	Q_PROPERTY(bool markAsReadEnabled READ markAsReadEnabled WRITE enableMarkAsRead NOTIFY markAsReadEnabledChanged)
 	Q_PROPERTY(bool notificationsEnabled READ isNotificationsEnabled WRITE enableNotifications NOTIFY notificationsEnabledChanged)
 	
-	Q_PROPERTY(ParticipantListModel* participants READ getParticipantListModel CONSTANT)
+	Q_PROPERTY(ParticipantListModelGUI* participants READ getParticipantListModel CONSTANT)
 	
 	Q_PROPERTY(ChatMessageModel * reply READ getReply WRITE setReply NOTIFY replyChanged)
 	
@@ -135,7 +135,7 @@ public:
 	int getUnreadMessagesCount() const;
 	int getMissedCallsCount() const;
 	
-	ParticipantListModel* getParticipantListModel() const;
+	ParticipantListModelGUI* getParticipantListModel() const;
 	QList<QString> getComposers() const;
 	ChatMessageModel * getReply()const;
 
@@ -237,7 +237,7 @@ signals:
 	DECLARE_SYNC_SIGNAL(bool, isEntriesLoading)
 	DECLARE_SYNC_SIGNAL(bool, isUpdating)
 	DECLARE_SYNC_SIGNAL(bool, isNotificationsEnabled)
-	DECLARE_SYNC_SIGNAL(ParticipantListModel*, getParticipantListModel)
+	DECLARE_SYNC_SIGNAL(ParticipantListModelGUI*, getParticipantListModel)
 	DECLARE_SYNC_SIGNAL(QList<QString>, getComposers)
 	DECLARE_SYNC_SIGNAL(ChatMessageModel*, getReply)
 	DECLARE_SYNC_SIGNAL(QDateTime, getLastUpdateTime)

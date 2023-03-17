@@ -24,16 +24,25 @@
 // Use them in .hpp
 #define DECLARE_SYNC_SLOT_CONST(RETURN_TYPE, FUNCTION_NAME) void FUNCTION_NAME ## Slot(RETURN_TYPE* result) const;
 #define DECLARE_SYNC_SLOT(RETURN_TYPE, FUNCTION_NAME) void FUNCTION_NAME ## Slot(RETURN_TYPE* result);
+#define DECLARE_THREADED_DESTRUCTOR_SIGNAL() void requestDestructionSync();
 
 // Use them in .cpp
-#define DECLARE_SYNC_BODY_SLOT_CONST(RETURN_TYPE, FUNCTION_NAME, ROOT_CLASS) \
+#define DEFINE_SYNC_BODY_SLOT_CONST(RETURN_TYPE, FUNCTION_NAME, ROOT_CLASS) \
 	void ROOT_CLASS::FUNCTION_NAME ## Slot(RETURN_TYPE * result) const{\
 	*result = FUNCTION_NAME();\
 	}
-#define DECLARE_SYNC_BODY_SLOT(RETURN_TYPE, FUNCTION_NAME, ROOT_CLASS) \
+#define DEFINE_SYNC_BODY_SLOT(RETURN_TYPE, FUNCTION_NAME, ROOT_CLASS) \
 	void ROOT_CLASS::FUNCTION_NAME ## Slot(RETURN_TYPE * result){\
 	*result = FUNCTION_NAME();\
 	}
+#define DEFINE_THREADED_DESCTRUCTOR(thisClass) thisClass::~thisClass () {\
+	if( thread() == QApplication::instance()->thread()){\
+		connect(this, &thisClass::requestDestructionSync, this, &thisClass::destruction, Qt::BlockingQueuedConnection);\
+		emit requestDestructionSync();\
+	}else{\
+		destruction();\
+	}\
+}
 
 // Use them in GUI.hpp
 #define DECLARE_SYNC_SIGNAL(RETURN_TYPE, FUNCTION_NAME) RETURN_TYPE FUNCTION_NAME ## Sync(RETURN_TYPE* result) const;
@@ -56,13 +65,13 @@
 	connect(this, &ROOT_CLASS ## GUI::FUNCTION_NAME ## Sync, appModel, &ROOT_CLASS::FUNCTION_NAME ## Slot, Qt::BlockingQueuedConnection)
 
 // Use them in GUI.cpp
-#define DECLARE_GETTER(RETURN_TYPE, FUNCTION_NAME, ROOT_CLASS) \
+#define DEFINE_GETTER(RETURN_TYPE, FUNCTION_NAME, ROOT_CLASS) \
 	RETURN_TYPE ROOT_CLASS ## GUI::FUNCTION_NAME() const{\
 	RETURN_TYPE result;\
 	emit FUNCTION_NAME ## Sync(&result);\
 	return result;\
 	}
-#define DECLARE_GETTER_ENUM(RETURN_TYPE, FUNCTION_NAME, ROOT_CLASS) \
+#define DEFINE_GETTER_ENUM(RETURN_TYPE, FUNCTION_NAME, ROOT_CLASS) \
 	ROOT_CLASS ## GUI::RETURN_TYPE ROOT_CLASS ## GUI::FUNCTION_NAME() const{\
 	ROOT_CLASS::RETURN_TYPE result;\
 	emit FUNCTION_NAME ## Sync(&result);\
