@@ -30,6 +30,16 @@
   outputs = { self, nixpkgs, linphone-sdk, ispell-src, ... }: {
 
     overlays.default = final: prev: {
+      
+      chore = {
+        update-from-submodules = prev.stdenv.mkDerivation rec {
+          name = "update-from-submodules";
+          src = ./tools/nix-align.sh;
+          unpackPhase = "true";
+          buildPhase = "true";
+          installPhase = "mkdir -p $out/bin; cp $src $out/bin/$name";
+        };
+      };
 
       linphone = prev.linphone.overrideAttrs (attrs:
         let overriddenSrc = linphone-sdk.nixUtils.overrideSource self; in
