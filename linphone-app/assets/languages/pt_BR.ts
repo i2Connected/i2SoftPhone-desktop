@@ -119,7 +119,7 @@
     </message>
     <message>
         <source>commandLineOptionQtLogsOnly</source>
-        <translation type="unfinished"></translation>
+        <translation>Imprimir somente logs da aplicação</translation>
     </message>
 </context>
 <context>
@@ -1367,7 +1367,20 @@ URL do servidor não configurado.</translation>
     <message>
         <source>scanQRCodeWhere</source>
         <extracomment>&apos;In your app go in assistant - QR code provisioning&apos; : Describe where to flash the QRCode in the mobile application.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>No seu aplicativo, vá em Assistente - Provisionamento de código QR</translation>
+    </message>
+</context>
+<context>
+    <name>FileViewDialog</name>
+    <message>
+        <source>exportAsTitle</source>
+        <extracomment>&quot;Export As...&quot;: Title of a file dialog to export a file.</extracomment>
+        <translation>Exportar como…</translation>
+    </message>
+    <message>
+        <source>loadFile</source>
+        <extracomment>&quot;Load&quot;: Title of a file dialog to load a file.</extracomment>
+        <translation>Carregar</translation>
     </message>
 </context>
 <context>
@@ -1779,7 +1792,12 @@ Clique aqui: &lt;a href=&quot;%1&quot;&gt;%1 &lt;/a&gt;
     <message>
         <source>newConferenceUriMissing</source>
         <extracomment>&apos;Video conference URI is not set. You have to change it in your account settings in order to create new meetings.&apos; : Tooltip to warn the user to change a setting to activate an action.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>A URI não está configurada para videoconferência. Você tem que mudá-lo nas configurações de sua conta a fim de criar novas conferências.</translation>
+    </message>
+    <message>
+        <source>confirmFetchUri</source>
+        <extracomment>&apos;Do you want to download and apply configuration from this URL?&apos; : text to confirm to fetch a specified URL</extracomment>
+        <translation>Você deseja fazer o download e aplicar a configuração a partir desta URL?</translation>
     </message>
 </context>
 <context>
@@ -2419,7 +2437,7 @@ Clique aqui: &lt;a href=&quot;%1&quot;&gt;%1 &lt;/a&gt;
     <message>
         <source>fullLogsEnabledLabel</source>
         <extracomment>&apos;Full logs&apos; : label for an option to activate all logs (debug and traces)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Logs completos</translation>
     </message>
 </context>
 <context>
