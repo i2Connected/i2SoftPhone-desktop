@@ -2294,6 +2294,29 @@ Clique aqui: &lt;a href=&quot;%1&quot;&gt;%1 &lt;/a&gt;
     </message>
 </context>
 <context>
+    <name>PresenceLevel</name>
+    <message>
+        <source>presenceOnline</source>
+        <extracomment>&apos;Online⁣&apos;: Presence text</extracomment>
+        <translation>Disponível</translation>
+    </message>
+    <message>
+        <source>presenceLastSeenToday</source>
+        <extracomment>&apos;Online today at %1&apos; : Presence text for today (%1 is the hour)</extracomment>
+        <translation>Online hoje às % 1</translation>
+    </message>
+    <message>
+        <source>presenceLastSeenYesterday</source>
+        <extracomment>&apos;Online yesterday at %1&apos; : Presence text for yesterday (%1 is the hour)</extracomment>
+        <translation>Online ontem às % 1</translation>
+    </message>
+    <message>
+        <source>presenceLastSeen</source>
+        <extracomment>&apos;Online on %1&apos; : Presence text for latter days (%1 is a date)</extracomment>
+        <translation>Online às % 1</translation>
+    </message>
+</context>
+<context>
     <name>QObject</name>
     <message>
         <source>LinphoneEnums_TunnelModeEnable</source>
@@ -3094,7 +3117,41 @@ Clique aqui: &lt;a href=&quot;%1&quot;&gt;%1 &lt;/a&gt;
     <message>
         <source>invalidLimeServerUrl</source>
         <extracomment>&quot;invalid E2E encryption keys server URL&quot; : Error text about E2E encryption keys server URL.</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>URL de servidor de chaves de criptografia E2E inválida</translation>
+    </message>
+    <message>
+        <source>publishDurationLabel</source>
+        <translation>Duração da publicação (seg)</translation>
+    </message>
+    <message>
+        <source>dialPrefix</source>
+        <extracomment>&apos;Prefix for your country&apos; : Label for a text option to set the country code on the phone numbers.</extracomment>
+        <translation>Prefixo para o seu país</translation>
+    </message>
+    <message>
+        <source>dialPrefixTooptip</source>
+        <extracomment>&quot;The prefix to use when using numbers without the &apos;+&apos;&quot; : tooltip for a text option to set the country code on the phone numbers.</extracomment>
+        <translation>O prefixo a ser usado ao usar números sem o &apos;+&apos;</translation>
+    </message>
+    <message>
+        <source>dialEscapePlus</source>
+        <extracomment>&quot;Replace &apos;+&apos; by &apos;00&apos;&quot; : Label to an option for escaping the &apos;+&apos; character when dialing.</extracomment>
+        <translation>Substituir &apos;+&apos; por &apos;00&apos;</translation>
+    </message>
+    <message>
+        <source>dialEscapePlusTooltip</source>
+        <extracomment>&apos;Replace + in addresses by 00&apos; : tooltip for an option that allow escaping the &apos;+&apos; character in phone number.</extracomment>
+        <translation>Substitua &apos;+&apos; nos endereços por &apos;00&apos;</translation>
+    </message>
+    <message>
+        <source>dialPrefixCallChat</source>
+        <extracomment>&apos;Apply prefix for outgoing calls and chats&apos; : Label to set an option for applying the specified prefix to outgoings calls and chats.</extracomment>
+        <translation>Aplicar prefixo para chamadas e bate-papos de saída</translation>
+    </message>
+    <message>
+        <source>dialPrefixCallChatTooltip</source>
+        <extracomment>&apos;If a number is entered, apply the prefix to number&apos; : tooltip for an option to applying the country prefix to numbers.</extracomment>
+        <translation>Se um número for inserido, aplique o prefixo ao número</translation>
     </message>
 </context>
 <context>
