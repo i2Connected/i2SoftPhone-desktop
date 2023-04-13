@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Primary color for links in chat.
 - Replace double click on avatar by a simple click for copying address into the SmartSearchBar.
+- Bubble chat layout.
 
 ### Added
 - VFS Encryption
@@ -26,11 +27,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Emojis picker.
 - Text edit in chat can now understand rich texts.
 - Create thumbnails into memory instead of disk.
+- Display video thumbnails.
+- Crop thumbnail and pictures if distored.
+- Update SDK to 5.2.50
 
 ### Removed
 - Picture zoom on mouse over.
 
-## 5.0.15 - undefined
+## 5.0.16 - undefined
+
+### Fixed
+- Section date timezone in chat.
+
+## 5.0.15 - 2023-04-11
 
 ### Fixed
 - Fix using only username in URI handlers.
@@ -72,12 +81,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Fixed
-- Display of non-Ascii avatar
 - Crash on ending call in conference.
 - Icon transparency generations on icon.ico
 - Remove duplicated nat policies.
 - Remove unadmin feature to self because of not fully supported.
 - Save Stun/Turn proxy configuration.
+- Crash after showing participant devices.
+- Display of non-Ascii avatar
 - Switch off camera at startup.
 - Upgrade Qt to 5.15.12
 - Update SDK to 5.2.24 (Fix unresponsive video conference on Mac/Windows)
@@ -91,7 +101,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Crash when editing contacts from chat.
 - Contacts synchronization on creation.
 - Contact menu in secure chats.
-- Remove FFMPEG from dependencies as it is no mmore needed.
+- Remove FFMPEG from dependencies as it is no more needed.
 
 ## 5.0.9 - 2023-01-31
 
