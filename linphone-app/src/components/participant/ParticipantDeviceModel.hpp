@@ -79,6 +79,7 @@ public:
 	virtual void onStateChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, linphone::ParticipantDevice::State state);
 	virtual void onStreamCapabilityChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, linphone::MediaDirection direction, linphone::StreamType streamType);
 	virtual void onStreamAvailabilityChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, bool available, linphone::StreamType streamType);
+	virtual void onVideoDisplayErrorReceived(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, int errorCode);
 	
 	void connectTo(ParticipantDeviceListener * listener);
 	void updateVideoEnabled();
@@ -93,6 +94,7 @@ signals:
 	void isSpeakingChanged();
 	void isMutedChanged();
 	void stateChanged();
+	void videoDisplayErrorReceived(int errorCode);
 
 private:
 

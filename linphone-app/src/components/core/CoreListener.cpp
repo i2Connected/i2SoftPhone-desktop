@@ -87,6 +87,9 @@ void CoreListener::onNotifyPresenceReceivedForUriOrTel (const std::shared_ptr<li
 void CoreListener::onNotifyPresenceReceived (const std::shared_ptr<linphone::Core> &core,const std::shared_ptr<linphone::Friend> &linphoneFriend){
 	emit notifyPresenceReceived (core,linphoneFriend);
 }
+void CoreListener::onPreviewDisplayErrorReceived(const std::shared_ptr<linphone::Core> & core, const int errorCode){
+	emit previewDisplayErrorReceived(core,errorCode);
+}
 void CoreListener::onQrcodeFound(const std::shared_ptr<linphone::Core> & core, const std::string & result){
 	emit qrcodeFound(core, result);
 }

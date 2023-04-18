@@ -38,3 +38,8 @@ void CallListener::onRemoteRecording(const std::shared_ptr<linphone::Call> & cal
 	qDebug() << "onRemoteRecording: " << recording;
 	emit remoteRecording(call, recording);
 }
+
+void CallListener::onVideoDisplayErrorReceived(const std::shared_ptr<linphone::Call> & call, const int errorCode) {
+	qDebug() << "onVideoDisplayErrorReceived: " << errorCode << "[" << call.get() << "]";
+	emit videoDisplayErrorReceived(call, errorCode);
+}

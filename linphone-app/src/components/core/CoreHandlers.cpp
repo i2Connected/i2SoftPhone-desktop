@@ -63,12 +63,12 @@ void CoreHandlers::connectTo(CoreListener * listener){
 	connect(listener, &CoreListener::messagesReceived, this, &CoreHandlers::onMessagesReceived);
 	connect(listener, &CoreListener::notifyPresenceReceivedForUriOrTel, this, &CoreHandlers::onNotifyPresenceReceivedForUriOrTel);
 	connect(listener, &CoreListener::notifyPresenceReceived, this, &CoreHandlers::onNotifyPresenceReceived);
+	connect(listener, &CoreListener::previewDisplayErrorReceived, this, &CoreHandlers::onPreviewDisplayErrorReceived);
 	connect(listener, &CoreListener::qrcodeFound, this, &CoreHandlers::onQrcodeFound);
 	connect(listener, &CoreListener::transferStateChanged, this, &CoreHandlers::onTransferStateChanged);
 	connect(listener, &CoreListener::versionUpdateCheckResultReceived, this, &CoreHandlers::onVersionUpdateCheckResultReceived);
 	connect(listener, &CoreListener::ecCalibrationResult, this, &CoreHandlers::onEcCalibrationResult);
 	connect(listener, &CoreListener::conferenceInfoReceived, this, &CoreHandlers::onConferenceInfoReceived);
-	
 }
 	
 	
@@ -340,6 +340,11 @@ void CoreHandlers::onNotifyPresenceReceived (
 	if (linphoneFriend->getVcard() && linphoneFriend->dataExists("contact-model"))
 		linphoneFriend->getData<ContactModel>("contact-model").refreshPresence();
 	emit presenceStatusReceived(linphoneFriend);
+}
+
+void CoreHandlers::onPreviewDisplayErrorReceived(const std::shared_ptr<linphone::Core> & core, const int errorCode){
+	qDebug() << "[CoreHandlers] onPreviewDisplayErrorReceived: " << errorCode;
+	emit previewDisplayErrorReceived(core, errorCode);
 }
 
 void CoreHandlers::onQrcodeFound(const std::shared_ptr<linphone::Core> & core, const std::string & result){

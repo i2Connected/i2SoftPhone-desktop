@@ -345,11 +345,13 @@ QVariantMap CallsListModel::createChatRoom(const QString& subject, const int& se
 				ChatRoomInitializer::start(initializer);
 			}
 			timeline = timelineList->getTimeline(chatRoom, true);
+			qWarning() << (int)chatRoom->getState();
 		}else{
 			if(admins.size() > 0){
 				ChatRoomInitializer::create(chatRoom)->setAdmins(admins);
 			}
 			timeline = timelineList->getTimeline(chatRoom, true);
+			qWarning() << (int)chatRoom->getState();
 		}
 		if(timeline){
 			CoreManager::getInstance()->getTimelineListModel()->mAutoSelectAfterCreation = false;

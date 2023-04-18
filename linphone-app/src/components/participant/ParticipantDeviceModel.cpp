@@ -32,6 +32,7 @@ void ParticipantDeviceModel::connectTo(ParticipantDeviceListener * listener){
 	connect(listener, &ParticipantDeviceListener::stateChanged, this, &ParticipantDeviceModel::onStateChanged);
 	connect(listener, &ParticipantDeviceListener::streamCapabilityChanged, this, &ParticipantDeviceModel::onStreamCapabilityChanged);
 	connect(listener, &ParticipantDeviceListener::streamAvailabilityChanged, this, &ParticipantDeviceModel::onStreamAvailabilityChanged);
+	connect(listener, &ParticipantDeviceListener::videoDisplayErrorReceived, this, &ParticipantDeviceModel::onVideoDisplayErrorReceived);
 }
 
 // =============================================================================
@@ -196,4 +197,7 @@ void ParticipantDeviceModel::onStreamCapabilityChanged(const std::shared_ptr<lin
 }
 void ParticipantDeviceModel::onStreamAvailabilityChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, bool available, linphone::StreamType streamType) {
 	updateVideoEnabled();
+}
+void ParticipantDeviceModel::onVideoDisplayErrorReceived(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, int errorCode){
+	emit videoDisplayErrorReceived(errorCode);
 }

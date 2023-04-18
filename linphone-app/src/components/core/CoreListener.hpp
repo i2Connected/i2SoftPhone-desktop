@@ -54,11 +54,13 @@ public:
 	virtual void onMessagesReceived (const std::shared_ptr<linphone::Core> &core,const std::shared_ptr<linphone::ChatRoom> &room,const std::list<std::shared_ptr<linphone::ChatMessage>> &messages) override;
 	virtual void onNotifyPresenceReceivedForUriOrTel (const std::shared_ptr<linphone::Core> &core,const std::shared_ptr<linphone::Friend> &linphoneFriend,const std::string &uriOrTel,const std::shared_ptr<const linphone::PresenceModel> &presenceModel) override;
 	virtual void onNotifyPresenceReceived (const std::shared_ptr<linphone::Core> &core,const std::shared_ptr<linphone::Friend> &linphoneFriend) override;
+	virtual void onPreviewDisplayErrorReceived(const std::shared_ptr<linphone::Core> & core, const int errorCode) override;
 	virtual void onQrcodeFound(const std::shared_ptr<linphone::Core> & core, const std::string & result) override;
 	virtual void onTransferStateChanged (const std::shared_ptr<linphone::Core> &core,const std::shared_ptr<linphone::Call> &call,linphone::Call::State state) override;
 	virtual void onVersionUpdateCheckResultReceived (const std::shared_ptr<linphone::Core> & core,linphone::VersionUpdateCheckResult result,const std::string &version,const std::string &url) override;
 	virtual void onEcCalibrationResult(const std::shared_ptr<linphone::Core> & core,linphone::EcCalibratorStatus status,int delayMs) override;
 	virtual void onConferenceInfoReceived(const std::shared_ptr<linphone::Core> & core, const std::shared_ptr<const linphone::ConferenceInfo> & conferenceInfo) override;
+	
 	
 signals:
 	void accountRegistrationStateChanged(const std::shared_ptr<linphone::Core> & core,const std::shared_ptr<linphone::Account> & account,linphone::RegistrationState state,const std::string & message);
@@ -80,6 +82,7 @@ signals:
 	void messagesReceived (const std::shared_ptr<linphone::Core> &core,const std::shared_ptr<linphone::ChatRoom> &room,const std::list<std::shared_ptr<linphone::ChatMessage>> &messages);
 	void notifyPresenceReceivedForUriOrTel (const std::shared_ptr<linphone::Core> &core,const std::shared_ptr<linphone::Friend> &linphoneFriend,const std::string &uriOrTel,const std::shared_ptr<const linphone::PresenceModel> &presenceModel);
 	void notifyPresenceReceived (const std::shared_ptr<linphone::Core> &core,const std::shared_ptr<linphone::Friend> &linphoneFriend);
+	void previewDisplayErrorReceived(const std::shared_ptr<linphone::Core> & core, const int errorCode);
 	void qrcodeFound(const std::shared_ptr<linphone::Core> & core, const std::string & result);
 	void transferStateChanged (const std::shared_ptr<linphone::Core> &core,const std::shared_ptr<linphone::Call> &call,linphone::Call::State state);
 	void versionUpdateCheckResultReceived (const std::shared_ptr<linphone::Core> & core,linphone::VersionUpdateCheckResult result,const std::string &version,const std::string &url);

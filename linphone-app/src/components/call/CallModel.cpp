@@ -1012,6 +1012,10 @@ void CallModel::onParticipantAdminStatusChanged(const std::shared_ptr<const linp
 	}
 }
 
+void CallModel::onVideoDisplayErrorReceived(const std::shared_ptr<linphone::Call> & call, const int errorCode){
+	emit videoDisplayErrorReceived(errorCode);
+}
+
 void CallModel::setRemoteDisplayName(const std::string& name){
 	mRemoteAddress->setDisplayName(name);
 	if(mCall) {

@@ -208,6 +208,7 @@ public slots:
 	void onRemoteRecording(const std::shared_ptr<linphone::Call> & call, bool recording);
 	void onChatRoomInitialized(int state);
 	void onParticipantAdminStatusChanged(const std::shared_ptr<const linphone::Participant> & participant);
+	void onVideoDisplayErrorReceived(const std::shared_ptr<linphone::Call> & call, const int errorCode);
 	
 signals:
 	void meAdminChanged();
@@ -226,6 +227,7 @@ signals:
 	void statsUpdated ();
 	void statusChanged (CallStatus status);
 	void videoRequested ();
+	void videoDisplayErrorReceived(int errorCode);
 	void securityUpdated ();
 	void encryptionChanged();
 	void isPQZrtpChanged();

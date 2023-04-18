@@ -53,6 +53,7 @@ signals:
 	void isComposingChanged (const std::shared_ptr<linphone::ChatRoom> &chatRoom);
 	void logsUploadStateChanged (linphone::Core::LogCollectionUploadState state, const std::string &info);
 	void messagesReceived (const std::list<std::shared_ptr<linphone::ChatMessage>> &messages);
+	void previewDisplayErrorReceived(const std::shared_ptr<linphone::Core> & core, const int errorCode);
 	void presenceReceived (const QString &sipAddress, const std::shared_ptr<const linphone::PresenceModel> &presenceModel);
 	void presenceStatusReceived(std::shared_ptr<linphone::Friend> contact);
 	void registrationStateChanged (const std::shared_ptr<linphone::Account> &account, linphone::RegistrationState state);
@@ -84,6 +85,7 @@ public slots:
 	void onMessagesReceived (const std::shared_ptr<linphone::Core> &core,const std::shared_ptr<linphone::ChatRoom> &room,const std::list<std::shared_ptr<linphone::ChatMessage>> &messages);
 	void onNotifyPresenceReceivedForUriOrTel (const std::shared_ptr<linphone::Core> &core,const std::shared_ptr<linphone::Friend> &linphoneFriend,const std::string &uriOrTel,const std::shared_ptr<const linphone::PresenceModel> &presenceModel);
 	void onNotifyPresenceReceived (const std::shared_ptr<linphone::Core> &core,const std::shared_ptr<linphone::Friend> &linphoneFriend);
+	void onPreviewDisplayErrorReceived(const std::shared_ptr<linphone::Core> & core, const int errorCode);
 	void onQrcodeFound(const std::shared_ptr<linphone::Core> & core, const std::string & result);
 	void onTransferStateChanged (const std::shared_ptr<linphone::Core> &core,const std::shared_ptr<linphone::Call> &call,linphone::Call::State state);
 	void onVersionUpdateCheckResultReceived (const std::shared_ptr<linphone::Core> & core,linphone::VersionUpdateCheckResult result,const std::string &version,const std::string &url);

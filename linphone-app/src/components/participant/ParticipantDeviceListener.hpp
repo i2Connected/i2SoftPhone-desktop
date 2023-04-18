@@ -41,12 +41,15 @@ public:
 	virtual void onStateChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, linphone::ParticipantDevice::State state) override;
 	virtual void onStreamCapabilityChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, linphone::MediaDirection direction, linphone::StreamType streamType) override;
 	virtual void onStreamAvailabilityChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, bool available, linphone::StreamType streamType) override;
+	virtual void onVideoDisplayErrorReceived(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, int errorCode) override;
+	
 signals:
 	void isSpeakingChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, bool isSpeaking);
 	void isMuted(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, bool isMuted);
 	void stateChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, linphone::ParticipantDevice::State state);
 	void streamCapabilityChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, linphone::MediaDirection direction, linphone::StreamType streamType);
 	void streamAvailabilityChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, bool available, linphone::StreamType streamType);
+	void videoDisplayErrorReceived(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, int errorCode);
 };
 
 #endif // PARTICIPANT_MODEL_H_
