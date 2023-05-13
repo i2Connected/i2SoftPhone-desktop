@@ -248,7 +248,10 @@ Rectangle {
 								color: ChatStyle.entry.event.text.color
 								font.pointSize: ChatStyle.entry.time.pointSize
 								
-								text: UtilsCpp.toTimeString($chatEntry.timestamp, 'hh:mm')
+								text: (Utils.equalDate( $chatEntry.timestamp, $chatEntry.receivedTimestamp) 
+											? ''
+											: UtilsCpp.toDateString($chatEntry.timestamp, 'dd/MM') + ' ')
+											+ UtilsCpp.toTimeString($chatEntry.timestamp, 'hh:mm')
 								
 								verticalAlignment: Text.AlignVCenter
 								

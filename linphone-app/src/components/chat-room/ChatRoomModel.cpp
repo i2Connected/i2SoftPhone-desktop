@@ -231,7 +231,7 @@ QVariant ChatRoomModel::data (const QModelIndex &index, int role) const {
 	
 	switch (role) {
 		case Roles::ChatEntry: return QVariant::fromValue(mList[row].get());
-		case Roles::SectionDate: return QVariant::fromValue(mList[row].objectCast<ChatEvent>()->getTimestamp().date());
+		case Roles::SectionDate: return QVariant::fromValue(mList[row].objectCast<ChatEvent>()->getReceivedTimestamp().date());
 	}
 	
 	return QVariant();
@@ -837,7 +837,7 @@ void ChatRoomModel::updateNewMessageNotice(const int& count){
 					lastUnreadMessage = min(lastUnreadMessage, QDateTime::fromMSecsSinceEpoch(message->getTime() * 1000 - 1 ));	//-1 to be sure that event will be before the message
 				}
 			}			
-			mUnreadMessageNotice = ChatNoticeModel::create(ChatNoticeModel::NoticeType::NoticeUnreadMessages, lastUnreadMessage, QString::number(count));
+			mUnreadMessageNotice = ChatNoticeModel::create(ChatNoticeModel::NoticeType::NoticeUnreadMessages, lastUnreadMessage,lastUnreadMessage, QString::number(count));
 			beginInsertRows(QModelIndex(), 0, 0);
 			mList.prepend(mUnreadMessageNotice);
 			endInsertRows();
