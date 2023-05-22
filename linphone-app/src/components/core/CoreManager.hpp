@@ -26,6 +26,7 @@
 #include <QString>
 #include <QHash>
 #include <QMutex>
+#include <QSharedPointer>
 
 // =============================================================================
 
@@ -68,7 +69,7 @@ public:
 		return mCore;
 	}
 	
-	std::shared_ptr<CoreHandlers> getHandlers () {
+	QSharedPointer<CoreHandlers> getHandlers () {
 		Q_CHECK_PTR(mHandlers);
 		return mHandlers;
 	}
@@ -178,7 +179,7 @@ public slots:
 	void initCoreManager();
 	void startIterate();
 	void stopIterate();
-	void setLastRemoteProvisioningState(const linphone::ConfiguringState& state);
+	void setLastRemoteProvisioningState(const linphone::Config::ConfiguringState& state);
 	void createLinphoneCore (const QString &configPath);// In order to delay creation
 	void handleChatRoomCreated(const QSharedPointer<ChatRoomModel> &chatRoomModel);
 	
@@ -215,10 +216,10 @@ private:
 	static QString getDownloadUrl ();
 	
 	std::shared_ptr<linphone::Core> mCore;
-	std::shared_ptr<CoreHandlers> mHandlers;	// It is used for handling linphone. Keep it to shared_ptr.
+	QSharedPointer<CoreHandlers> mHandlers;
 	
 	bool mStarted = false;
-	linphone::ConfiguringState mLastRemoteProvisioningState;
+	linphone::Config::ConfiguringState mLastRemoteProvisioningState;
 	
 	CallsListModel *mCallsListModel = nullptr;
 	ContactsListModel *mContactsListModel = nullptr;
