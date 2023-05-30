@@ -74,7 +74,8 @@ Note: If you have the third party tool `qtchooser` installed :
         `mkdir build`
         `cd build`
         `cmake .. -DCMAKE_BUILD_PARALLEL_LEVEL=10 -DCMAKE_BUILD_TYPE=RelWithDebInfo`
-        `cmake --build . --target install --parallel 10 --config RelWithDebInfo`
+        `cmake --build . --parallel 10 --config RelWithDebInfo`
+        `cmake --install .`
         `./OUTPUT/bin/linphone --verbose` or `./OUTPUT/Linphone.app/Contents/MacOS/linphone --verbose`
 
 ### Get sources
@@ -244,7 +245,7 @@ Also, more configurations are available in the docker-files folder of linphone-s
 | ENABLE_LDAP | Enable LDAP support. | YES |
 | ENABLE_VIDEO | Enable Video support. | YES |
 | ENABLE_OPENH264 | Enable the use of OpenH264 codec | YES |
-| ENABLE_NON_FREE_CODECS | Enable the use of non free codecs | YES |
+| ENABLE_NON_FREE_FEATURES | Enable the use of non free features | YES |
 | ENABLE_FFMPEG | Build mediastreamer2 with ffmpeg video support. | NO |
 | ENABLE_CONSOLE_UI | Turn on or off compilation of console interface. | NO |
 -->
