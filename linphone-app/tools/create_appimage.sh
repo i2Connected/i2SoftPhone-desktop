@@ -38,13 +38,31 @@ export APPIMAGE_EXTRACT_AND_RUN=1
 rm -rf ${WORK_DIR}/AppDir
 mkdir -p "${WORK_DIR}/AppDir/usr/"
 
+copyFolder()
+{
+	mkdir -p "${WORK_DIR}/AppDir/usr/$1"
+	cp -rf "${BIN_SOURCE_DIR}/$1"/* "${WORK_DIR}/AppDir/usr/$1"
+}
+
+
 #Copy all files from the output project
-cp -rf "${BIN_SOURCE_DIR}"/* "${WORK_DIR}/AppDir/usr/"
+#cp -rf "${BIN_SOURCE_DIR}"/* "${WORK_DIR}/AppDir/usr/"
+copyFolder bin
+#cp -rf "${BIN_SOURCE_DIR}/bin"/* "${WORK_DIR}/AppDir/usr/bin"
+
+# Copy share
+copyFolder share/applications
+copyFolder share/belr
+copyFolder share/icons
+copyFolder share/images
+copyFolder share/linphone
+copyFolder share/sounds
+
 #remove Packages folder : it is not part of the project
-rm -rf "${WORK_DIR}/AppDir/usr/Packages"
+#rm -rf "${WORK_DIR}/AppDir/usr/Packages"
 #remove libraries : there are automatically found by linuxdeploy
-rm -rf "${WORK_DIR}/AppDir/usr/lib"
-rm -rf "${WORK_DIR}/AppDir/usr/lib64"
+#rm -rf "${WORK_DIR}/AppDir/usr/lib"
+#rm -rf "${WORK_DIR}/AppDir/usr/lib64"
 #Copy soci sqlite3 backend
 mkdir -p "${WORK_DIR}/AppDir/usr/lib"
 cp -f "${BIN_SOURCE_DIR}/lib"/libsoci_sqlite3* "${WORK_DIR}/AppDir/usr/lib/"
@@ -83,7 +101,7 @@ fi
 ###########################################################################################
 
 export QML_SOURCES_PATHS=${QML_SOURCES_PATHS}:${WORK_DIR}/..
-export LD_LIBRARY_PATH=${QT_PATH}/lib
+export LD_LIBRARY_PATH=${QT_PATH}/lib:${BIN_SOURCE_DIR}/lib:${BIN_SOURCE_DIR}/lib64
 #export EXTRA_QT_PLUGINS=webenginecore;webview;webengine
 
 echo "-- Generating AppDir for AppImage"

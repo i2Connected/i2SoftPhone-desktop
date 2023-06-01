@@ -54,6 +54,15 @@ project(linphoneqt)
 include(GNUInstallDirs)
 include(CheckCXXCompilerFlag)
 
+set(CMAKE_CXX_STANDARD 17)
+set(APPLICATION_OUTPUT_DIR "${CMAKE_BINARY_DIR}/OUTPUT")
+#set(LINPHONE_OUTPUT_DIR "${CMAKE_BINARY_DIR}/linphone-sdk/desktop")	# Fromp 5.3, this install output is no more usable. We have to install all into the same folder as the final folder.
+#set(QTKEYCHAIN_OUTPUT_DIR "${CMAKE_BINARY_DIR}/qtkeychain")
+set(LINPHONE_OUTPUT_DIR "${APPLICATION_OUTPUT_DIR}")
+set(QTKEYCHAIN_OUTPUT_DIR "${APPLICATION_OUTPUT_DIR}")
+
+set(QTKEYCHAIN_TARGET_NAME "EQt5Keychain")
+
 # Avoid cmake warning if CMP0071 is not set.
 if (POLICY CMP0071)
     cmake_policy(SET CMP0071 NEW)
@@ -91,39 +100,46 @@ option(ENABLE_APP_WEBVIEW "Enable webviews." OFF) # Webview is not fully support
 option(ENABLE_BUILD_APP_PLUGINS "Enable the build of plugins" ON)
 option(ENABLE_BUILD_EXAMPLES "Enable the build of examples" OFF)
 option(ENABLE_BUILD_VERBOSE "Enable the build generation to be more verbose" OFF)
+option(ENABLE_CONSOLE_UI "Turn on or off compilation of console interface." OFF)
+option(ENABLE_DAEMON "Enable the linphone daemon interface." OFF)
+option(ENABLE_DOC "Enable API documentation generation." OFF)
+option(ENABLE_FFMPEG "Build mediastreamer2 with ffmpeg video support." OFF)# No more needed
+option(ENABLE_LDAP "Enable LDAP support." YES)
+option(ENABLE_NON_FREE_CODECS "Enable the use of non free codecs" YES)
+set(ENABLE_NON_FREE_FEATURES ${ENABLE_NON_FREE_CODECS})
+option(ENABLE_OPENH264 "Enable the use of OpenH264 codec" YES)
 option(ENABLE_QT_KEYCHAIN "Build QtKeychain to manage VFS from System key stores." ON)
-option(ENABLE_UPDATE_CHECK "Enable update check." ON)
-option(LINPHONE_SDK_MAKE_RELEASE_FILE_URL "Make a RELEASE file that work along check_version and use this URL" "")
-
+option(ENABLE_QRCODE "Enable QRCode support" OFF)#Experimental
 option(ENABLE_RELATIVE_PREFIX "Set Internal packages relative to the binary" ON)
+option(ENABLE_SANITIZER "Enable sanitizer." OFF)
+option(ENABLE_STRICT "Build with strict compilator flags e.g. -Wall -Werror" OFF)
+option(ENABLE_TESTS "Build with testing binaries of SDK" OFF)
+option(ENABLE_TESTS_COMPONENTS "Build libbctoolbox-tester" OFF)
+option(ENABLE_TOOLS "Enable tools of SDK" OFF)
+option(ENABLE_UNIT_TESTS "Enable unit test of SDK." OFF)
+option(ENABLE_UPDATE_CHECK "Enable update check." ON)
+option(ENABLE_VIDEO "Enable Video support." YES)
+option(ENABLE_WINDOWS_TOOLS_CHECK "Enable tools checks on Windows for auto install." OFF)
+
+
+option(LINPHONE_SDK_MAKE_RELEASE_FILE_URL "Make a RELEASE file that work along check_version and use this URL" "")
 
 # QtKeychain
 option(LIBSECRET_SUPPORT "Build with libsecret support" OFF) # Need libsecret-devel
 
-# Set some SDK variables to configure the APP build as we want it
-set(ENABLE_CONSOLE_UI OFF)
-set(ENABLE_CXX_WRAPPER ON CACHE BOOL "Build the C++ wrapper for Liblinphone." FORCE)
-set(ENABLE_DAEMON OFF)
-set(ENABLE_FFMPEG OFF)
-set(ENABLE_LDAP ON)
-set(ENABLE_NON_FREE_FEATURES ON)
-set(ENABLE_OPENH264 ON)
-set(ENABLE_QRCODE OFF) # Experimental
-set(ENABLE_SANITIZER OFF)
-set(ENABLE_STRICT OFF)
-set(ENABLE_TESTS_COMPONENT OFF)
-set(ENABLE_THEORA OFF)
-set(ENABLE_TOOLS OFF)
-set(ENABLE_VIDEO ON)
 if(WIN32)
-	set(ENABLE_OPENSSL_EXPORT ON)
+	option(ENABLE_OPENSSL_EXPORT "Enable OpenSSL deployment" YES)
 elseif(APPLE)
-	set(ENABLE_OPENSSL_EXPORT OFF)
+	option(ENABLE_OPENSSL_EXPORT "Enable OpenSSL deployment" OFF)
 else()
-	set(ENABLE_V4L ON)
-	set(ENABLE_OPENSSL_EXPORT OFF)
+	option(ENABLE_V4L "Ability to capture and display video using libv4l2 or libv4l." YES)
+	option(ENABLE_OPENSSL_EXPORT "Enable OpenSSL deployment" OFF)
 endif()
 
+# Set some SDK variables to configure the APP build as we want it
+set(ENABLE_CXX_WRAPPER ON CACHE BOOL "Build the C++ wrapper for Liblinphone." FORCE)
+set(ENABLE_THEORA OFF)
+set(ENABLE_QT_GL ${ENABLE_VIDEO})
 
 find_package(Qt5 5.10 COMPONENTS Core REQUIRED)
 
@@ -134,19 +150,25 @@ endif()
 if(NOT LINPHONE_QT_ONLY)
 
 	function(add_linphone_sdk)
+		set(CMAKE_INSTALL_PREFIX "${LINPHONE_OUTPUT_DIR}")
 		set(CMAKE_POLICY_DEFAULT_CMP0077 NEW) # Prevent project from overriding the options we just set here
 		add_subdirectory("linphone-sdk")
 	endfunction()
 	add_linphone_sdk()
 
 	if(ENABLE_QT_KEYCHAIN)
-		set(QTKEYCHAIN_TARGET_NAME "EQt5Keychain")
-		add_subdirectory("external/qtkeychain")
+		function(add_linphone_keychain)
+			set(CMAKE_INSTALL_PREFIX "${QTKEYCHAIN_OUTPUT_DIR}")
+			add_subdirectory("external/qtkeychain")
+		endfunction()
+		add_linphone_keychain()
 	endif()
 
 endif()
 
 function(add_linphone_app)
+	set(CMAKE_INSTALL_PREFIX "${APPLICATION_OUTPUT_DIR}")
+	set(CMAKE_POLICY_DEFAULT_CMP0077 NEW) # Prevent project from overriding the options we just set here
 	if(APPLE)
 		add_compile_definitions("ENABLE_FAT_BINARY=ON") # Disable XCFrameworks as it is not supported.
 	elseif(UNIX)
