@@ -2,6 +2,7 @@ import QtQuick 2.7
 
 import Linphone 1.0
 
+import Units 1.0
 import UtilsCpp 1.0
 
 import App.Styles 1.0
@@ -32,7 +33,7 @@ Avatar {
 	Component.onDestruction: _sipAddressObserver=null// Need to set it to null because of not calling destructor if not.
 	
 	backgroundColor: CallStyle.container.avatar.backgroundColor.color
-	foregroundColor: mainItem.isPaused ? CallStyle.container.pause.color : 'transparent'
+	foregroundColor: mainItem.isPaused ? CallStyle.container.pause.colorModel.color : 'transparent'
 	
 	image: {
 		if (_sipAddressObserver) {
@@ -48,7 +49,7 @@ Avatar {
 		color: CallStyle.container.pause.text.colorModel.color
 		
 		// `|| 1` => `pointSize` must be greater than 0.
-		font.pointSize: (width / CallStyle.container.pause.text.pointSizeFactor) || 1
+		font.pointSize: Units.dp * (width / CallStyle.container.pause.text.pointSizeFactor) || 1
 		
 		horizontalAlignment: Text.AlignHCenter
 		verticalAlignment: Text.AlignVCenter

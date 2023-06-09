@@ -98,8 +98,8 @@ public:
 	Q_PROPERTY(bool entriesLoading READ isEntriesLoading WRITE setEntriesLoading NOTIFY entriesLoadingChanged)
 	
 	
-	static QSharedPointer<ChatRoomModel> create(const std::shared_ptr<linphone::ChatRoom>& chatRoom, const std::list<std::shared_ptr<linphone::CallLog>>& callLogs = std::list<std::shared_ptr<linphone::CallLog>>());
-	ChatRoomModel (const std::shared_ptr<linphone::ChatRoom>& chatRoom, const std::list<std::shared_ptr<linphone::CallLog>>& callLogs = std::list<std::shared_ptr<linphone::CallLog>>(), QObject * parent = nullptr);
+	static QSharedPointer<ChatRoomModel> create(const std::shared_ptr<linphone::ChatRoom>& chatRoom, const QMap<QString,QMap<QString, std::shared_ptr<linphone::CallLog>>>& lastCalls = QMap<QString,QMap<QString, std::shared_ptr<linphone::CallLog>>>());
+	ChatRoomModel (const std::shared_ptr<linphone::ChatRoom>& chatRoom, const QMap<QString,QMap<QString, std::shared_ptr<linphone::CallLog>>>& lastCalls = QMap<QString,QMap<QString, std::shared_ptr<linphone::CallLog>>>(), QObject * parent = nullptr);
 	
 	~ChatRoomModel ();
 	
@@ -199,7 +199,7 @@ public:
 	
 	bool mDeleteChatRoom = false;	// Use as workaround because of core->deleteChatRoom() that call destructor without takking account of count ref : call it in ChatRoomModel destructor	
 	int mLastEntriesStep = 50;		// Retrieve a part of the history to avoid too much processing
-	int mFirstLastEntriesStep = 10;	// Retrieve a part of the history to avoid too much processing at the init
+	int mFirstLastEntriesStep = 20;	// Retrieve a part of the history to avoid too much processing at the init
 	bool mMarkAsReadEnabled = true;
 	bool mEntriesLoading = false;
 	

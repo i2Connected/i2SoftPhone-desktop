@@ -103,8 +103,8 @@ void ChatRoomModel::connectTo(ChatRoomListener * listener){
 }
 
 // -----------------------------------------------------------------------------
-QSharedPointer<ChatRoomModel> ChatRoomModel::create(const std::shared_ptr<linphone::ChatRoom>& chatRoom, const std::list<std::shared_ptr<linphone::CallLog>>& callLogs){
-	QSharedPointer<ChatRoomModel> model = QSharedPointer<ChatRoomModel>::create(chatRoom, callLogs);
+QSharedPointer<ChatRoomModel> ChatRoomModel::create(const std::shared_ptr<linphone::ChatRoom>& chatRoom, const QMap<QString,QMap<QString, std::shared_ptr<linphone::CallLog>>>& lastCalls){
+	QSharedPointer<ChatRoomModel> model = QSharedPointer<ChatRoomModel>::create(chatRoom, lastCalls);
 	if(model){
 		model->mSelf = model;
 		 //chatRoom->addListener(model);
@@ -113,7 +113,7 @@ QSharedPointer<ChatRoomModel> ChatRoomModel::create(const std::shared_ptr<linpho
 		return nullptr;
 }
 
-ChatRoomModel::ChatRoomModel (const std::shared_ptr<linphone::ChatRoom>& chatRoom, const std::list<std::shared_ptr<linphone::CallLog>>& callLogs, QObject * parent) : ProxyListModel(parent){
+ChatRoomModel::ChatRoomModel (const std::shared_ptr<linphone::ChatRoom>& chatRoom, const QMap<QString,QMap<QString, std::shared_ptr<linphone::CallLog>>>& lastCalls, QObject * parent) : ProxyListModel(parent){
 	App::getInstance()->getEngine()->setObjectOwnership(this, QQmlEngine::CppOwnership);// Avoid QML to destroy it when passing by Q_INVOKABLE
 	CoreManager *coreManager = CoreManager::getInstance();
 	mCoreHandlers = coreManager->getHandlers();
@@ -157,34 +157,23 @@ ChatRoomModel::ChatRoomModel (const std::shared_ptr<linphone::ChatRoom>& chatRoo
 				connect(contact.get(), &ContactModel::contactUpdated, this, &ChatRoomModel::fullPeerAddressChanged);
 			}
 		}
-		
-		std::shared_ptr<linphone::CallLog> lastCall = nullptr;
-		QString peerAddress = getParticipantAddress();
-		std::shared_ptr<const linphone::Address> lLocalAddress = mChatRoom->getLocalAddress();
-		QString localAddress = Utils::coreStringToAppString(lLocalAddress->asStringUriOnly());
-		
-		if(callLogs.size() == 0) {
-			auto callHistory = CallsListModel::getCallHistory(peerAddress, localAddress);
-			if(callHistory.size() > 0)
-				lastCall = callHistory.front();
-		}else{// Find the last call in list
-			std::shared_ptr<linphone::Address> lPeerAddress = Utils::interpretUrl(peerAddress);
-			if( lPeerAddress && lLocalAddress){
-				auto itCallLog = std::find_if(callLogs.begin(), callLogs.end(), [lPeerAddress, lLocalAddress](std::shared_ptr<linphone::CallLog> c){
-					return c->getLocalAddress()->weakEqual(lLocalAddress) && c->getRemoteAddress()->weakEqual(lPeerAddress);
-				});
-				if( itCallLog != callLogs.end())
-					lastCall = *itCallLog;
+		time_t callDate = 0;
+		if(lastCalls.size() > 0){
+			QString peerAddress = getParticipantAddress();
+			QString localAddress = Utils::coreStringToAppString(mChatRoom->getLocalAddress()->asStringUriOnly());
+
+			auto itLocal = lastCalls.find(localAddress);
+			if(itLocal != lastCalls.end()){
+				auto itPeer = itLocal->find(peerAddress);
+				if(itPeer != itLocal->end()) {
+					callDate = itPeer.value()->getStartDate();
+					if( itPeer.value()->getStatus() == linphone::Call::Status::Success )
+						callDate += itPeer.value()->getDuration();
 				}
+			}
 		}
-			
-		if(lastCall){
-			auto callDate = lastCall->getStartDate();
-			if( lastCall->getStatus() == linphone::Call::Status::Success )
-				callDate += lastCall->getDuration();
-			setLastUpdateTime(QDateTime::fromMSecsSinceEpoch(std::max(mChatRoom->getLastUpdateTime(), callDate )*1000));
-		}else
-			setLastUpdateTime(QDateTime::fromMSecsSinceEpoch(mChatRoom->getLastUpdateTime()*1000));
+		setLastUpdateTime(QDateTime::fromMSecsSinceEpoch(std::max(mChatRoom->getLastUpdateTime(), callDate )*1000));
+
 	}else
 		mParticipantListModel = nullptr;
 }
@@ -238,7 +227,7 @@ bool ChatRoomModel::removeRows (int row, int count, const QModelIndex &parent) {
 	
 	if (row < 0 || count < 0 || limit >= mList.count())
 		return false;
-	emit layoutAboutToBeChanged();
+	
 	beginRemoveRows(parent, row, limit);
 	
 	for (int i = 0; i < count; ++i) {
@@ -253,7 +242,7 @@ bool ChatRoomModel::removeRows (int row, int count, const QModelIndex &parent) {
 	else if (limit == mList.count())
 		emit lastEntryRemoved();
 	emit focused();// Removing rows is like having focus. Don't wait asynchronous events.
-	emit layoutChanged();
+	emit dataChanged(index(row), index(limit));
 	return true;
 }
 
@@ -980,18 +969,19 @@ void ChatRoomModel::initEntries(){
 		EntrySorterHelper::getLimitedSelection(&entries, prepareEntries, mFirstLastEntriesStep, this);
 		qDebug() << "Internal Entries : Built";
 		if(entries.size() >0){
-			emit layoutAboutToBeChanged();
+			auto firstIndex = index(mList.size()-1,0);
 			beginInsertRows(QModelIndex(),0, entries.size()-1);
 			for(auto e : entries) {
 				if( e->mType == ChatRoomModel::EntryType::MessageEntry){
 					connect(e.objectCast<ChatMessageModel>().get(), &ChatMessageModel::remove, this, &ChatRoomModel::removeEntry);
 					auto model = e.objectCast<ChatMessageModel>().get();
-					qDebug() << "Adding" << model->getReceivedTimestamp().toString("yyyy/MM/dd hh:mm:ss.zzz") << model->getTimestamp().toString("yyyy/MM/dd hh:mm:ss.zzz") << QString(model->getChatMessage()->getUtf8Text().c_str()).left(5);
+					qDebug() << "Adding" << model->getReceivedTimestamp().toString("yyyy/MM/dd hh:mm:ss.zzz") << model->getTimestamp().toString("yyyy/MM/dd hh:mm:ss.zzz") << (CoreManager::getInstance()->getSettingsModel()->isDeveloperSettingsAvailable() ? QString(model->getChatMessage()->getUtf8Text().c_str()).left(5) : "");
 				}
 				mList.push_back(e);
 			}
 			endInsertRows();
-			emit layoutChanged();
+			auto lastIndex = index(mList.size()-1,0);
+			emit dataChanged(firstIndex,lastIndex);
 			updateNewMessageNotice(mChatRoom->getUnreadMessagesCount());
 		}
 		qDebug() << "Internal Entries : End";
@@ -1075,14 +1065,14 @@ int ChatRoomModel::loadMoreEntries(){
 		
 		if(entries.size() >0){
 			if(mPostModelChangedEvents){
-				emit layoutAboutToBeChanged();
+				
 				beginInsertRows(QModelIndex(), 0, entries.size()-1);
 			}
 			for(auto entry : entries)
 				mList.prepend(entry);
 			if(mPostModelChangedEvents){
 				endInsertRows();
-				emit layoutChanged();
+				emit dataChanged(index(0),index(entries.size()-1));
 			}
 			updateLastUpdateTime();
 		}
@@ -1115,11 +1105,11 @@ void ChatRoomModel::insertCall (const std::shared_ptr<linphone::CallLog> &callLo
 		QSharedPointer<ChatCallModel> model = ChatCallModel::create(callLog, true);
 		if(model){
 			int row = mList.count();
-			emit layoutAboutToBeChanged();
 			beginInsertRows(QModelIndex(), row, row);
 			mList << model;
 			endInsertRows();
-			emit layoutChanged();
+			auto lastIndex = index(mList.size()-1,0);
+			emit dataChanged(lastIndex,lastIndex );
 			if (callLog->getStatus() == linphone::Call::Status::Success) {
 				model = ChatCallModel::create(callLog, false);
 				if(model)
