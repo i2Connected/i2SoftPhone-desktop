@@ -67,8 +67,10 @@ Rectangle {
 			
 // Load optimizations
 			property int remainingLoadersCount: 0
-			property int syncLoaderBatch: 50	// batch of simultaneous loaders on synchronous mode
+			property int syncLoaderBatch: 20	// batch of simultaneous loaders on synchronous mode
 //------------------------------------
+
+			signal refreshContents()
 						
 			onLoadingEntriesChanged: {
 				if( loadingEntries && !displaying)
@@ -84,6 +86,13 @@ Rectangle {
 				running: false
 				onTriggered: if(container.proxyModel.chatRoomModel) container.proxyModel.chatRoomModel.resetMessageCount()
 			}
+			Timer{
+				id: refreshContentsTimer
+				interval: 200
+				repeat: true
+				running: false
+				onTriggered: chat.refreshContents()
+			}
 			
 			Layout.fillHeight: true
 			Layout.fillWidth: true
@@ -93,11 +102,15 @@ Rectangle {
 			onIsMovingChanged:{
 				if(!chat.isMoving && chat.atYBeginning && !chat.loadingEntries){// Moving has stopped. Check if we are at beginning
 					chat.displaying = true
-					container.proxyModel.loadMoreEntriesAsync()
+					console.log("Trying to load more entries")
+					Qt.callLater(container.proxyModel.loadMoreEntriesAsync)
 				}
 			}
 			// -----------------------------------------------------------------------
-			Component.onCompleted: Logic.initView()
+			Component.onCompleted: {
+					Logic.initView()
+					refreshContentsTimer.start()
+			}
 			onMovementStarted: {Logic.handleMovementStarted(); chat.isMoving = true}
 			onMovementEnded: {Logic.handleMovementEnded(); chat.isMoving = false}
 			
@@ -156,6 +169,7 @@ Rectangle {
 				
 				width: chat.contentWidth	// Fill all space
 				clip: false
+				visible: loader.status == Loader.Ready
 				// ---------------------------------------------------------------------
 				MouseArea {
 					id: mouseArea
@@ -181,7 +195,7 @@ Rectangle {
 							Layout.rightMargin: ChatStyle.entry.message.outgoing.areaSize
 							spacing:0
 							// Display time.
-							visible: !entry.isTopGrouped
+							visible: !entry.isTopGrouped// && !entry.isNotice
 							
 							Text {
 								id:timeDisplay
@@ -202,7 +216,6 @@ Rectangle {
 								TooltipArea {
 									text: entry.chatEntry ? UtilsCpp.toDateTimeString(entry.chatEntry.timestamp) : ''
 								}
-								visible:!entry.isNotice
 							}
 							Text{
 								id:authorName
@@ -212,14 +225,7 @@ Rectangle {
 								
 								color: ChatStyle.entry.event.text.colorModel.color
 								font.pointSize: ChatStyle.entry.event.text.pointSize
-								visible: entry.isMessage
-										 && entry.chatEntry
-										 && !entry.chatEntry.isOutgoing // Only outgoing
-										 && (!entry.previousItem  //No previous entry
-											 || entry.previousItem.type != ChatRoomModel.MessageEntry // Previous entry is a message
-											 || entry.previousItem.fromSipAddress != entry.chatEntry.fromSipAddress // Different user
-											 || (new Date(entry.previousItem.timestamp)).setHours(0, 0, 0, 0) != (new Date(entry.chatEntry.timestamp)).setHours(0, 0, 0, 0) // Same day == section
-											 )
+								visible: entry.chatEntry && !entry.chatEntry.isOutgoing && text != ''
 							}
 						}
 						// Display content.
@@ -228,23 +234,33 @@ Rectangle {
 							height: (item !== null && typeof(item)!== 'undefined')? item.height: 0
 							Layout.fillWidth: true
 							source: Logic.getComponentFromEntry(entry.chatEntry)
-							property int loaderIndex: 0	// index of loader from remaining loaders
-							property int remainingIndex : loaderIndex % ((chat.remainingLoadersCount) / chat.syncLoaderBatch) != 0	// Check loader index to remaining loader.
-							onRemainingIndexChanged: if( remainingIndex == 0 && asynchronous) asynchronous = false
-							asynchronous: true
 							z:1
-						
+							asynchronous: true
+							property int loaderIndex: 0
+							function updateSync(){
+								if( asynchronous && loaderIndex > 0 && chat.remainingLoadersCount - loaderIndex - chat.syncLoaderBatch <= 0 ) asynchronous = false// Sync load the end
+							}
+							function stopLoading(){
+								chatConnections.enabled = false // No more update is needed : ignore signals.
+								--chat.remainingLoadersCount // Loader is ready: remove one from remaining count.
+							}
 							onStatusChanged:	if( status == Loader.Ready) {
 													loader.item.isTopGrouped = entry.isTopGrouped
 													loader.item.isBottomGrouped = entry.isBottomGrouped
-													remainingIndex = -1	// overwrite to remove signal changed. That way, there is no more binding loops.
-													--chat.remainingLoadersCount // Loader is ready: remove one from remaining count.
+													stopLoading();
+												}else if( status == Loader.Error) {
+													stopLoading();
 												}
-							
+
 							Component.onCompleted: {
 								loaderIndex = ++chat.remainingLoadersCount	// on new Loader : one more remaining
 							}
-							Component.onDestruction: if( status != Loader.Ready) --chat.remainingLoadersCount	// Remove remaining count if not loaded
+							Component.onDestruction: if( status != Loader.Ready && status != Loader.Error) {stopLoading();}	// Remove remaining count if not loaded
+							Connections{
+								id: chatConnections
+								target: chat
+								onRefreshContents:loader.updateSync()
+							}
 						}
 							
 						Connections{
