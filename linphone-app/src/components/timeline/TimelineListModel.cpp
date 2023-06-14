@@ -34,6 +34,7 @@
 #include "TimelineListModel.hpp"
 
 #include <QDebug>
+#include <QElapsedTimer>
 
 
 // =============================================================================
@@ -44,7 +45,6 @@ TimelineListModel::TimelineListModel (QObject *parent) : ProxyListModel(parent) 
 	connect(coreHandlers, &CoreHandlers::chatRoomRead, this, &TimelineListModel::onChatRoomRead);
 	connect(coreHandlers, &CoreHandlers::chatRoomStateChanged, this, &TimelineListModel::onChatRoomStateChanged);
 	connect(coreHandlers, &CoreHandlers::messagesReceived, this, &TimelineListModel::update);
-	connect(coreHandlers, &CoreHandlers::messagesReceived, this, &TimelineListModel::updated);
 	
 	QObject::connect(coreHandlers, &CoreHandlers::callStateChanged, this, &TimelineListModel::onCallStateChanged);
 	QObject::connect(coreHandlers, &CoreHandlers::callCreated, this, &TimelineListModel::onCallCreated);
@@ -60,7 +60,6 @@ TimelineListModel::TimelineListModel(const TimelineListModel* model){
 	connect(coreHandlers, &CoreHandlers::chatRoomRead, this, &TimelineListModel::onChatRoomRead);
 	connect(coreHandlers, &CoreHandlers::chatRoomStateChanged, this, &TimelineListModel::onChatRoomStateChanged);
 	connect(coreHandlers, &CoreHandlers::messagesReceived, this, &TimelineListModel::update);
-	connect(coreHandlers, &CoreHandlers::messagesReceived, this, &TimelineListModel::updated);
 	
 	QObject::connect(coreHandlers, &CoreHandlers::callStateChanged, this, &TimelineListModel::onCallStateChanged);
 	QObject::connect(coreHandlers, &CoreHandlers::callCreated, this, &TimelineListModel::onCallCreated);
@@ -70,7 +69,8 @@ TimelineListModel::TimelineListModel(const TimelineListModel* model){
 	for(auto item : model->mList) {
 		auto newItem = qobject_cast<TimelineModel*>(item)->clone();
 		connect(newItem.get(), SIGNAL(selectedChanged(bool)), this, SLOT(onSelectedHasChanged(bool)));
-		connect(newItem.get(), &TimelineModel::chatRoomDeleted, this, &TimelineListModel::onChatRoomDeleted);
+		connect(newItem.get(), &TimelineModel::chatRoomDeleted, this, &TimelineListModel::onTimelineDeleted);
+		connect(newItem.get(), &TimelineModel::dataChanged, this, &TimelineListModel::onTimelineDataChanged);
 		mList << newItem;
 	}
 }
@@ -240,6 +240,10 @@ void TimelineListModel::onSelectedHasChanged(bool selected){
 }
 
 void TimelineListModel::updateTimelines () {
+	QElapsedTimer timer, stepsTimer;
+	timer.start();
+	
+	stepsTimer.start();
 	CoreManager *coreManager = CoreManager::getInstance();
 	std::list<std::shared_ptr<linphone::ChatRoom>> allChatRooms = coreManager->getCore()->getChatRooms();
 
@@ -259,7 +263,7 @@ void TimelineListModel::updateTimelines () {
 		}
 		return false;
 	}); 
-	
+	qInfo() << "Timelines cleaning :" << stepsTimer.restart() << "ms.";
 //Remove no more chat rooms
 	auto itTimeline = mList.begin();
 	while(itTimeline != mList.end()) {
@@ -291,6 +295,7 @@ void TimelineListModel::updateTimelines () {
 		}else
 			++itTimeline;
 	}
+	qInfo() << "Timelines removing expired :" << stepsTimer.restart() << "ms.";
 	// Add new.
 // Call logs optimization : store all the list and check on it for each chat room instead of loading call logs on each chat room. See TimelineModel()
 	std::list<std::shared_ptr<linphone::CallLog>> callLogs = coreManager->getCore()->getCallLogs();
@@ -308,7 +313,7 @@ void TimelineListModel::updateTimelines () {
 				optimizedCallLogs[localAddress][peerAddress] = callLog;
 		}
 	}
-
+	qInfo() << "Timelines optimization for build :" << stepsTimer.restart() << "ms.";
 	for(auto dbChatRoom : allChatRooms){
 		auto haveTimeline = getTimeline(dbChatRoom, false);
 		if(!haveTimeline && dbChatRoom){// Create a new Timeline if needed
@@ -319,15 +324,19 @@ void TimelineListModel::updateTimelines () {
 			}
 		}
 	}
+	qInfo() << "Timelines adding :" << stepsTimer.restart() << "ms for " << models.size() << " new timelines";
 	add(models);
+	qInfo() << "Timelines adding GUI :" << stepsTimer.restart() << "ms.";
 	CoreManager::getInstance()->updateUnreadMessageCount();
+	qInfo() << "Timelines initialized in:" << timer.elapsed() << "ms.";
 }
 
 void TimelineListModel::add (QSharedPointer<TimelineModel> timeline){
 	auto chatRoomModel = timeline->getChatRoomModel();
 	auto chatRoom = chatRoomModel->getChatRoom();
-	connect(timeline.get(), &TimelineModel::chatRoomDeleted, this, &TimelineListModel::onChatRoomDeleted);
-	connect(chatRoomModel, &ChatRoomModel::lastUpdateTimeChanged, this, &TimelineListModel::updated);
+	connect(timeline.get(), &TimelineModel::chatRoomDeleted, this, &TimelineListModel::onTimelineDeleted);
+	connect(timeline.get(), &TimelineModel::dataChanged, this, &TimelineListModel::onTimelineDataChanged);
+	
 	ProxyListModel::add(timeline);
 	emit countChanged();
 }
@@ -336,11 +345,13 @@ void TimelineListModel::add (QList<QSharedPointer<TimelineModel>> timelines){
 	for(auto timeline : timelines){
 		auto chatRoomModel = timeline->getChatRoomModel();
 		auto chatRoom = chatRoomModel->getChatRoom();
-		connect(timeline.get(), &TimelineModel::chatRoomDeleted, this, &TimelineListModel::onChatRoomDeleted);
-		connect(chatRoomModel, &ChatRoomModel::lastUpdateTimeChanged, this, &TimelineListModel::updated);
+		connect(timeline.get(), &TimelineModel::chatRoomDeleted, this, &TimelineListModel::onTimelineDeleted);
+		connect(timeline.get(), &TimelineModel::dataChanged, this, &TimelineListModel::onTimelineDataChanged);
 	}
-	ProxyListModel::add(timelines);
-	emit countChanged();
+	if(timelines.size() > 0) {
+		ProxyListModel::add(timelines);
+		emit countChanged();
+	}
 }
 
 void TimelineListModel::removeChatRoomModel(QSharedPointer<ChatRoomModel> model){
@@ -458,6 +469,14 @@ void TimelineListModel::onCallCreated(const std::shared_ptr<linphone::Call> &cal
 	}
 }
 
-void TimelineListModel::onChatRoomDeleted(){
+void TimelineListModel::onTimelineDeleted(){
 	remove(sender());// This will call removeRows()
+}
+
+void TimelineListModel::onTimelineDataChanged(){
+	int row = -1;
+	get(sender(), &row);
+	if(row >= 0){
+		emit dataChanged(index(row),index(row));
+	}
 }
