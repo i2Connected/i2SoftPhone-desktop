@@ -548,6 +548,11 @@ URL do servidor não configurado.</translation>
         <source>conferencesCopiedICS</source>
         <translation>O convite foi copiado</translation>
     </message>
+    <message>
+        <source>confirmForward</source>
+        <extracomment>&apos;Do you want to forward this message?&apos; : text to confirm to forward a message</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ChatCalendarMessage</name>
@@ -917,6 +922,7 @@ URL do servidor não configurado.</translation>
     </message>
     <message>
         <source>sipAccounts</source>
+        <extracomment>&apos;SIP ACCOUNT(S)&apos; : label for sip accounts in contact</extracomment>
         <translation>CONTA (S) SIP</translation>
     </message>
     <message>
@@ -991,6 +997,11 @@ URL do servidor não configurado.</translation>
         <source>missingConferenceURI</source>
         <extracomment>&apos;You need to set the conference URI in your account settings to create a conference based chat room.&apos; : Tooltip to warn the user that a setting is missing in its configuration.</extracomment>
         <translation>Você precisa definir o URI da conferência nas configurações da sua conta para criar uma sala de bate-papo baseada em conferência.</translation>
+    </message>
+    <message>
+        <source>usernames</source>
+        <extracomment>&apos;USERNAME(S)&apos; : label for sip accounts when only username is displayed n contact</extracomment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1111,6 +1122,26 @@ URL do servidor não configurado.</translation>
         <source>conversationMenuActivate</source>
         <extracomment>&apos;Enable notifications&apos; : Item menu to enable chat&apos;s notifications</extracomment>
         <translation>Habilitar notificação</translation>
+    </message>
+    <message>
+        <source>groupCallConfirmTitle</source>
+        <extracomment>&apos;Group call&apos; : Title for a group call confirmation.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>groupCallConfirmDescription</source>
+        <extracomment>&apos;Do you want to start a group call?&lt;br/&gt;Everyone in this group will receive a call to join the meeting.&quot;</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>cancelButton</source>
+        <extracomment>&apos;Cancel&apos; : Cancel button</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>startButton</source>
+        <extracomment>&apos;Start&apos; : Start button</extracomment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1721,6 +1752,11 @@ URL do servidor não configurado.</translation>
         <translation>Para isso, ligue para o contato e siga o processo de autenticação.</translation>
         <extra-Context>Explanation process</extra-Context>
     </message>
+    <message>
+        <source>dontAskAgain</source>
+        <extracomment>&quot;Don&apos;t ask again&quot; : Checkbox text to avoid showing the popup information on encryptions.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>InviteFriends</name>
@@ -1799,6 +1835,7 @@ Clique aqui: &lt;a href=&quot;%1&quot;&gt;%1 &lt;/a&gt;
     </message>
     <message>
         <source>contactsEntry</source>
+        <extracomment>&apos;Contacts&apos; : Contacts section label in main waindow.</extracomment>
         <translation>CONTATOS</translation>
     </message>
     <message>
@@ -1852,6 +1889,11 @@ Clique aqui: &lt;a href=&quot;%1&quot;&gt;%1 &lt;/a&gt;
         <source>confirmFetchUri</source>
         <extracomment>&apos;Do you want to download and apply configuration from this URL?&apos; : text to confirm to fetch a specified URL</extracomment>
         <translation>Você deseja fazer o download e aplicar a configuração a partir desta URL?</translation>
+    </message>
+    <message>
+        <source>localContactsEntry</source>
+        <extracomment>&apos;Local contacts&apos; : Contacts section label in main window when we have to specify that they are local to the application.</extracomment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3134,14 +3176,6 @@ Clique aqui: &lt;a href=&quot;%1&quot;&gt;%1 &lt;/a&gt;
         <translation>Usar URI do RLS</translation>
     </message>
     <message>
-        <source>rlsUriAuto</source>
-        <translation>AUTOMÁTICO</translation>
-    </message>
-    <message>
-        <source>rlsUriDisabled</source>
-        <translation>NUNCA</translation>
-    </message>
-    <message>
         <source>showNetworkSettingsLabel</source>
         <translation>Mostrar configurações de rede</translation>
     </message>
@@ -3630,6 +3664,26 @@ Clique aqui: &lt;a href=&quot;%1&quot;&gt;%1 &lt;/a&gt;
     <message>
         <source>fontsEmojiChange</source>
         <extracomment>&apos;Emojis&apos; : Label for changing emojis fonts</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>displayUsernamesLabel</source>
+        <extracomment>&apos;Display only usernames&apos; : Option text to display only usernames from SIP addresses.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>displayUsernamesTooltip</source>
+        <extracomment>&apos;Display only usernames from SIP addresses&apos; : tooltip for addresses display mode where username is only shown.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>magicSearchMaxResultsLabel</source>
+        <extracomment>&apos;Max results on search&apos; : Label for setting the max results returned by the Magic Search bar.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>restoreAskingPopups</source>
+        <extracomment>&apos;Restore asking popups&apos; : Text button for restoring asking popups.</extracomment>
         <translation type="unfinished"></translation>
     </message>
 </context>

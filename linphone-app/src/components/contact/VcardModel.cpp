@@ -263,7 +263,7 @@ void VcardModel::setCountry (const QString &country) {
 
 // -----------------------------------------------------------------------------
 
-QVariantList VcardModel::getSipAddresses () const {  
+QVariantList VcardModel::getSipAddresses () const {
 	QVariantList list;
 	if(mVcard->getVcard()){
 		shared_ptr<linphone::Core> core = CoreManager::getInstance()->getCore();
@@ -273,6 +273,44 @@ QVariantList VcardModel::getSipAddresses () const {
 
 			if (linphoneAddress)
 				list << Utils::coreStringToAppString(linphoneAddress->asStringUriOnly());
+			else
+				qWarning() << QStringLiteral("Unable to parse sip address: `%1`")
+							  .arg(QString::fromStdString(value));
+		}
+
+	}
+	return list;
+}
+
+QVariantList VcardModel::getSipUsernames () const {
+	QVariantList list;
+	if(mVcard->getVcard()){
+		shared_ptr<linphone::Core> core = CoreManager::getInstance()->getCore();
+		for (const auto &address : mVcard->getVcard()->getImpp()) {
+			string value = address->getValue();
+			shared_ptr<linphone::Address> linphoneAddress = core->createAddress(value);
+
+			if (linphoneAddress)
+				list << Utils::coreStringToAppString(linphoneAddress->getUsername());
+			else
+				qWarning() << QStringLiteral("Unable to parse sip address: `%1`")
+							  .arg(QString::fromStdString(value));
+		}
+
+	}
+	return list;
+}
+
+QList<std::shared_ptr<linphone::Address>> VcardModel::getLinphoneSipAddresses () const {
+	QList<std::shared_ptr<linphone::Address>> list;
+	if(mVcard->getVcard()){
+		shared_ptr<linphone::Core> core = CoreManager::getInstance()->getCore();
+		for (const auto &address : mVcard->getVcard()->getImpp()) {
+			string value = address->getValue();
+			shared_ptr<linphone::Address> linphoneAddress = core->createAddress(value);
+
+			if (linphoneAddress)
+				list << linphoneAddress;
 			else
 				qWarning() << QStringLiteral("Unable to parse sip address: `%1`")
 							  .arg(QString::fromStdString(value));

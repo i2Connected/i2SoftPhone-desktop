@@ -66,6 +66,8 @@ public:
 	std::shared_ptr<linphone::Address> getUsedSipAddress () const;
 	void setUsedSipAddress (const std::shared_ptr<linphone::Address> &address);
 	
+	std::shared_ptr<linphone::Account> findAccount(std::shared_ptr<const linphone::Address> address) const ;
+	
 	QString getUsedSipAddressAsStringUriOnly () const;
 	QString getUsedSipAddressAsString () const;
 	
@@ -80,6 +82,8 @@ public:
 	
 	Q_INVOKABLE void setDefaultAccount (const std::shared_ptr<linphone::Account> &account = nullptr);
 	Q_INVOKABLE void setDefaultAccountFromSipAddress (const QString &sipAddress);
+	Q_INVOKABLE void enableRegister (std::shared_ptr<linphone::Account> account, bool enable);
+	static void enableRegister(std::shared_ptr<linphone::AccountParams> params, bool registerEnabled, QString contactParameters);
 	
 	Q_INVOKABLE bool addOrUpdateAccount (const std::shared_ptr<linphone::Account> &account, const QVariantMap &data);
 	Q_INVOKABLE bool addOrUpdateAccount (const QVariantMap &data);// Create default account and apply data

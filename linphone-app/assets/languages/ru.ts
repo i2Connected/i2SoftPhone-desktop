@@ -549,6 +549,11 @@
         <source>conferencesCopiedICS</source>
         <translation>Приглашение было скопировано</translation>
     </message>
+    <message>
+        <source>confirmForward</source>
+        <extracomment>&apos;Do you want to forward this message?&apos; : text to confirm to forward a message</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ChatCalendarMessage</name>
@@ -923,6 +928,7 @@
     </message>
     <message>
         <source>sipAccounts</source>
+        <extracomment>&apos;SIP ACCOUNT(S)&apos; : label for sip accounts in contact</extracomment>
         <translation>SIP АККАУНТ(Ы)</translation>
     </message>
     <message>
@@ -997,6 +1003,11 @@
         <source>missingConferenceURI</source>
         <extracomment>&apos;You need to set the conference URI in your account settings to create a conference based chat room.&apos; : Tooltip to warn the user that a setting is missing in its configuration.</extracomment>
         <translation>Вам необходимо установить URI конференции в настройках вашего аккаунта, чтобы создать чат-комнату на основе конференции.</translation>
+    </message>
+    <message>
+        <source>usernames</source>
+        <extracomment>&apos;USERNAME(S)&apos; : label for sip accounts when only username is displayed n contact</extracomment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1117,6 +1128,26 @@
         <source>conversationMenuActivate</source>
         <extracomment>&apos;Enable notifications&apos; : Item menu to enable chat&apos;s notifications</extracomment>
         <translation>Включить уведомления</translation>
+    </message>
+    <message>
+        <source>groupCallConfirmTitle</source>
+        <extracomment>&apos;Group call&apos; : Title for a group call confirmation.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>groupCallConfirmDescription</source>
+        <extracomment>&apos;Do you want to start a group call?&lt;br/&gt;Everyone in this group will receive a call to join the meeting.&quot;</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>cancelButton</source>
+        <extracomment>&apos;Cancel&apos; : Cancel button</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>startButton</source>
+        <extracomment>&apos;Start&apos; : Start button</extracomment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1731,6 +1762,11 @@
         <translation>Для этого позвоните контакту и следуйте процессу аутентификации.</translation>
         <extra-Context>Explanation process</extra-Context>
     </message>
+    <message>
+        <source>dontAskAgain</source>
+        <extracomment>&quot;Don&apos;t ask again&quot; : Checkbox text to avoid showing the popup information on encryptions.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>InviteFriends</name>
@@ -1809,6 +1845,7 @@
     </message>
     <message>
         <source>contactsEntry</source>
+        <extracomment>&apos;Contacts&apos; : Contacts section label in main waindow.</extracomment>
         <translation>КОНТАКТЫ</translation>
     </message>
     <message>
@@ -1862,6 +1899,11 @@
         <source>confirmFetchUri</source>
         <extracomment>&apos;Do you want to download and apply configuration from this URL?&apos; : text to confirm to fetch a specified URL</extracomment>
         <translation>Вы хотите загрузить и применить конфигурацию с этого URL-адреса?</translation>
+    </message>
+    <message>
+        <source>localContactsEntry</source>
+        <extracomment>&apos;Local contacts&apos; : Contacts section label in main window when we have to specify that they are local to the application.</extracomment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3147,14 +3189,6 @@
         <translation>Использовать RLS URI</translation>
     </message>
     <message>
-        <source>rlsUriAuto</source>
-        <translation>АВТО</translation>
-    </message>
-    <message>
-        <source>rlsUriDisabled</source>
-        <translation>НИКОГДА</translation>
-    </message>
-    <message>
         <source>showNetworkSettingsLabel</source>
         <translation>Показать сетевые настройки</translation>
     </message>
@@ -3644,6 +3678,26 @@
         <source>fontsEmojiChange</source>
         <extracomment>&apos;Emojis&apos; : Label for changing emojis fonts</extracomment>
         <translation>смайлики</translation>
+    </message>
+    <message>
+        <source>displayUsernamesLabel</source>
+        <extracomment>&apos;Display only usernames&apos; : Option text to display only usernames from SIP addresses.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>displayUsernamesTooltip</source>
+        <extracomment>&apos;Display only usernames from SIP addresses&apos; : tooltip for addresses display mode where username is only shown.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>magicSearchMaxResultsLabel</source>
+        <extracomment>&apos;Max results on search&apos; : Label for setting the max results returned by the Magic Search bar.</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>restoreAskingPopups</source>
+        <extracomment>&apos;Restore asking popups&apos; : Text button for restoring asking popups.</extracomment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

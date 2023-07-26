@@ -30,6 +30,7 @@
 #include "components/core/CoreHandlers.hpp"
 #include "components/contacts/ContactsImporterModel.hpp"
 #include "utils/LinphoneEnums.hpp"
+#include "utils/Utils.hpp"
 
 #ifdef ENABLE_QT_KEYCHAIN
 #include "components/vfs/VfsUtils.hpp"
@@ -99,6 +100,7 @@ class SettingsModel : public QObject {
 	Q_PROPERTY(QVariantMap videoDefinition READ getVideoDefinition WRITE setVideoDefinition NOTIFY videoDefinitionChanged)
 	
 	Q_PROPERTY(bool videoEnabled READ getVideoEnabled WRITE setVideoEnabled NOTIFY videoEnabledChanged)
+	Q_PROPERTY(bool videoAvailable READ getVideoAvailable NOTIFY videoAvailableChanged)
 	
 	Q_PROPERTY(bool showVideoCodecs READ getShowVideoCodecs WRITE setShowVideoCodecs NOTIFY showVideoCodecsChanged)
 	
@@ -194,6 +196,7 @@ class SettingsModel : public QObject {
 	Q_PROPERTY(int dscpVideo READ getDscpVideo WRITE setDscpVideo NOTIFY dscpVideoChanged)
 	
 	Q_PROPERTY(bool rlsUriEnabled READ getRlsUriEnabled WRITE setRlsUriEnabled NOTIFY rlsUriEnabledChanged)
+	Q_PROPERTY(QString rlsUri READ getRlsUri WRITE setRlsUri NOTIFY rlsUriChanged)
 	
 	// UI. -----------------------------------------------------------------------
 	
@@ -220,6 +223,12 @@ class SettingsModel : public QObject {
 	
 	Q_PROPERTY(bool mipmapEnabled READ isMipmapEnabled WRITE setMipmapEnabled NOTIFY mipmapEnabledChanged)
 	Q_PROPERTY(bool useMinimalTimelineFilter READ useMinimalTimelineFilter WRITE setUseMinimalTimelineFilter NOTIFY useMinimalTimelineFilterChanged)
+	Q_PROPERTY(Utils::SipDisplayMode sipDisplayMode READ getSipDisplayMode WRITE setSipDisplayMode NOTIFY sipDisplayModeChanged)
+	Q_PROPERTY(int magicSearchMaxResults READ getMagicSearchMaxResults WRITE setMagicSearchMaxResults NOTIFY magicSearchMaxResultsChanged)
+	
+	Q_PROPERTY(bool dontAskAgainInfoEncryption READ getDontAskAgainInfoEncryption WRITE setDontAskAgainInfoEncryption NOTIFY dontAskAgainInfoEncryptionChanged)
+	Q_PROPERTY(bool haveDontAskAgainChoices READ getHaveDontAskAgainChoices NOTIFY haveDontAskAgainChoicesChanged)
+	
 	
 	// Advanced. -----------------------------------------------------------------
 	
@@ -379,8 +388,10 @@ public:
 	Q_INVOKABLE QVariantMap getCurrentPreviewVideoDefinition () const;
 	void setVideoDefinition (const QVariantMap &definition);
 	
-	bool getVideoEnabled() const;
+	bool getVideoEnabled() const;	// Enabled from settings
 	void setVideoEnabled(const bool& enable);
+	bool getVideoAvailable() const; // Enabled and have enough codecs.
+	bool haveAtLeastOneVideoCodec() const;
 	
 	bool getShowVideoCodecs () const;
 	void setShowVideoCodecs (bool status);
@@ -479,6 +490,9 @@ public:
 	
 	bool getPostQuantumAvailable() const;
 	
+	bool getDontAskAgainInfoEncryption() const;
+	void setDontAskAgainInfoEncryption(bool show);
+	
 	bool getLimeState () const;
 	void setLimeState (const bool& state);
 	
@@ -549,9 +563,9 @@ public:
 	bool getRlsUriEnabled () const;
 	void setRlsUriEnabled (bool status);
 	
-	void configureRlsUri ();
-	void configureRlsUri (const std::string& domain);
-	void configureRlsUri (const std::shared_ptr<const linphone::Account> &account);
+	QString getRlsUri() const;
+	void setRlsUri (const QString& rlsUri);
+	void updateRlsUri();
 	
 	Q_INVOKABLE bool tunnelAvailable() const;
 	Q_INVOKABLE TunnelModel * getTunnel() const;
@@ -611,6 +625,16 @@ public:
 	
 	bool useMinimalTimelineFilter() const;
 	void setUseMinimalTimelineFilter(const bool& useMinimal);
+	
+	Utils::SipDisplayMode getSipDisplayMode() const;
+	void setSipDisplayMode(Utils::SipDisplayMode mode);
+	
+	int getMagicSearchMaxResults() const;
+	void setMagicSearchMaxResults(int maxResults);
+	
+// Show all "don't ask again" checkboxes and popups.
+	bool getHaveDontAskAgainChoices() const;
+	Q_INVOKABLE void resetDontAskAgainChoices();
 	
 	// Advanced. ---------------------------------------------------------------------------
 	
@@ -721,6 +745,7 @@ signals:
 	
 	// Video. --------------------------------------------------------------------
 	void videoEnabledChanged();
+	void videoAvailableChanged();
 	void videoDevicesChanged (const QStringList &devices);
 	void videoDeviceChanged (const QString &device);
 	
@@ -736,6 +761,8 @@ signals:
 	void activeSpeakerCameraModeChanged();
 	void callCameraModeChanged();
 	void videoConferenceLayoutChanged();
+	
+	void haveAtLeastOneVideoCodecChanged();
 	
 	// Chat & calls. -------------------------------------------------------------
 	
@@ -809,6 +836,7 @@ signals:
 	void dscpVideoChanged (int dscp);
 	
 	void rlsUriEnabledChanged (bool status);
+	void rlsUriChanged ();
 		
 	// UI. -----------------------------------------------------------------------
 	
@@ -830,9 +858,16 @@ signals:
 	void mipmapEnabledChanged();
 	void useMinimalTimelineFilterChanged();
 	
+	void sipDisplayModeChanged();
+	
 	void checkForUpdateEnabledChanged();
 	void versionCheckUrlChanged();
 	void versionCheckTypeChanged();
+	
+	void magicSearchMaxResultsChanged();
+	
+	void dontAskAgainInfoEncryptionChanged();
+	void haveDontAskAgainChoicesChanged();
 	
 	// Advanced. -----------------------------------------------------------------
 	

@@ -5,6 +5,7 @@ import Common 1.0
 import Linphone 1.0
 import Linphone.Styles 1.0
 import UtilsCpp 1.0
+import Units 1.0
 
 import 'qrc:/ui/scripts/Utils/utils.js' as Utils
 
@@ -43,7 +44,7 @@ Notification {
 				property ChatRoomModel chatRoomModel : notification.timelineModel.getChatRoomModel()
 				property var sipObserver: SipAddressesModel.getSipAddressObserver(notification.fullPeerAddress, notification.fullLocalAddress)
 				subtitle: chatRoomModel.isOneToOne
-							? SipAddressesModel.cleanSipAddress(notification.fullPeerAddress)
+							? UtilsCpp.toDisplayString(SipAddressesModel.cleanSipAddress(notification.fullPeerAddress), SettingsModel.sipDisplayMode)
 							: UtilsCpp.getDisplayName(notification.fullPeerAddress) 
 				entry: chatRoomModel ? chatRoomModel : sipObserver
 				Component.onDestruction: sipObserver=null// Need to set it to null because of not calling destructor if not.
@@ -56,23 +57,36 @@ Notification {
 				color: NotificationReceivedMessageStyle.messageContainer.colorModel.color
 				radius: NotificationReceivedMessageStyle.messageContainer.radius
 				
-				Text {
+				TextEdit {
+					id: messageText
+					property font customFont : SettingsModel.textMessageFont
+					property string fullText: notification.notificationData.message
 					anchors {
 						fill: parent
 						margins: NotificationReceivedMessageStyle.messageContainer.margins
 					}
 					
 					color: NotificationReceivedMessageStyle.messageContainer.text.colorModel.color
-					elide: Text.ElideRight
+					
 					
 					font {
 						italic: true
-						pointSize: NotificationReceivedMessageStyle.messageContainer.text.pointSize
+						family: customFont.family
+						pointSize: Units.dp * (customFont.pointSize - 1)
 					}
 					
 					verticalAlignment: Text.AlignVCenter
-					text: notification.notificationData.message
+					text: UtilsCpp.encodeTextToQmlRichFormat(metrics.elidedText)
+					textFormat: Text.RichText
 					wrapMode: Text.Wrap
+
+					TextMetrics {
+						id: metrics
+						font: messageText.font
+						text: messageText.fullText
+						elideWidth: messageText.width
+						elide: Qt.ElideRight
+					}
 				}
 			}
 		}
@@ -83,11 +97,12 @@ Notification {
 		
 		onClicked: notification._close(function () {
 			AccountSettingsModel.setDefaultAccountFromSipAddress(notification.localAddress)
+			var chatroom = notification.timelineModel.getChatRoomModel()
+			console.debug("Load conversation from notification: "+chatroom)
+			//notification.notificationData.window.setView('Conversation', {
+				//											 chatRoomModel: chatroom
+					//									 })
 			notification.timelineModel.selected = true
-			console.debug("Load conversation from notification")
-			notification.notificationData.window.setView('Conversation', {
-															 chatRoomModel:notification.timelineModel.getChatRoomModel()
-														 })
 			App.smartShowWindow(notification.notificationData.window)
 		})
 	}

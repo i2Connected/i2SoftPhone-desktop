@@ -52,6 +52,7 @@
 #include "components/contact/VcardModel.hpp"
 #include "components/settings/AccountSettingsModel.hpp"
 #include "components/settings/SettingsModel.hpp"
+#include "components/sip-addresses/SipAddressesModel.hpp"
 
 
 #ifdef _WIN32
@@ -94,13 +95,13 @@ char *Utils::rstrstr (const char *a, const char *b) {
 
 // -----------------------------------------------------------------------------
 
-bool Utils::hasCapability(const QString& address, const LinphoneEnums::FriendCapability& capability){
+bool Utils::hasCapability(const QString& address, const LinphoneEnums::FriendCapability& capability, bool defaultCapability){
 	auto addressCleaned = cleanSipAddress(address);
 	auto contact = CoreManager::getInstance()->getContactsListModel()->findContactModelFromSipAddress(addressCleaned);
 	if(contact)
 		return contact->hasCapability(capability);
 	else
-		return false;
+		return defaultCapability;
 }
 
 QDateTime Utils::addMinutes(QDateTime date, const int& min){
@@ -130,6 +131,20 @@ QString Utils::toTimeString(QDateTime date, const QString& format){
 
 QString Utils::toDateString(QDateTime date, const QString& format){
 	return QLocale().toString(getOffsettedUTC(date), (!format.isEmpty() ? format : QLocale().dateFormat()) );
+}
+
+// Return custom address to be displayed on UI.
+// In order to return only the username and to remove all domains from the GUI, you may just change the default mode.
+QString Utils::toDisplayString(const QString& str, SipDisplayMode displayMode){
+	if(displayMode == SIP_DISPLAY_ALL) return str;
+	std::shared_ptr<linphone::Address> addr = linphone::Factory::get()->createAddress(str.toStdString());
+	QString displayString;
+	if( addr && ( (displayMode & SIP_DISPLAY_USERNAME) == SIP_DISPLAY_USERNAME))
+		displayString = Utils::coreStringToAppString(addr->getUsername());
+	if(displayString.isEmpty())
+		return str;
+	else
+		return displayString;
 }
 
 QString Utils::getDisplayName(const QString& address){
@@ -542,47 +557,7 @@ void Utils::copyDir(QString from, QString to) {
 QString Utils::getDisplayName(const std::shared_ptr<const linphone::Address>& address){
 	QString displayName;
 	if(address){
-		std::shared_ptr<linphone::Address> cleanAddress = address->clone();
-		cleanAddress->clean();
-		QString qtAddress = Utils::coreStringToAppString(cleanAddress->asStringUriOnly());
-		displayName = CoreManager::getInstance()->getContactsListModel()->findDisplayNameFromCache(qtAddress);
-		
-		if(displayName.isEmpty()){
-			auto model = CoreManager::getInstance()->getContactsListModel()->findContactModelFromSipAddress(qtAddress);
-			if(model && model->getVcardModel())
-				displayName = model->getVcardModel()->getUsername();
-			else{
-				// Try to get display from full address
-				displayName = QString::fromStdString(address->getDisplayName());
-				if( displayName == ""){
-					// Try to get display name from proxies
-					auto accounts = CoreManager::getInstance()->getCore()->getAccountList();
-					for(auto accountIt = accounts.begin() ; displayName=="" && accountIt != accounts.end() ; ++accountIt){
-						auto params = accountIt->get()->getParams();
-						if(params){
-							auto accountAddress = params->getIdentityAddress();
-							if(accountAddress && accountAddress->weakEqual(address)){
-								displayName = Utils::coreStringToAppString(accountAddress->getDisplayName());
-							}
-						}
-					}
-					if(displayName == ""){
-						// Try to get display name from logs
-						auto callHistory = CoreManager::getInstance()->getCore()->getCallLogs();
-						auto callLog = std::find_if(callHistory.begin(), callHistory.end(), [address](std::shared_ptr<linphone::CallLog>& cl){
-								return cl->getRemoteAddress()->weakEqual(address);
-						});
-						if(callLog != callHistory.end())
-							displayName = QString::fromStdString((*callLog)->getRemoteAddress()->getDisplayName());
-						if(displayName == "")
-							displayName = QString::fromStdString(address->getDisplayName());
-						if(displayName == "")
-							displayName = Utils::coreStringToAppString(address->getUsername());
-					}
-				}
-				CoreManager::getInstance()->getContactsListModel()->addDisplayNameToCache(qtAddress, displayName);
-			}
-		}
+		displayName = CoreManager::getInstance()->getSipAddressesModel()->getDisplayName(address);
 	}
 	return displayName;
 }
@@ -638,7 +613,7 @@ bool Utils::isAnimatedImage(const QString& path){
 bool Utils::isImage(const QString& path){
 	if(path.isEmpty()) return false;
 	QFileInfo info(path);
-	if( !info.exists()){
+	if( !info.exists() || CoreManager::getInstance()->getSettingsModel()->getVfsEncrypted()){
 		return QMimeDatabase().mimeTypeForFile(info, QMimeDatabase::MatchExtension).name().contains("image/");
 	}else if(!QMimeDatabase().mimeTypeForFile(info).name().contains("image/"))
 		return false;
@@ -721,6 +696,10 @@ bool Utils::codepointIsEmoji(uint code){
                (code >= 0x1f000 && code <= 0x1faff) || code == 0x200d || code == 0xfe0f;
 }
 
+bool Utils::codepointIsVisible(uint code) {
+	return code > 0x00020;
+}
+
 QString Utils::encodeEmojiToQmlRichFormat(const QString &body){
 	QString fmtBody = "";
 	QVector<uint> utf32_string = body.toUcs4();
@@ -751,21 +730,23 @@ bool Utils::isOnlyEmojis(const QString& text){
 	if(text.isEmpty()) return false;
 	QVector<uint> utf32_string = text.toUcs4();
 	for (auto &code : utf32_string)
-		if( !Utils::codepointIsEmoji(code))
+		if(codepointIsVisible(code) && !Utils::codepointIsEmoji(code))
 			return false;
 	return true;
 }
 
 
 QString Utils::encodeTextToQmlRichFormat(const QString& text, const QVariantMap& options){
-	QString images;
-	QStringList formattedText;
+	/*QString images;
 	QStringList imageFormat;
-	bool lastWasUrl = false;
 	for(auto format : QImageReader::supportedImageFormats())
 		imageFormat.append(QString::fromLatin1(format).toUpper());
+	*/
+	QStringList formattedText;
+	bool lastWasUrl = false;
+	
 	if(options.contains("noLink") && options["noLink"].toBool()){
-		formattedText.append(text);
+		formattedText.append(encodeEmojiToQmlRichFormat(text));
 	}else{
 		auto primaryColor = App::getInstance()->getColorListModel()->getColor("i")->getColor();
 		auto iriParsed = UriTools::parseIri(text);
@@ -782,9 +763,10 @@ QString Utils::encodeTextToQmlRichFormat(const QString& text, const QVariantMap&
 					if(iri.front() != ' ')
 						iri.push_front(' ');
 				}
-				formattedText.append(iri);
+				formattedText.append(encodeEmojiToQmlRichFormat(iri));
 			}else{
 				QString uri = iriParsed[i].second.left(3) == "www" ? "http://"+iriParsed[i].second : iriParsed[i].second ;
+				/* TODO : preview from link
 				int extIndex = iriParsed[i].second.lastIndexOf('.');
 				QString ext;
 				if( extIndex >= 0)
@@ -798,24 +780,19 @@ QString Utils::encodeTextToQmlRichFormat(const QString& text, const QVariantMap&
 							options.contains("imagesWidth")
 							? QString(" height='auto'")
 							: ""
-						) + " src=\"" + iriParsed[i].second + "\" /></a>";
+						) + " src=\"" + iriParsed[i].second + "\" />"+uri+"</a>";
 				}else{
+				*/
 					formattedText.append( "<a style=\"color:"+ primaryColor.name() +";\" href=\"" + uri + "\">" + iri + "</a>");
 					lastWasUrl = true;
-				}
+				/*}*/
 			}
 		}
 	}
 	if(lastWasUrl && formattedText.last().back() != ' '){
 		formattedText.push_back(" ");
 	}
-	if(images != "")
-		images = "<div>" + images +"</div>";
-	QString encodeEmojis = encodeEmojiToQmlRichFormat(formattedText.join(""));
-	if( encodeEmojis.isEmpty() && images.isEmpty())
-		return "";
-	else
-		return images + "<p style=\"white-space:pre-wrap;\">" + encodeEmojiToQmlRichFormat(formattedText.join("")) + "</p>";
+	return "<p style=\"white-space:pre-wrap;\">" + formattedText.join("") + "</p>";
 }
 
 QString Utils::getFileContent(const QString& filePath){

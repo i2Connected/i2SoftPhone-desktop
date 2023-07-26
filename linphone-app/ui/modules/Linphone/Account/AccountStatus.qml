@@ -39,7 +39,7 @@ Item {
 			spacing: AccountStatusStyle.horizontalSpacing
 			
 			Item {
-				Layout.alignment: Qt.AlignBottom | Qt.AlignLeft
+				Layout.alignment: !subtitle.visible ?  Qt.AlignVCenter | Qt.AlignLeft: Qt.AlignBottom | Qt.AlignLeft
 				Layout.bottomMargin: AccountStatusStyle.presenceLevel.bottomMargin
 				Layout.preferredHeight: AccountStatusStyle.presenceLevel.size
 				Layout.preferredWidth: AccountStatusStyle.presenceLevel.size
@@ -70,7 +70,8 @@ Item {
 			Text {
 				id:username
 				Layout.fillWidth: true
-				Layout.alignment: accountStatus.noAccountConfigured ?  Qt.AlignVCenter | Qt.AlignLeft: Qt.AlignBottom | Qt.AlignLeft
+				Layout.preferredHeight: accountStatus.noAccountConfigured ? -1 : parent.height / 2
+				Layout.alignment: !subtitle.visible ?  Qt.AlignVCenter | Qt.AlignLeft : Qt.AlignBottom | Qt.AlignLeft
 				color: AccountStatusStyle.username.colorModel.color
 				elide: Text.ElideRight
 				font.bold: true
@@ -82,7 +83,7 @@ Item {
 				maximumLineCount: 3
 			}
 			Item {
-				Layout.alignment: Qt.AlignBottom | Qt.AlignLeft
+				Layout.alignment: !subtitle.visible ?  Qt.AlignVCenter | Qt.AlignLeft: Qt.AlignBottom | Qt.AlignLeft
 				Layout.bottomMargin: 5
 				Layout.preferredHeight: AccountStatusStyle.presenceLevel.size
 				Layout.preferredWidth: AccountStatusStyle.presenceLevel.size
@@ -104,13 +105,14 @@ Item {
 		}//RowLayout
 		
 		Text {
+			id: subtitle
 			Layout.preferredHeight:parent.height / 2
 			Layout.preferredWidth:parent.width
-			visible: !accountStatus.noAccountConfigured
+			visible: !accountStatus.noAccountConfigured && text != username.text
 			color: AccountStatusStyle.sipAddress.colorModel.color
 			elide: Text.ElideRight
 			font.pointSize: AccountStatusStyle.sipAddress.pointSize
-			text: AccountSettingsModel.sipAddress
+			text: UtilsCpp.toDisplayString(AccountSettingsModel.sipAddress, SettingsModel.sipDisplayMode)
 			verticalAlignment: Text.AlignTop
 		}
 	}//ColumnLayout

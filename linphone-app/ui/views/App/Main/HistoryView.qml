@@ -57,9 +57,7 @@ ColumnLayout  {
 				presenceLevel: historyView._sipAddressObserver?Presence.getPresenceLevel(
 																	historyView._sipAddressObserver.presenceStatus
 																	):null
-				presenceTimestamp: historyView._sipAddressObserver?Presence.getPresenceTimestamp(
-																	historyView._sipAddressObserver.presenceStatus
-																	):null
+				presenceTimestamp: historyView._sipAddressObserver && historyView._sipAddressObserver.contact ? historyView._sipAddressObserver.contact.presenceTimestamp :null
 				
 				username: historyView.entry && historyView.entry.wasConference
 							? historyView.entry.title
@@ -76,10 +74,10 @@ ColumnLayout  {
 				
 				subtitleText: historyView.entry && historyView.entry.wasConference
 								? ''
-								: SipAddressesModel.cleanSipAddress(historyView.peerAddress)
-				subtitleColor: HistoryViewStyle.bar.description.subtitleColor
+								: UtilsCpp.toDisplayString(SipAddressesModel.cleanSipAddress(historyView.peerAddress), SettingsModel.sipDisplayMode)
+				subtitleColor: HistoryViewStyle.bar.description.subtitleColor.color
 				titleText: avatar.username
-				titleColor: HistoryViewStyle.bar.description.titleColor
+				titleColor: HistoryViewStyle.bar.description.titleColor.color
 				visible:peerAddress
 			}
 			
@@ -96,7 +94,7 @@ ColumnLayout  {
 						isCustom: true
 						backgroundRadius: 90
 						colorSet: HistoryViewStyle.videoCall
-						visible: peerAddress && SettingsModel.videoEnabled && SettingsModel.outgoingCallsEnabled && SettingsModel.showStartVideoCallButton
+						visible: peerAddress && SettingsModel.videoAvailable && SettingsModel.outgoingCallsEnabled && SettingsModel.showStartVideoCallButton
 						
 						onClicked: CallsListModel.launchVideoCall(historyView.peerAddress)
 					}

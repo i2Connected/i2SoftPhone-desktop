@@ -20,7 +20,7 @@ Rectangle {
 	color: WaitingRoomStyle.backgroundColor.color
 	property ConferenceInfoModel conferenceInfoModel
 	property CallModel callModel	// Store the call for processing calling.
-	property bool previewLoaderEnabled: callModel ? callModel.videoEnabled : SettingsModel.videoEnabled
+	property bool previewLoaderEnabled: callModel ? callModel.videoEnabled : SettingsModel.videoAvailable
 	property var _sipAddressObserver: callModel ? SipAddressesModel.getSipAddressObserver(callModel.fullPeerAddress, callModel.fullLocalAddress) : undefined
 	property bool isEnded: callModel && callModel.status == CallModel.CallStatusEnded
 	
@@ -157,7 +157,7 @@ Rectangle {
 											: mainItem.callModel
 												? mainItem.callModel.conferenceModel
 												: null
-					deactivateCamera: !SettingsModel.videoEnabled || !mainItem.previewLoaderEnabled || mainItem.isEnded
+					deactivateCamera: !SettingsModel.videoAvailable || !mainItem.previewLoaderEnabled || mainItem.isEnded
 					
 					/*
 					image: mainItem._sipAddressObserver && mainItem._sipAddressObserver.contact && mainItem._sipAddressObserver.contact.vcard.avatar
@@ -167,13 +167,11 @@ Rectangle {
 					*/					
 					avatarRatio: 2/3
 					
-					showCustomButton: !mainItem.callModel
 					showUsername: false
-					customButtonColorSet : WaitingRoomStyle.buttons.options
-					customButtonToggled: multimediaLoader.active
+					
+					
 					
 					onVideoDefinitionChanged: previewDefinition = SettingsModel.getCurrentPreviewVideoDefinition()
-					onCustomButtonClicked: multimediaLoader.active = !multimediaLoader.active
 				}
 			}
 			Loader{
@@ -208,6 +206,7 @@ Rectangle {
 			visible: !mainItem.conferenceInfoModel
 			spacing: 10
 			Text{
+				id: displayName
 				Layout.alignment: Qt.AlignCenter
 				text: mainItem._sipAddressObserver ? UtilsCpp.getDisplayName(mainItem._sipAddressObserver.peerAddress) : ''
 				color: WaitingRoomStyle.callee.colorModel.color
@@ -218,12 +217,12 @@ Rectangle {
 			}
 			Text{
 				Layout.fillWidth: true
-				text: mainItem.callModel && SipAddressesModel.cleanSipAddress(mainItem.callModel.peerAddress)
+				text: mainItem.callModel && UtilsCpp.toDisplayString(SipAddressesModel.cleanSipAddress(mainItem.callModel.peerAddress), SettingsModel.sipDisplayMode)
 				color: WaitingRoomStyle.callee.colorModel.color
 				font.pointSize:  WaitingRoomStyle.callee.addressPointSize
 				horizontalAlignment: Text.AlignHCenter
 				verticalAlignment: Text.AlignVCenter
-				visible: mainItem.callModel && !mainItem.conferenceInfoModel
+				visible: mainItem.callModel && !mainItem.conferenceInfoModel && text != displayName.text
 			}
 		}
 		// -------------------------------------------------------------------------
@@ -308,7 +307,7 @@ Rectangle {
 				ActionSwitch {
 					id: camera
 					property bool cameraEnabled: true
-					visible: !mainItem.callModel && SettingsModel.videoEnabled
+					visible: !mainItem.callModel && SettingsModel.videoAvailable
 					isCustom: true
 					backgroundRadius: 90
 					colorSet: cameraEnabled  ? WaitingRoomStyle.buttons.cameraOn : WaitingRoomStyle.buttons.cameraOff
@@ -342,12 +341,28 @@ Rectangle {
 					}
 				}
 			}
+			
+			ActionButton{
+				id: optionsButton
+				anchors.centerIn: parent
+				anchors.horizontalCenterOffset: contentsStack.cameraWidth/2 - modeChoice.width/2
+				
+				visible: !mainItem.callModel
+				isCustom: true
+				colorSet: WaitingRoomStyle.buttons.options
+				backgroundRadius: width/2
+				toggled: multimediaLoader.active
+				onClicked: multimediaLoader.active = !multimediaLoader.active
+			}
+			
 			ActionButton{
 				id: modeChoice
 				property int selectedMode: SettingsModel.videoConferenceLayout
-				anchors.centerIn: parent
-				anchors.horizontalCenterOffset: contentsStack.cameraWidth/2 - modeChoice.width/2
-				visible: !mainItem.callModel && SettingsModel.videoEnabled
+				anchors.verticalCenter: optionsButton.verticalCenter
+				anchors.right: optionsButton.left
+				anchors.rightMargin: 10
+				
+				visible: !mainItem.callModel && SettingsModel.videoAvailable
 				toggled: layoutMenu.visible
 				isCustom: true
 				backgroundRadius: width/2
@@ -396,6 +411,7 @@ Rectangle {
 					}
 				}
 			}
+			
 		}
 	}
 }

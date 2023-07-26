@@ -217,15 +217,20 @@ TabContainer {
 			visible: SettingsModel.contactsEnabled || SettingsModel.developerSettingsEnabled
 			width: parent.width
 		}
-		
-		TextButtonB {
-			anchors.right: parent.right
-			text: qsTr('cleanAvatars')
-			visible: SettingsModel.contactsEnabled || SettingsModel.developerSettingsEnabled
-			
-			onClicked: Logic.cleanAvatars()
+		RowLayout{
+			width: parent.width
+			Item{
+				Layout.fillHeight: true
+				Layout.fillWidth: true
+			}
+			TextButtonB {
+				id: cleanAvatarsButton
+				text: qsTr('cleanAvatars')
+				visible: SettingsModel.contactsEnabled || SettingsModel.developerSettingsEnabled
+				
+				onClicked: Logic.cleanAvatars()
+			}
 		}
-		
 		// -------------------------------------------------------------------------
 		// Other.
 		// -------------------------------------------------------------------------
@@ -288,6 +293,35 @@ TabContainer {
 				}
 			}
 			FormLine {
+				FormGroup {
+					//: 'Display only usernames' : Option text to display only usernames from SIP addresses.
+					label: qsTr('displayUsernamesLabel')
+					
+					Switch {
+						checked: SettingsModel.sipDisplayMode === UtilsCpp.SIP_DISPLAY_USERNAME
+						
+						onClicked: SettingsModel.sipDisplayMode = (checked ? UtilsCpp.SIP_DISPLAY_ALL : UtilsCpp.SIP_DISPLAY_USERNAME)
+						TooltipArea{
+						//: 'Display only usernames from SIP addresses' : tooltip for addresses display mode where username is only shown.
+							text: qsTr('displayUsernamesTooltip')
+						}
+					}
+				}
+				FormGroup {
+				//: 'Max results on search' : Label for setting the max results returned by the Magic Search bar.
+					label: qsTr('magicSearchMaxResultsLabel')
+
+					NumericField {
+						minValue: 0
+						maxValue: 100000
+						step: 5
+						text: SettingsModel.magicSearchMaxResults
+			
+						onEditingFinished: SettingsModel.magicSearchMaxResults = text
+					}
+				}
+			}
+			FormLine {
 				maxItemWidth: parent.width
 				visible: SettingsModel.isCheckForUpdateAvailable()
 				FormGroup {
@@ -324,6 +358,21 @@ TabContainer {
 																			: SettingsModel.VersionCheckType_Custom)
 						}
 					}
+				}
+			}
+			RowLayout{
+				width: parent.width
+				Item{
+					Layout.fillHeight: true
+					Layout.fillWidth: true
+				}
+			
+				TextButtonB {
+					visible: SettingsModel.haveDontAskAgainChoices
+					//: 'Restore asking popups' : Text button for restoring asking popups.
+					text: qsTr('restoreAskingPopups')
+					
+					onClicked: SettingsModel.resetDontAskAgainChoices()
 				}
 			}
 		}

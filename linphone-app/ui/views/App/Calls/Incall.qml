@@ -231,9 +231,9 @@ Rectangle {
 					id: address
 					Layout.fillWidth: true
 					horizontalAlignment: Qt.AlignHCenter
-					visible: !conferenceModel && callModel && !callModel.isConference
+					visible: !conferenceModel && callModel && !callModel.isConference && text != title.text
 					text: !conferenceModel && callModel
-								? SipAddressesModel.cleanSipAddress(callModel.peerAddress)
+								? UtilsCpp.toDisplayString(SipAddressesModel.cleanSipAddress(callModel.peerAddress), SettingsModel.sipDisplayMode)
 								: ''
 					color: IncallStyle.title.colorModel.color
 					font.pointSize: IncallStyle.title.addressPointSize
@@ -549,7 +549,7 @@ Rectangle {
 				colorSet: callModel && callModel.cameraEnabled  ? IncallStyle.buttons.cameraOn : IncallStyle.buttons.cameraOff
 				updating: callModel.videoEnabled && callModel.updating && !mainItem.layoutChanging
 				enabled: callModel && !callModel.pausedByUser
-				visible: SettingsModel.videoEnabled
+				visible: SettingsModel.videoAvailable
 				property bool _activateCamera: false
 				onClicked: if(callModel && !mainItem.layoutChanging){
 								if( callModel.isConference){// Only deactivate camera in conference.

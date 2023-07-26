@@ -53,12 +53,17 @@ public:
 	
 private:
 	void createAccount (const shared_ptr<linphone::AccountCreator> &creator) {
-		shared_ptr<linphone::ProxyConfig> proxyConfig = creator->createProxyConfig();
-		auto account = CoreManager::getInstance()->getCore()->getAccountByIdkey(proxyConfig->getIdkey());
+		auto account = creator->createAccountInCore();
 		if(account){
+			AccountSettingsModel *accountSettingsModel = CoreManager::getInstance()->getAccountSettingsModel();
 			CoreManager::getInstance()->addingAccount(account->getParams());
-			CoreManager::getInstance()->getSettingsModel()->configureRlsUri(account);
-			CoreManager::getInstance()->getAccountSettingsModel()->setDefaultAccount(account);
+			auto accountParams = account->getParams()->clone();
+			auto natPolicy = accountParams->getNatPolicy();
+			if(natPolicy)
+				accountParams->setNatPolicy(natPolicy->clone());// Be sure to have a 'ref' entry on a nat_policy. When using default values, the 'ref' entry is lost where it should be pointing to default. We get one by cloning the policy.
+			if (accountSettingsModel->addOrUpdateAccount(account, accountParams)) {
+				accountSettingsModel->setDefaultAccount(account);
+			}
 		}
 	}
 	
@@ -133,13 +138,18 @@ private:
 			bool error = false;
 			QVariantMap description = doc.toVariant().toMap();
 			creator->setToken(description.value("token").toString().toStdString());
-			emit mAssistant->createStatusChanged("Creating account");
-			creator->createAccount();// it will automatically use the account creation token.
+			// it will automatically use the account creation token.
+			if (mAssistant->mUsePhoneNumber) {
+				emit mAssistant->createStatusChanged("Recovering account");
+				creator->recoverAccount();
+			}else{
+				emit mAssistant->createStatusChanged("Creating account");
+				creator->createAccount();
+			}
 		}else
 			QTimer::singleShot(2000, [creator](){
 				creator->requestAccountCreationTokenUsingRequestToken();
 			});
-		
 	}
 	
 	void onActivateAccount (
@@ -182,9 +192,9 @@ private:
 	}
 	
 	void onRecoverAccount (
-			const shared_ptr<linphone::AccountCreator> &,
+			const shared_ptr<linphone::AccountCreator> &accountCreator,
 			linphone::AccountCreator::Status status,
-			const string &
+			const string &response
 			) override {
 		if (status == linphone::AccountCreator::Status::RequestOk) {
 			CoreManager::getInstance()->getSipAddressesModel()->reset();
@@ -199,7 +209,21 @@ private:
 		}
 		mAssistant->setIsProcessing(false);
 	}
-	
+	virtual void onLoginLinphoneAccount(
+			const std::shared_ptr<linphone::AccountCreator> & creator,
+			linphone::AccountCreator::Status status,
+			const std::string & response) override {
+		if( status == linphone::AccountCreator::Status::RequestOk){
+			createAccount(creator);
+			CoreManager::getInstance()->getSipAddressesModel()->reset();
+			emit mAssistant->activateStatusChanged(QString(""));
+		} else {
+			if (status == linphone::AccountCreator::Status::RequestFailed)
+				emit mAssistant->activateStatusChanged(tr("requestFailed"));
+			else
+				emit mAssistant->activateStatusChanged(tr("smsActivationFailed"));
+		}
+	}
 private:
 	AssistantModel *mAssistant;
 };
@@ -232,9 +256,11 @@ AssistantModel::~AssistantModel(){
 
 void AssistantModel::activate () {
 	setIsProcessing(true);
-	if (mAccountCreator->getEmail().empty())
-		mAccountCreator->activateAccount();
-	else
+	if (mAccountCreator->getEmail().empty()){
+		if(mAccountCreator->getUsername().empty())
+			mAccountCreator->setUsername(mAccountCreator->getPhoneNumber());
+		mAccountCreator->loginLinphoneAccount();// It will detect if phone is an alias or not. 
+	}else
 		mAccountCreator->isAccountActivated();
 }
 
@@ -246,8 +272,11 @@ void AssistantModel::create () {
 
 void AssistantModel::login () {
 	setIsProcessing(true);
-	if (!mCountryCode.isEmpty()) {
-		mAccountCreator->recoverAccount();
+	if(mAccountCreator->getUsername().empty())
+		mAccountCreator->setUsername(mAccountCreator->getPhoneNumber());
+	if (mUsePhoneNumber) {
+		emit createStatusChanged("Requesting validation url");
+		mAccountCreator->requestAccountCreationRequestToken();
 		return;
 	}
 	
@@ -257,11 +286,23 @@ void AssistantModel::login () {
 		return;
 	}
 	
-	// No verification if no xmlrpc url. Use addOtherSipAccount directly.
+	// No verification if no xmlrpc url.
+	auto account = mAccountCreator->createAccountInCore();
+	if(account){
+		AccountSettingsModel *accountSettingsModel = CoreManager::getInstance()->getAccountSettingsModel();
+		if (accountSettingsModel->addOrUpdateAccount(account, account->getParams()->clone())) {
+			accountSettingsModel->setDefaultAccount(account);
+		}
+		emit loginStatusChanged("");
+		return;
+	}
+	
+	// Cannot create new account from account creator. Use addOtherSipAccount directly.
 	QVariantMap map;
 	map["sipDomain"] = Utils::coreStringToAppString(config->getString("assistant", "domain", ""));
 	map["username"] = getUsername();
 	map["password"] = getPassword();
+	map["transport"] = LinphoneEnums::toString(LinphoneEnums::fromLinphone(mAccountCreator->getTransport()));
 	emit loginStatusChanged(addOtherSipAccount(map) ? QString("") : tr("unableToAddAccount"));
 	setIsProcessing(false);
 }
@@ -287,7 +328,11 @@ bool AssistantModel::addOtherSipAccount (const QVariantMap &map) {
 	std::string accountIdKey = map["accountIdKey"].toString().toStdString();
 	if( accountIdKey  != "")
 		account = core->getAccountByIdkey(accountIdKey);
-	shared_ptr<linphone::AccountParams> accountParams = core->createAccountParams();
+	shared_ptr<linphone::AccountParams> accountParams;
+	if(account)
+		accountParams = account->getParams()->clone();
+	else
+		accountParams = core->createAccountParams();
 	
 	
 	const QString domain = map["sipDomain"].toString();
@@ -516,12 +561,29 @@ QString AssistantModel::getCountryCode () const {
 
 void AssistantModel::setCountryCode (const QString &countryCode) {
 	mCountryCode = countryCode;
+	mAccountCreator->setPhoneNumber(Utils::appStringToCoreString(mPhoneNumber), Utils::appStringToCoreString(mCountryCode));
 	emit countryCodeChanged(countryCode);
+	emit computedPhoneNumberChanged();
 }
 
 // -----------------------------------------------------------------------------
 
+bool AssistantModel::getUsePhoneNumber() const{
+	return mUsePhoneNumber;
+}
+
+void AssistantModel::setUsePhoneNumber(bool use) {
+	if(mUsePhoneNumber != use){
+		mUsePhoneNumber = use;
+		emit usePhoneNumberChanged();
+	}
+}
+
 QString AssistantModel::getPhoneNumber () const {
+	return mPhoneNumber;
+}
+
+QString AssistantModel::getComputedPhoneNumber () const{
 	return Utils::coreStringToAppString(mAccountCreator->getPhoneNumber());
 }
 
@@ -549,8 +611,20 @@ void AssistantModel::setPhoneNumber (const QString &phoneNumber) {
 		default:
 			break;
 	}
-	
+	mPhoneNumber = phoneNumber;
 	emit phoneNumberChanged(phoneNumber, error);
+	emit computedPhoneNumberChanged();
+}
+
+QString AssistantModel::getPhoneCountryCode() const {
+	return mPhoneCountryCode;
+}
+
+void AssistantModel::setPhoneCountryCode(const QString &code) {
+	if( mPhoneCountryCode != code) {
+		mPhoneCountryCode = code;
+		emit phoneCountryCodeChanged();
+	}
 }
 
 // -----------------------------------------------------------------------------

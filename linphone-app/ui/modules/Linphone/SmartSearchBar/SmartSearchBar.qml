@@ -18,9 +18,6 @@ SearchBox {
 	property alias header : view.headerItem
 	property alias actions : view.actions
 	property alias showHeader : view.showHeader
-	property string previousText: text
-	onTextChanged: if( text != '') previousText = text;
-	
 	property alias participantListModel : searchModel.participantListModel
 	
 	function addAddressToIgnore(entry){
@@ -67,25 +64,25 @@ SearchBox {
 				secure: 0,
 				visible: true,
 				handler: function (entry) {
-					searchBox.closeMenu()
 					searchBox.launchVideoCall(entry.sipAddress)
+					searchBox.closeMenu()
 				},
-				visible: SettingsModel.videoEnabled && SettingsModel.outgoingCallsEnabled && SettingsModel.showStartVideoCallButton
+				visible: SettingsModel.videoAvailable && SettingsModel.outgoingCallsEnabled && SettingsModel.showStartVideoCallButton
 			}, {
 				colorSet: SipAddressesViewStyle.call,
 				secure: 0,
 				visible: true,
 				handler: function (entry) {
-					searchBox.closeMenu()
 					searchBox.launchCall(entry.sipAddress)
+					searchBox.closeMenu()
 				},
 				visible: SettingsModel.outgoingCallsEnabled
 			}, {
 				colorSet: SettingsModel.getShowStartChatButton() ? SipAddressesViewStyle.chat : SipAddressesViewStyle.history,
 				secure: 0,
 				handler: function (entry) {
-					searchBox.closeMenu()
 					searchBox.launchChat(entry.sipAddress)
+					searchBox.closeMenu()
 				},
 				visible: SettingsModel.standardChatEnabled,
 				zz: 'toto'
@@ -93,9 +90,15 @@ SearchBox {
 				colorSet: SettingsModel.getShowStartChatButton() ? SipAddressesViewStyle.chat : SipAddressesViewStyle.history,
 				secure: 1,
 				visible: SettingsModel.secureChatEnabled && AccountSettingsModel.conferenceUri != '',
+				secureIconVisibleHandler : function(entry) {
+									if(entry)
+										return UtilsCpp.hasCapability(entry.sipAddress ? entry.sipAddress : entry,  LinphoneEnums.FriendCapabilityLimeX3Dh, true);
+									else
+										return false;
+								},
 				handler: function (entry) {
-					searchBox.closeMenu()
 					searchBox.launchSecureChat(entry.sipAddress)
+					searchBox.closeMenu()
 				}
 			}
 			
@@ -116,8 +119,8 @@ SearchBox {
 		}
 		
 		onEntryClicked: {
-			searchBox.closeMenu()
 			searchBox.entryClicked(entry)
+			searchBox.closeMenu()
 		}
 	}
 }

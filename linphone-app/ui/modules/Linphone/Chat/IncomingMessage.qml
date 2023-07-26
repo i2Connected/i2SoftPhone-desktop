@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.3
 import Common 1.0
 import Linphone 1.0
 import Linphone.Styles 1.0
+import UtilsCpp 1.0
 
 // =============================================================================
 
@@ -43,20 +44,17 @@ RowLayout {
 			width: ChatStyle.entry.message.incoming.avatarSize
 			
 			// The avatar is only visible for the first message of a incoming messages sequence.
-			visible: {
-				if (index <= 0) {
-					return true // 1. First message, so visible.
-				}
-				return !$chatEntry.isOutgoing && !mainRow.isTopGrouped
-			}
+			visible: index <= 0 ? true // 1. First message, so visible.
+								: $chatEntry && !$chatEntry.isOutgoing && !mainRow.isTopGrouped || false
+
 			TooltipArea{
 				delay:0
 				text:avatar.username+'\n'+$chatEntry.fromSipAddress
 				maxWidth: mainRow.width
 				isClickable: true
 				onClicked: {
-					window.mainSearchBar.text = $chatEntry.fromSipAddress
-					}
+					window.mainSearchBar.text = UtilsCpp.toDisplayString($chatEntry.fromSipAddress, SettingsModel.sipDisplayMode)
+				}
 			}
 		}
 	}

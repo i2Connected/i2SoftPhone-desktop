@@ -55,13 +55,21 @@ class Utils : public QObject{
 	Q_OBJECT
 public:
 	Utils(QObject * parent = nullptr) : QObject(parent){}
+	
+	typedef enum{
+		SIP_DISPLAY_USERNAME = 0,
+		SIP_DISPLAY_ALL = -1
+	}SipDisplayMode;
+	Q_ENUM(SipDisplayMode)
+	
 	// Qt interfaces	
-	Q_INVOKABLE static bool hasCapability(const QString& address, const LinphoneEnums::FriendCapability& capability);
+	Q_INVOKABLE static bool hasCapability(const QString& address, const LinphoneEnums::FriendCapability& capability, bool defaultCapability = true);
 	Q_INVOKABLE static QDateTime addMinutes(QDateTime date, const int& min);
 	static QDateTime getOffsettedUTC(const QDateTime& date);
 	Q_INVOKABLE static QString toDateTimeString(QDateTime date);
 	Q_INVOKABLE static QString toTimeString(QDateTime date, const QString& format = "hh:mm:ss");
 	Q_INVOKABLE static QString toDateString(QDateTime date, const QString& format = "");
+	Q_INVOKABLE static QString toDisplayString(const QString& str, SipDisplayMode displayMode = SIP_DISPLAY_ALL);
 	static void cleanDisplayNameCache(const QString& address = "");// if "", clean all cache
 	Q_INVOKABLE static QString getDisplayName(const QString& address);
 	Q_INVOKABLE static QString getInitials(const QString& username);	// Support UTF32
@@ -80,6 +88,7 @@ public:
 	Q_INVOKABLE static QPoint getCursorPosition();
 	Q_INVOKABLE static QString getFileChecksum(const QString& filePath);
 	static bool codepointIsEmoji(uint code);
+	static bool codepointIsVisible(uint code);
 	Q_INVOKABLE static bool isOnlyEmojis(const QString& text);
 	Q_INVOKABLE static QString encodeEmojiToQmlRichFormat(const QString &body);
 	Q_INVOKABLE static QString encodeTextToQmlRichFormat(const QString& text, const QVariantMap& options = QVariantMap());

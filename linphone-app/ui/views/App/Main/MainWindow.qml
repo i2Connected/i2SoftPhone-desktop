@@ -9,6 +9,7 @@ import Utils 1.0
 
 import App.Styles 1.0
 import ColorsList 1.0
+import UtilsCpp 1.0
 
 import 'MainWindow.js' as Logic
 import 'qrc:/ui/scripts/Utils/utils.js' as Utils
@@ -139,7 +140,7 @@ ApplicationWindow {
 						Layout.fillWidth: false
 						
 						TooltipArea {
-							text: AccountSettingsModel.sipAddress
+							text: UtilsCpp.toDisplayString(AccountSettingsModel.sipAddress, SettingsModel.sipDisplayMode)
 							hoveringCursor: Qt.PointingHandCursor
 						}
 						
@@ -182,6 +183,7 @@ ApplicationWindow {
 						maxMenuHeight: MainWindowStyle.searchBox.maxHeight
 						placeholderText: qsTr('mainSearchBarPlaceholder')
 						tooltipText: qsTr('smartSearchBarTooltip')
+						closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
 						
 						onAddContact: window.setView('ContactEdit', {
 														 sipAddress: sipAddress
@@ -307,7 +309,12 @@ ApplicationWindow {
 							icon: MainWindowStyle.menu.contacts.icon
 							iconSize: MainWindowStyle.menu.contacts.iconSize
 							overwriteColor: isSelected ? MainWindowStyle.menu.contacts.selectedColor.color : MainWindowStyle.menu.contacts.colorModel.color
-							name: qsTr('contactsEntry')
+							name: LdapListModel.count > 0
+							//: 'Local contacts' : Contacts section label in main window when we have to specify that they are local to the application.
+															? qsTr('localContactsEntry').toUpperCase() 
+							//: 'Contacts' : Contacts section label in main waindow.
+															: qsTr('contactsEntry').toUpperCase()
+							
 							visible: SettingsModel.contactsEnabled
 							
 							onSelected: {
@@ -366,6 +373,7 @@ ApplicationWindow {
 						Layout.fillWidth: true
 						model: TimelineProxyModel{
 							listSource: TimelineProxyModel.Main
+							onListSourceChanged: console.log("listSourceChanged")
 						}
 						
 						onEntrySelected:{
@@ -407,8 +415,7 @@ ApplicationWindow {
 						anchors.right: parent.right
 						anchors.top: parent.top
 						id: telKeypad
-						onSendDtmf: smartSearchBar.text = smartSearchBar.previousText+dtmf
-						onVisibleChanged: if(!visible) smartSearchBar.previousText = ''	// this is a way to reset search text
+						onSendDtmf: smartSearchBar.text += dtmf
 						visible: SettingsModel.showTelKeypadAutomatically
 					}
 				}

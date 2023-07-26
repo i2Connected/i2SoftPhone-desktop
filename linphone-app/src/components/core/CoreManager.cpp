@@ -94,15 +94,16 @@ CoreManager::~CoreManager(){
 
 void CoreManager::initCoreManager(){
 	qInfo() << "Init CoreManager";
+	mContactsListModel = new ContactsListModel(this);
+	mSipAddressesModel = new SipAddressesModel(this);	// at first in order to prioritzed on handler signals.
 	mAccountSettingsModel = new AccountSettingsModel(this);
 	mSettingsModel = new SettingsModel(this);
 	mEmojisSettingsModel = new EmojisSettingsModel(this);
 	mCallsListModel = new CallsListModel(this);
 	mChatModel = new ChatModel(this);
-	mContactsListModel = new ContactsListModel(this);
+	
 	mContactsImporterListModel = new ContactsImporterListModel(this);
 	mLdapListModel = new LdapListModel(this);
-	mSipAddressesModel = new SipAddressesModel(this);
 	mEventCountNotifier = new EventCountNotifier(this);
 	mTimelineListModel = new TimelineListModel(this);
 	mEventCountNotifier->updateUnreadMessageCount();
@@ -220,18 +221,16 @@ void CoreManager::cleanLogs () const {
 
 void CoreManager::setDatabasesPaths () {
 	SET_DATABASE_PATH(Friends, Paths::getFriendsListFilePath());
-	linphone_core_set_call_logs_database_path(mCore->cPtr(), Paths::getCallHistoryFilePath().c_str());// Setting the message database let SDK to migrate data
 	if(QFile::exists(Utils::coreStringToAppString(Paths::getMessageHistoryFilePath()))){
 		linphone_core_set_chat_database_path(mCore->cPtr(), Paths::getMessageHistoryFilePath().c_str());// Setting the message database let SDK to migrate data
 		QFile::remove(Utils::coreStringToAppString(Paths::getMessageHistoryFilePath()));
 	}
 }
 
-#undef SET_DATABASE_PATH
-
 // -----------------------------------------------------------------------------
 
 void CoreManager::setOtherPaths () {
+	SET_DATABASE_PATH(CallLogs, Paths::getCallHistoryFilePath());// Setting the call logs database let SDK to migrate data
 	if (mCore->getZrtpSecretsFile().empty() || !Paths::filePathExists(mCore->getZrtpSecretsFile(), true))
 		mCore->setZrtpSecretsFile(Paths::getZrtpSecretsFilePath());// Use application path if Linphone default is not available
 	qInfo() << "Using ZrtpSecrets path : " << QString::fromStdString(mCore->getZrtpSecretsFile());
@@ -255,6 +254,8 @@ void CoreManager::setResourcesPaths () {
 }
 
 // -----------------------------------------------------------------------------
+
+#undef SET_DATABASE_PATH
 
 void CoreManager::createLinphoneCore (const QString &configPath) {
 	qInfo() << QStringLiteral("Launch async core creation.");
@@ -319,7 +320,10 @@ void CoreManager::migrate () {
 	shared_ptr<linphone::Config> config = mCore->getConfig();
 	auto oldLimeServerUrl = mCore->getLimeX3DhServerUrl();// core url is deprecated : If core url exists, it must be copied to all linphone accounts.
 	int rcVersion = config->getInt(SettingsModel::UiSection, Constants::RcVersionName, 0);
-	if (oldLimeServerUrl.empty() && rcVersion == Constants::RcVersionCurrent)
+	if( !oldLimeServerUrl.empty()) {
+		mCore->setLimeX3DhServerUrl("");
+		mCore->enableLimeX3Dh(true);
+	}else if( rcVersion == Constants::RcVersionCurrent)
 		return;
 	if (rcVersion > Constants::RcVersionCurrent) {
 		qWarning() << QStringLiteral("RC file version (%1) is more recent than app rc file version (%2)!!!")
@@ -329,10 +333,6 @@ void CoreManager::migrate () {
 	
 	qInfo() << QStringLiteral("Migrate from old rc file (%1 to %2).")
 			   .arg(rcVersion).arg(Constants::RcVersionCurrent);
-	if( !oldLimeServerUrl.empty()) {
-		mCore->setLimeX3DhServerUrl("");
-		mCore->enableLimeX3Dh(true);
-	}
 	bool setLimeServerUrl = false;
 	for(const auto &account : getAccountList()){
 		auto params = account->getParams();

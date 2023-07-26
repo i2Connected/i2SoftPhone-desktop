@@ -86,7 +86,17 @@ shared_ptr<linphone::Address> AccountSettingsModel::getUsedSipAddress () const {
 	return account ? account->getParams()->getIdentityAddress()->clone() : core->createPrimaryContactParsed();
 }
 
-void AccountSettingsModel::setUsedSipAddress (const shared_ptr<linphone::Address> &address) {
+ std::shared_ptr<linphone::Account> AccountSettingsModel::findAccount(shared_ptr<const linphone::Address> address) const {
+	shared_ptr<linphone::Core> core = CoreManager::getInstance()->getCore();
+	list<shared_ptr<linphone::Account>> accounts = CoreManager::getInstance()->getAccountList();
+	for(auto account : accounts){
+		if(account->getContactAddress()->weakEqual(address))
+			return account;
+	}
+	return nullptr;
+}
+
+void AccountSettingsModel::setUsedSipAddress (const shared_ptr<const linphone::Address> &address) {
 	shared_ptr<linphone::Core> core = CoreManager::getInstance()->getCore();
 	shared_ptr<linphone::Account> account = core->getDefaultAccount();
 	if( account){
@@ -130,9 +140,7 @@ bool AccountSettingsModel::addOrUpdateAccount (std::shared_ptr<linphone::Account
 		}
 		
 		coreManager->addingAccount(account->getParams());
-		coreManager->getSettingsModel()->configureRlsUri(account);
-	}else
-		coreManager->getSettingsModel()->configureRlsUri();
+	}
 	
 	emit accountSettingsUpdated();
 	
@@ -266,6 +274,13 @@ void AccountSettingsModel::setDefaultAccountFromSipAddress (const QString &sipAd
 	
 	qWarning() << "Unable to set default account from:" << sipAddress;
 }
+
+void AccountSettingsModel::enableRegister (std::shared_ptr<linphone::Account> account, bool enable){
+	auto params = account->getParams()->clone();
+	enableRegister(params, enable, Utils::coreStringToAppString(params->getContactParameters()));
+	account->setParams(params);
+}
+
 void AccountSettingsModel::removeAccount (const shared_ptr<linphone::Account> &account) {
 	
 	CoreManager *coreManager = CoreManager::getInstance();
@@ -282,7 +297,7 @@ void AccountSettingsModel::removeAccount (const shared_ptr<linphone::Account> &a
 	}
 // "message-expires" is used to keep contact for messages. Setting to 0 will remove the contact for messages too.
 // Check if a "message-expires" exists and set it to 0
-	QStringList parameters = Utils::coreStringToAppString(account->getParams()->getContactParameters()).split(";");
+	QStringList parameters = Utils::coreStringToAppString(account->getParams()->getContactParameters()).split(";", Qt::SkipEmptyParts);
 	for(int i = 0 ; i < parameters.size() ; ++i){
 		QStringList fields = parameters[i].split("=");
 		if( fields.size() > 1 && fields[0].simplified() == "message-expires"){
@@ -291,16 +306,40 @@ void AccountSettingsModel::removeAccount (const shared_ptr<linphone::Account> &a
 	}
 	auto accountParams = account->getParams()->clone();
 	accountParams->setContactParameters(Utils::appStringToCoreString(parameters.join(";")));	
+	bool isRegistered = account->getState() == linphone::RegistrationState::Ok;
 	if (account->setParams(accountParams) == -1) {
 		qWarning() << QStringLiteral("Unable to reset message-expiry property before removing account: `%1`.")
 				  .arg(QString::fromStdString(account->getParams()->getIdentityAddress()->asString()));
-	}else if(account->getParams()->registerEnabled()) { // Wait for update
+	}else if(isRegistered && account->getParams()->registerEnabled()) { // Wait for update
 		mRemovingAccounts.push_back(account);
 	}else{// Registration is not enabled : Removing without wait.
 		CoreManager::getInstance()->getCore()->removeAccount(account);
 	}
 	
 	emit accountSettingsUpdated();
+}
+
+void AccountSettingsModel::enableRegister(std::shared_ptr<linphone::AccountParams> params, bool registerEnabled, QString contactParameters){
+	bool findMessageExpires = false;
+	QStringList parameters = contactParameters.split(";", Qt::SkipEmptyParts);
+	for(int i = 0 ; i < parameters.size() ; ++i){
+		QStringList fields = parameters[i].split("=");
+		if( fields.size() > 1 && fields[0].simplified() == "message-expires"){
+			findMessageExpires = true;
+			if(!registerEnabled)// replace message-expires by 0 in order to not get new incoming messages.
+				parameters[i] = Constants::DefaultContactParametersOnRemove;
+			else if(!params->registerEnabled() && fields[1].toInt() == 0)
+				parameters[i] = Constants::DefaultContactParameters;
+		}
+	}
+	if(!findMessageExpires){
+		if(!registerEnabled)// message-expires was not found we need to disable the account.
+			parameters.push_back(Constants::DefaultContactParametersOnRemove);
+		else if(!params->registerEnabled())// Switch on
+			parameters.push_back(Constants::DefaultContactParameters);
+	}
+	params->setContactParameters(Utils::appStringToCoreString(parameters.join(";")));
+	params->enableRegister(registerEnabled);
 }
 
 bool AccountSettingsModel::addOrUpdateAccount(
@@ -352,13 +391,17 @@ bool AccountSettingsModel::addOrUpdateAccount(
 	txt = data["videoConferenceUri"].toString();
 	accountParams->setAudioVideoConferenceFactoryAddress(Utils::interpretUrl(txt));
 	accountParams->setLimeServerUrl(Utils::appStringToCoreString(data["limeServerUrl"].toString()));
-		
+
+	QString contactParameters = Utils::coreStringToAppString(accountParams->getContactParameters());
 	if(data.contains("contactParams"))
-		accountParams->setContactParameters(Utils::appStringToCoreString(data["contactParams"].toString()));
+		contactParameters = data["contactParams"].toString();
 	if(data.contains("avpfInterval"))
 		accountParams->setAvpfRrInterval(uint8_t(data["avpfInterval"].toInt()));
-	if(data.contains("registerEnabled"))
-		accountParams->enableRegister(data["registerEnabled"].toBool());
+	if(data.contains("registerEnabled")){
+		enableRegister(accountParams, data["registerEnabled"].toBool(), contactParameters);
+	}else{
+		accountParams->setContactParameters(Utils::appStringToCoreString(contactParameters));
+	}
 	if(data.contains("publishPresence")) {
 		newPublishPresence = accountParams->publishEnabled() != data["publishPresence"].toBool();
 		accountParams->enablePublish(data["publishPresence"].toBool());
@@ -564,11 +607,13 @@ QVariantList AccountSettingsModel::getAccounts () const {
 	
 	for (const auto &account : CoreManager::getInstance()->getAccountList()) {
 		QVariantMap accountMap;
-		accountMap["sipAddress"] = Utils::coreStringToAppString(account->getParams()->getIdentityAddress()->asStringUriOnly());
-		accountMap["fullSipAddress"] = Utils::coreStringToAppString(account->getParams()->getIdentityAddress()->asString());
+		auto params = account->getParams();
+		accountMap["sipAddress"] = Utils::coreStringToAppString(params->getIdentityAddress()->asStringUriOnly());
+		accountMap["fullSipAddress"] = Utils::coreStringToAppString(params->getIdentityAddress()->asString());
 		accountMap["account"].setValue(account);
 		accountMap["unreadMessageCount"] = settingsModel->getStandardChatEnabled() || settingsModel->getSecureChatEnabled() ? account->getUnreadChatMessageCount() : 0;
 		accountMap["missedCallCount"] = CoreManager::getInstance()->getMissedCallCountFromLocal(accountMap["sipAddress"].toString());
+		accountMap["registerEnabled"] = params->registerEnabled();
 		accounts << accountMap;
 	}
 	
@@ -590,7 +635,6 @@ void AccountSettingsModel::handleRegistrationStateChanged (
 			QTimer::singleShot(60000, [authInfo](){// 60s is just to be sure. account_update remove deleted account only after 32s
 				CoreManager::getInstance()->getCore()->removeAuthInfo(authInfo);
 			});
-		coreManager->getSettingsModel()->configureRlsUri();
 	}else if(mRemovingAccounts.contains(account)){
 		mRemovingAccounts.removeAll(account);
 		QTimer::singleShot(100, [account, this](){// removeAccount cannot be called from callback

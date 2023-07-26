@@ -67,7 +67,8 @@ Rectangle {
 			
 // Load optimizations
 			property int remainingLoadersCount: 0
-			property int syncLoaderBatch: 20	// batch of simultaneous loaders on synchronous mode
+			property int visibleItemsEstimation: chat.height / (2 * textMetrics.height)	// Title + body
+			property int syncLoaderBatch: visibleItemsEstimation	// batch of simultaneous loaders on synchronous mode
 //------------------------------------
 
 			signal refreshContents()
@@ -93,6 +94,11 @@ Rectangle {
 				running: false
 				onTriggered: chat.refreshContents()
 			}
+			TextMetrics{
+				id: textMetrics
+				font: SettingsModel.textMessageFont
+				text: "X"
+			}
 			
 			Layout.fillHeight: true
 			Layout.fillWidth: true
@@ -110,6 +116,9 @@ Rectangle {
 			Component.onCompleted: {
 					Logic.initView()
 					refreshContentsTimer.start()
+					console.debug("Chat loading with "+chat.visibleItemsEstimation+" visible items. "+chat.count)
+					if(chat.visibleItemsEstimation >= chat.count)
+						Qt.callLater(container.proxyModel.loadMoreEntriesAsync)
 			}
 			onMovementStarted: {Logic.handleMovementStarted(); chat.isMoving = true}
 			onMovementEnded: {Logic.handleMovementEnded(); chat.isMoving = false}
@@ -195,7 +204,7 @@ Rectangle {
 							Layout.rightMargin: ChatStyle.entry.message.outgoing.areaSize
 							spacing:0
 							// Display time.
-							visible: !entry.isTopGrouped// && !entry.isNotice
+							visible: !entry.isTopGrouped && !entry.isNotice
 							
 							Text {
 								id:timeDisplay
@@ -235,7 +244,8 @@ Rectangle {
 							Layout.fillWidth: true
 							source: Logic.getComponentFromEntry(entry.chatEntry)
 							z:1
-							asynchronous: true
+							
+							asynchronous: index < chat.count - 1 - chat.visibleItemsEstimation
 							property int loaderIndex: 0
 							function updateSync(){
 								if( asynchronous && loaderIndex > 0 && chat.remainingLoadersCount - loaderIndex - chat.syncLoaderBatch <= 0 ) asynchronous = false// Sync load the end
@@ -278,18 +288,12 @@ Rectangle {
 									//: 'Choose where to forward the message' : Dialog title for choosing where to forward the current message.
 									, {title: qsTr('forwardDialogTitle'),
 										addressSelectedCallback: function (sipAddress) {
-																	var chat = CallsListModel.createChatRoom( '', proxyModel.chatRoomModel.haveEncryption, [sipAddress], false )
-																	if(chat){
-																		chat.chatRoomModel.forwardMessage(entry.chatEntry)
-																		TimelineListModel.select(chat.chatRoomModel)
-																	}
+																	Logic.forwardMessage(undefined, entry.chatEntry, {subject:'', haveEncryption: proxyModel.chatRoomModel.haveEncryption, participants: [sipAddress], toSelect: false} )
 																},
 										chatRoomSelectedCallback: function (chatRoomModel){
-																	if(chatRoomModel){
-																		chatRoomModel.forwardMessage(entry.chatEntry)
-																		TimelineListModel.select(chatRoomModel)
-																	}
-									}
+																	if(chatRoomModel)
+																		Logic.forwardMessage(chatRoomModel, entry.chatEntry)
+										}
 								})
 							}
 							
@@ -432,6 +436,7 @@ Rectangle {
 						onTextChanged: {// This slot can be call before the item has been completed because of Rich text. So the cache must not take it account.
 								if(componentReady) {
 									proxyModel.cachedText=text
+									Logic.handleTextChanged(textArea.getText())
 								}
 							}
 						onValidText: {

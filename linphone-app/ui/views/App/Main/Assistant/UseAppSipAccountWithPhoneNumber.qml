@@ -1,5 +1,8 @@
 import Common 1.0
 import Linphone 1.0
+import QtQuick.Layouts 1.0
+
+import 'qrc:/ui/scripts/Utils/utils.js' as Utils
 
 // =============================================================================
 
@@ -15,7 +18,8 @@ Form {
 			label: qsTr('displayNameLabel')
 			
 			TextField {
-				onTextChanged: assistantModel.displayName = text
+				text: assistantModel.displayName
+				onTextChanged: if( assistantModel.displayName != text) assistantModel.displayName = text
 			}
 		}
 	}
@@ -30,13 +34,15 @@ Form {
 				currentIndex: model.defaultIndex
 				model: telephoneNumbersModel
 				textRole: 'countryName'
-				
+				function setCode(code){
+					currentIndex = Utils.findIndex(model, function (phoneModel) {
+							return phoneModel.countryCode === code
+						})
+					assistantModel.setCountryCode(currentIndex)
+				}
+			
 				onActivated: {
 					assistantModel.setCountryCode(index)
-					var text = phoneNumber.text
-					if (text.length > 0) {
-						assistantModel.phoneNumber = text
-					}
 				}
 			}
 		}
@@ -45,13 +51,30 @@ Form {
 	FormLine {
 		FormGroup {
 			label: qsTr('phoneNumberLabel')
-			
-			TextField {
-				id: phoneNumber
+			 RowLayout{
+				  spacing: 5
+				  TextField {
+					  id: countryCode
+					  Layout.fillHeight: true
+					  Layout.preferredWidth: 50
+					  inputMethodHints: Qt.ImhDialableCharactersOnly
+					  text: "+"+assistantModel.countryCode
+					  cursorPosition:1
+					  onCursorPositionChanged: if(cursorPosition == 0) cursorPosition = 1
+					  onTextEdited: {
+						  country.setCode(text.substring(1))
+						  
+					  }
+				  }
+				TextField {
+					id: phoneNumber
+					Layout.fillHeight: true
+					Layout.fillWidth: true
 				
-				inputMethodHints: Qt.ImhDialableCharactersOnly
-				
-				onTextChanged: assistantModel.phoneNumber = text
+					inputMethodHints: Qt.ImhDialableCharactersOnly
+					text: assistantModel.phoneNumber
+					onTextChanged: if( assistantModel.phoneNumber != text) assistantModel.phoneNumber = text
+				}
 			}
 		}
 	}

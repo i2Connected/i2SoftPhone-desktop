@@ -154,7 +154,7 @@ ColumnLayout  {
 												}else if(chatRoomModel.isSecure())
 													return chatRoomModel.participants.addressesToString;
 												else
-													return SipAddressesModel.cleanSipAddress(chatRoomModel.sipAddress)
+													return UtilsCpp.toDisplayString(SipAddressesModel.cleanSipAddress(chatRoomModel.sipAddress), SettingsModel.sipDisplayMode)
 										  }else
 											  return ''
 							
@@ -205,18 +205,24 @@ ColumnLayout  {
 						MouseArea{
 							anchors.fill:parent
 							visible: conversation.chatRoomModel && !conversation.chatRoomModel.isReadOnly && (SettingsModel.standardChatEnabled || SettingsModel.secureChatEnabled)
-							onClicked : {
+							function showParticipantsDevice(){
 								window.detachVirtualWindow()
-								window.attachVirtualWindow(Qt.resolvedUrl('Dialogs/InfoEncryption.qml')
+								window.attachVirtualWindow(Qt.resolvedUrl('Dialogs/ParticipantsDevices.qml')
+															,{chatRoomModel:chatRoomModel
+															, window:window})
+							}
+							onClicked : {
+								if(!SettingsModel.dontAskAgainInfoEncryption){
+									window.detachVirtualWindow()
+									window.attachVirtualWindow(Qt.resolvedUrl('Dialogs/InfoEncryption.qml')
 														   ,{securityLevel:securityLevel}
 														   , function (status) {
 															   if(status){
-																   window.detachVirtualWindow()
-																   window.attachVirtualWindow(Qt.resolvedUrl('Dialogs/ParticipantsDevices.qml')
-																							  ,{chatRoomModel:chatRoomModel
-																								  , window:window})		
+																	showParticipantsDevice()
 															   }
 														   })
+								} else
+									showParticipantsDevice()
 							}
 						}
 					}
@@ -256,7 +262,7 @@ ColumnLayout  {
 						backgroundRadius: 1000
 						colorSet: ConversationStyle.bar.actions.videoCall
 						
-						visible: SettingsModel.videoEnabled && SettingsModel.outgoingCallsEnabled && SettingsModel.showStartVideoCallButton && !conversation.haveMoreThanOneParticipants
+						visible: SettingsModel.videoAvailable && SettingsModel.outgoingCallsEnabled && SettingsModel.showStartVideoCallButton && !conversation.haveMoreThanOneParticipants
 						
 						onClicked: CallsListModel.launchVideoCall(chatRoomModel.participants.addressesToString)
 					}
@@ -313,18 +319,35 @@ ColumnLayout  {
 						
 						//onClicked: CallsListModel. Logic.openConferenceManager({chatRoomModel:conversation.chatRoomModel, autoCall:true})
 						onClicked:{
-							if( SettingsModel.videoConferenceEnabled ){
-								groupCallButton.toggled = true
-								conferenceInfoModel.resetConferenceInfo();
-								conferenceInfoModel.isScheduled = false
-								conferenceInfoModel.subject = chatRoomModel.subject
+							window.detachVirtualWindow()
+							window.attachVirtualWindow(Utils.buildCommonDialogUri('ConfirmDialog'), {
+													flat: true
+													//: 'Group call' : Title for a group call confirmation.
+													, descriptionText: '<b>'+qsTr('groupCallConfirmTitle')+'</b><br/><br/>'
+													//: 'Do you want to start a group call?<br/>Everyone in this group will receive a call to join the meeting."
+													+qsTr('groupCallConfirmDescription')
+													, height: 330
+													//: 'Cancel' : Cancel button
+													, buttonTexts: [qsTr('cancelButton').toUpperCase()
+													//: 'Start' : Start button
+														, qsTr('startButton').toUpperCase()]
+												}, function (status) {
+												   if(status){
+													   if( SettingsModel.videoConferenceEnabled ){
+															groupCallButton.toggled = true
+															conferenceInfoModel.resetConferenceInfo();
+															conferenceInfoModel.isScheduled = false
+															conferenceInfoModel.subject = chatRoomModel.subject
+														
+															conferenceInfoModel.setParticipants(conversation.chatRoomModel.participants)
+															conferenceInfoModel.inviteMode = 0;
+															conferenceInfoModel.createConference(false)// TODO activate it when secure video conference is implemented
+														}else{
+															Logic.openConferenceManager({chatRoomModel:conversation.chatRoomModel, autoCall:true})
+														}
+												   }
+											   })
 							
-								conferenceInfoModel.setParticipants(conversation.chatRoomModel.participants)
-								conferenceInfoModel.inviteMode = 0;
-								conferenceInfoModel.createConference(false)// TODO activate it when secure video conference is implemented
-							}else{
-								Logic.openConferenceManager({chatRoomModel:conversation.chatRoomModel, autoCall:true})
-							}
 						}
 						//: "Call all chat room's participants" : tooltip on a button for calling all participant in the current chat room
 						tooltipText: qsTr("groupChatCallButton")
