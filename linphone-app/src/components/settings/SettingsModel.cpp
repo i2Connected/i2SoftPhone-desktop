@@ -53,6 +53,9 @@ const string SettingsModel::ContactsSection("contacts_import");
 SettingsModel::SettingsModel (QObject *parent) : QObject(parent) {
 	CoreManager *coreManager = CoreManager::getInstance();
 	mConfig = coreManager->getCore()->getConfig();
+	
+	connect(this, &SettingsModel::dontAskAgainInfoEncryptionChanged, this, &SettingsModel::haveDontAskAgainChoicesChanged);
+	connect(this, &SettingsModel::haveAtLeastOneVideoCodecChanged, this, &SettingsModel::videoAvailableChanged);
 
 	QObject::connect(coreManager->getHandlers().get(), &CoreHandlers::callCreated,
 			 this, &SettingsModel::handleCallCreated);
@@ -676,6 +679,19 @@ void SettingsModel::setShowVideoCodecs (bool status) {
 	emit showVideoCodecsChanged(status);
 }
 
+bool SettingsModel::getVideoAvailable() const{
+	return getVideoEnabled() && haveAtLeastOneVideoCodec();
+}
+
+bool SettingsModel::haveAtLeastOneVideoCodec() const{
+	auto codecs = CoreManager::getInstance()->getCore()->getVideoPayloadTypes();
+	for (auto &codec : codecs){
+		if(codec->enabled() && codec->isUsable())
+			return true;
+	}
+	return false;
+}
+
 // =============================================================================
 void SettingsModel::updateCameraMode(){
 	auto mode = mConfig->getString("video", "main_display_mode", "OccupyAllSpace");	
@@ -1077,6 +1093,21 @@ void SettingsModel::enableMandatoryMediaEncryption(bool mandatory) {
 
 bool SettingsModel::getPostQuantumAvailable() const{
 	return CoreManager::getInstance()->getCore() && CoreManager::getInstance()->getCore()->getPostQuantumAvailable();
+}
+
+bool SettingsModel::getDontAskAgainInfoEncryption() const{
+	return mConfig->getBool(UiSection, "dont_ask_again_info_encryption", false);
+}
+
+void SettingsModel::setDontAskAgainInfoEncryption(bool show){
+	if(show != getDontAskAgainInfoEncryption()) {
+		mConfig->setBool(UiSection, "dont_ask_again_info_encryption", show);
+		emit dontAskAgainInfoEncryptionChanged();
+	}
+}
+
+bool SettingsModel::getHaveDontAskAgainChoices() const {
+	return getDontAskAgainInfoEncryption();
 }
 
 // -----------------------------------------------------------------------------
@@ -1712,6 +1743,10 @@ void SettingsModel::setMagicSearchMaxResults(int maxResults) {
 		mConfig->setInt(UiSection, "magic_search_max_results", maxResults);
 		emit magicSearchMaxResultsChanged();
 	}
+}
+
+void SettingsModel::resetDontAskAgainChoices(){
+	setDontAskAgainInfoEncryption(false);
 }
 
 // =============================================================================

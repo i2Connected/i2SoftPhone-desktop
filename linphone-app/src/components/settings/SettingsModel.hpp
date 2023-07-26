@@ -100,6 +100,7 @@ class SettingsModel : public QObject {
 	Q_PROPERTY(QVariantMap videoDefinition READ getVideoDefinition WRITE setVideoDefinition NOTIFY videoDefinitionChanged)
 	
 	Q_PROPERTY(bool videoEnabled READ getVideoEnabled WRITE setVideoEnabled NOTIFY videoEnabledChanged)
+	Q_PROPERTY(bool videoAvailable READ getVideoAvailable NOTIFY videoAvailableChanged)
 	
 	Q_PROPERTY(bool showVideoCodecs READ getShowVideoCodecs WRITE setShowVideoCodecs NOTIFY showVideoCodecsChanged)
 	
@@ -224,6 +225,10 @@ class SettingsModel : public QObject {
 	Q_PROPERTY(bool useMinimalTimelineFilter READ useMinimalTimelineFilter WRITE setUseMinimalTimelineFilter NOTIFY useMinimalTimelineFilterChanged)
 	Q_PROPERTY(Utils::SipDisplayMode sipDisplayMode READ getSipDisplayMode WRITE setSipDisplayMode NOTIFY sipDisplayModeChanged)
 	Q_PROPERTY(int magicSearchMaxResults READ getMagicSearchMaxResults WRITE setMagicSearchMaxResults NOTIFY magicSearchMaxResultsChanged)
+	
+	Q_PROPERTY(bool dontAskAgainInfoEncryption READ getDontAskAgainInfoEncryption WRITE setDontAskAgainInfoEncryption NOTIFY dontAskAgainInfoEncryptionChanged)
+	Q_PROPERTY(bool haveDontAskAgainChoices READ getHaveDontAskAgainChoices NOTIFY haveDontAskAgainChoicesChanged)
+	
 	
 	// Advanced. -----------------------------------------------------------------
 	
@@ -383,8 +388,10 @@ public:
 	Q_INVOKABLE QVariantMap getCurrentPreviewVideoDefinition () const;
 	void setVideoDefinition (const QVariantMap &definition);
 	
-	bool getVideoEnabled() const;
+	bool getVideoEnabled() const;	// Enabled from settings
 	void setVideoEnabled(const bool& enable);
+	bool getVideoAvailable() const; // Enabled and have enough codecs.
+	bool haveAtLeastOneVideoCodec() const;
 	
 	bool getShowVideoCodecs () const;
 	void setShowVideoCodecs (bool status);
@@ -482,6 +489,9 @@ public:
 	void enableMandatoryMediaEncryption(bool mandatory);
 	
 	bool getPostQuantumAvailable() const;
+	
+	bool getDontAskAgainInfoEncryption() const;
+	void setDontAskAgainInfoEncryption(bool show);
 	
 	bool getLimeState () const;
 	void setLimeState (const bool& state);
@@ -622,6 +632,10 @@ public:
 	int getMagicSearchMaxResults() const;
 	void setMagicSearchMaxResults(int maxResults);
 	
+// Show all "don't ask again" checkboxes and popups.
+	bool getHaveDontAskAgainChoices() const;
+	Q_INVOKABLE void resetDontAskAgainChoices();
+	
 	// Advanced. ---------------------------------------------------------------------------
 	
 	
@@ -731,6 +745,7 @@ signals:
 	
 	// Video. --------------------------------------------------------------------
 	void videoEnabledChanged();
+	void videoAvailableChanged();
 	void videoDevicesChanged (const QStringList &devices);
 	void videoDeviceChanged (const QString &device);
 	
@@ -746,6 +761,8 @@ signals:
 	void activeSpeakerCameraModeChanged();
 	void callCameraModeChanged();
 	void videoConferenceLayoutChanged();
+	
+	void haveAtLeastOneVideoCodecChanged();
 	
 	// Chat & calls. -------------------------------------------------------------
 	
@@ -848,6 +865,9 @@ signals:
 	void versionCheckTypeChanged();
 	
 	void magicSearchMaxResultsChanged();
+	
+	void dontAskAgainInfoEncryptionChanged();
+	void haveDontAskAgainChoicesChanged();
 	
 	// Advanced. -----------------------------------------------------------------
 	
