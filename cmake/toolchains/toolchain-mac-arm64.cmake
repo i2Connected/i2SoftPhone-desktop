@@ -1,9 +1,6 @@
 ################################################################################
 #
-#  Copyright (c) 2017-2023 Belledonne Communications SARL.
-# 
-#  This file is part of linphone-desktop
-#  (see https://www.linphone.org).
+#  Copyright (c) 2021-2023 Belledonne Communications SARL.
 # 
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -19,25 +16,9 @@
 #  along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 ################################################################################
+message(FATAL_ERROR A)
+set(CMAKE_SYSTEM_PROCESSOR "arm64")
+set(CMAKE_OSX_ARCHITECTURES "arm64")
+set(CLANG_TARGET "arm64-apple-macos")
 
-cmake_minimum_required(VERSION 3.22)
-
-project(app-plugins)
-
-## Add custom plugins
-macro(get_all_subdirs result curdir)
-	file(GLOB children RELATIVE ${curdir} ${curdir}/*)
-	set(dirlist "")
-	foreach(child ${children})
-		if(IS_DIRECTORY ${curdir}/${child} AND (ENABLE_BUILD_EXAMPLES OR NOT ${child} MATCHES "example"))
-			list(APPEND dirlist ${child})
-		endif()
-	endforeach()
-	set(${result} ${dirlist})
-endmacro()
-get_all_subdirs(SUBDIRS ${CMAKE_CURRENT_SOURCE_DIR})
-
-foreach(subdir ${SUBDIRS})
-	message("Adding ${subdir} plugin")
-	add_subdirectory(${subdir})
-endforeach()
+include("${CMAKE_CURRENT_LIST_DIR}/toolchain-mac-common.cmake")
