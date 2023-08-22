@@ -6,7 +6,9 @@
 .build_all_script: &build_all_script |
   ccache -s
   export Qt5_DIR=~/Qt/$QT_MAC_VER/lib/cmake/Qt5
+  echo $Qt5_DIR
   export PATH=~/Qt/$QT_MAC_VER/bin:$PATH
+  echo $PATH
   if [ -d "build" ]; then rm -rf build; fi;
   mkdir -p build/OUTPUT
   cd build
@@ -16,19 +18,18 @@
   echo $DEFAULT_MACOS_CMAKE_OPTIONS
   echo $CMAKE_OPTIONS
   echo $ADDITIONAL_BUILD_OPTIONS
-  cmake .. -G "$CMAKE_GENERATOR" -DLINPHONESDK_PLATFORM=Desktop -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 -DCMAKE_BUILD_TYPE=$CI_BUILD_TYPE $DEFAULT_MACOS_CMAKE_OPTIONS $XCODE_OPTIONS $CMAKE_OPTIONS $SCHEDULE_CMAKE_OPTIONS -DLINPHONE_BUILDER_SIGNING_IDENTITY="$MACOS_SIGNING_IDENTITY" -DLINPHONESDK_MACOS_ARCHS="$LINPHONESDK_MACOS_ARCHS" -DLINPHONESDK_OPENSSL_ROOT_DIR_X86_64="$LINPHONESDK_OPENSSL_ROOT_DIR_X86_64" -DLINPHONESDK_OPENSSL_ROOT_DIR_ARM64="$LINPHONESDK_OPENSSL_ROOT_DIR_ARM64" $RELEASE_FILE
+  cmake .. -G "$CMAKE_GENERATOR" -DLINPHONESDK_PLATFORM=Macos -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 -DCMAKE_BUILD_TYPE=$CI_BUILD_TYPE $DEFAULT_MACOS_CMAKE_OPTIONS $XCODE_OPTIONS $CMAKE_OPTIONS $SCHEDULE_CMAKE_OPTIONS -DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE -DCMAKE_APPLE_SILICON_PROCESSOR=$CMAKE_APPLE_SILICON_PROCESSOR $RELEASE_FILE
   cmake --build . --target install --config $CI_BUILD_TYPE $LBC_NODEBUG_OPTIONS -- $ADDITIONAL_BUILD_OPTIONS
   ccache -s
 
 .job-macosx-desktop:
   stage: build
-  tags: [ "macmini-m1-xcode13" ]
+  tags: [ "macmini-m1-bis-xcode13" ]
   script:
     - *build_all_script
   variables:
-    LINPHONESDK_MACOS_ARCHS: "x86_64"
-    LINPHONESDK_OPENSSL_ROOT_DIR_X86_64: "/usr/local/opt/openssl@1.1"
-    LINPHONESDK_OPENSSL_ROOT_DIR_ARM64: "/opt/homebrew/opt/openssl@1.1"
+    CMAKE_TOOLCHAIN_FILE: linphone-sdk/cmake/toolchains/toolchain-mac-x86_64.cmake
+    CMAKE_APPLE_SILICON_PROCESSOR: x86_64
   artifacts:
     paths:
       - build/OUTPUT
@@ -39,13 +40,14 @@
 # On each push
 #################################################
 
+#TODO: reactivate pcrypto when liboqs is fixed for 'Vortex' CPU.
 job-macosx-ninja:
   except:
     refs:
       - schedules
   variables:
     CMAKE_GENERATOR: Ninja
-    CMAKE_OPTIONS: -DENABLE_PQCRYPTO=ON
+    CMAKE_OPTIONS: -DENABLE_PQCRYPTO=OFF
   extends: .job-macosx-desktop
 
 #################################################
@@ -59,7 +61,7 @@ job-macosx-makefile:
       - $DEPLOY_PLUGINS
   variables:
     CMAKE_GENERATOR: Unix Makefiles
-    CMAKE_OPTIONS: -DENABLE_PQCRYPTO=ON
+    CMAKE_OPTIONS: -DENABLE_PQCRYPTO=OFF
     ADDITIONAL_BUILD_OPTIONS: -j$MAKEFILE_JOBS
   extends: .job-macosx-desktop
 
@@ -68,7 +70,7 @@ job-macosx-ninja-novideo:
     variables:
       - $NIGHTLY_MASTER
   variables:
-    CMAKE_OPTIONS: -DENABLE_VIDEO=NO -DENABLE_PQCRYPTO=ON
+    CMAKE_OPTIONS: -DENABLE_VIDEO=OFF -DENABLE_PQCRYPTO=OFF
     CMAKE_GENERATOR: Ninja
   extends: .job-macosx-desktop
 
@@ -90,7 +92,7 @@ job-macosx-ninja-novideo:
 # WAIT for QT6 for arm64
 job-macosx-makefile-package:
   stage: package
-  tags: [ "macmini-m1-xcode13" ]
+  tags: [ "macmini-m1-bis-xcode13" ]
   dependencies: []
   only:
      variables:
@@ -98,9 +100,8 @@ job-macosx-makefile-package:
        - $PACKAGE_MACOSX
        - $DEPLOY_MACOSX
   variables:
-    CMAKE_OPTIONS: -DENABLE_APP_PACKAGING=YES -DENABLE_G729=ON
+    CMAKE_OPTIONS: -DENABLE_APP_PACKAGING=ON -DENABLE_GPL_THIRD_PARTIES=ON -DENABLE_G729=ON
     RELEASE_FILE: -DLINPHONE_SDK_MAKE_RELEASE_FILE_URL=$MAKE_RELEASE_FILE_URL/$MACOSX_PLATFORM/$APP_FOLDER
-    LINPHONESDK_MACOS_ARCHS: "x86_64"
   extends: job-macosx-makefile
   script:
     - if [[ $MAKE_RELEASE_FILE_URL == "" ]]; then export RELEASE_FILE=""; fi
@@ -114,7 +115,7 @@ job-macosx-makefile-package:
 
 job-macosx-codesigning:
   stage: signing
-  tags: [ "macmini-m1-xcode13" ]
+  tags: [ "macmini-m1-bis-xcode13" ]
   needs:
     - job-macosx-makefile-package
   only:
@@ -139,7 +140,7 @@ job-macosx-codesigning:
 
 job-macosx-makefile-deploy:
   stage: deploy
-  tags: [ "macmini-m1-xcode13" ]
+  tags: [ "macmini-m1-bis-xcode13" ]
   needs:
     - job-macosx-codesigning
   only:
@@ -157,7 +158,7 @@ job-macosx-makefile-deploy:
 
 job-macosx-makefile-plugins-deploy:
   stage: deploy
-  tags: [ "macmini-m1-xcode13" ]
+  tags: [ "macmini-m1-bis-xcode13" ]
   needs:
     - job-macosx-makefile
   only:

@@ -1,9 +1,6 @@
 ################################################################################
-#
-#  Copyright (c) 2017-2023 Belledonne Communications SARL.
-# 
-#  This file is part of linphone-desktop
-#  (see https://www.linphone.org).
+#  toolchain-windows-store-x86.cmake
+#  Copyright (c) 2021-2023 Belledonne Communications SARL.
 # 
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -20,24 +17,7 @@
 #
 ################################################################################
 
-cmake_minimum_required(VERSION 3.22)
+# set(CMAKE_SYSTEM_PROCESSOR "x86")
+set(MICROSOFT_STORE_LINK_PATHS "\$(WindowsSDK_LibraryPath_x86);\$(NETFXKitsDir)Lib\\um\\x86;\$(VC_LibraryPath_VC_x86_store);\$(VC_ReferencesPath_ATL_x86);\$(VC_LibraryPath_VC_x86);\$(VC_LibraryPath_x86);\$(VC_VS_LibraryPath_VC_VS_x86);\$(LibraryPath);\$(VC_LibraryPath_VC_x86_store)\\references")
 
-project(app-plugins)
-
-## Add custom plugins
-macro(get_all_subdirs result curdir)
-	file(GLOB children RELATIVE ${curdir} ${curdir}/*)
-	set(dirlist "")
-	foreach(child ${children})
-		if(IS_DIRECTORY ${curdir}/${child} AND (ENABLE_BUILD_EXAMPLES OR NOT ${child} MATCHES "example"))
-			list(APPEND dirlist ${child})
-		endif()
-	endforeach()
-	set(${result} ${dirlist})
-endmacro()
-get_all_subdirs(SUBDIRS ${CMAKE_CURRENT_SOURCE_DIR})
-
-foreach(subdir ${SUBDIRS})
-	message("Adding ${subdir} plugin")
-	add_subdirectory(${subdir})
-endforeach()
+include("${CMAKE_CURRENT_LIST_DIR}/toolchain-windows-store-common.cmake")
