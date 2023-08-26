@@ -1157,6 +1157,10 @@ void App::checkForUpdate() {
 	checkForUpdates(false);
 }
 void App::checkForUpdates(bool force) {
+#ifdef DEBUG
+	if(force)
+		App::getInstance()->getNotifier()->notifyNewVersionAvailable("5.42.5","https://linphone.org");
+#endif
 	if(force || CoreManager::getInstance()->getSettingsModel()->isCheckForUpdateEnabled())
 		CoreManager::getInstance()->getCore()->checkForUpdate(
 					Utils::appStringToCoreString(applicationVersion())

@@ -31,6 +31,8 @@
 #include "components/core/CoreManager.hpp"
 #include "components/timeline/TimelineModel.hpp"
 #include "components/timeline/TimelineListModel.hpp"
+#include "components//other/desktop-tools/notifications/NotificationsDefault.hpp"
+#include "components//other/desktop-tools/notifications/NotificationsDBus.hpp"
 #include "utils/Utils.hpp"
 
 #include "Notifier.hpp"
@@ -48,31 +50,13 @@ namespace {
 	
 	constexpr char NotificationShowMethodName[] = "open";
 	
-	constexpr char NotificationPropertyData[] = "notificationData";
-	
-	constexpr char NotificationPropertyX[] = "popupX";
-	constexpr char NotificationPropertyY[] = "popupY";
-	
-	constexpr char NotificationPropertyWindow[] = "__internalWindow";
-	
 	constexpr char NotificationPropertyTimer[] = "__timer";
 	
 	// ---------------------------------------------------------------------------
 	// Arbitrary hardcoded values.
 	// ---------------------------------------------------------------------------
 	
-	constexpr int NotificationSpacing = 10;
 	constexpr int MaxNotificationsNumber = 5;
-}
-
-// =============================================================================
-
-template<class T>
-void setProperty (QObject &object, const char *property, const T &value) {
-	if (!object.setProperty(property, QVariant(value))) {
-		qWarning() << QStringLiteral("Unable to set property: `%1`.").arg(property);
-		abort();
-	}
 }
 
 // =============================================================================
@@ -121,7 +105,7 @@ Notifier::~Notifier () {
 // -----------------------------------------------------------------------------
 
 QObject *Notifier::createNotification (Notifier::NotificationType type, QVariantMap data) {
-	QQuickItem *wrapperItem = nullptr;
+	QObject *wrapperItem = nullptr;
 	mMutex->lock();
 	Q_ASSERT(mInstancesNumber <= MaxNotificationsNumber);
 	if (mInstancesNumber == MaxNotificationsNumber) {	// Check existing instances.
@@ -129,74 +113,17 @@ QObject *Notifier::createNotification (Notifier::NotificationType type, QVariant
 		mMutex->unlock();
 		return nullptr;
 	}
-	QList<QScreen *> allScreens = QGuiApplication::screens();
-	if(allScreens.size() > 0){	// Ensure to have a screen to avoid errors
-		QQuickItem * previousWrapper = nullptr;
-		++mInstancesNumber;
-		bool showAsTool = false;
-#ifdef Q_OS_MACOS
-		for(auto w : QGuiApplication::topLevelWindows()){
-			if( (w->windowState()&Qt::WindowFullScreen)==Qt::WindowFullScreen){
-				showAsTool = true;
-				w->raise();// Used to get focus on Mac (On Mac, A Tool is hidden if the app has not focus and the only way to rid it is to use Widget Attributes(Qt::WA_MacAlwaysShowToolWindow) that is not available)
-			}
-		}
+#ifdef _WIN32
+#elif defined(__APPLE__)
+#else
+	wrapperItem = NotificationsDBus::create(type, data);
 #endif
-		for(int i = 0 ; i < allScreens.size() ; ++i){
-			QQuickView *view = new QQuickView(App::getInstance()->getEngine(), nullptr);	// Use QQuickView to create a visual root object that is independant from current application Window
-			QScreen *screen = allScreens[i];
-			QObject::connect(view, &QQuickView::statusChanged, [allScreens](QQuickView::Status status){	// Debug handler : show screens descriptions on Error
-				if( status == QQuickView::Error){
-					QScreen * primaryScreen = QGuiApplication::primaryScreen();
-					qInfo() << "Primary screen : " << primaryScreen->geometry() << primaryScreen->availableGeometry() <<  primaryScreen->virtualGeometry() <<  primaryScreen->availableVirtualGeometry();
-					for(int i = 0 ; i < allScreens.size() ; ++i){
-						QScreen *screen = allScreens[i];
-						qInfo() << QString("Screen [")+QString::number(i)+"] (hdpi, Geometry, Available, Virtual, AvailableGeometry) :" 
-								<< screen->devicePixelRatio() << screen->geometry() << screen->availableGeometry() << screen->virtualGeometry() << screen->availableVirtualGeometry();
-					}
-				}
-			});
-			view->setScreen(screen);	// Bind the visual root object to the screen
-			view->setProperty("flags", QVariant(Qt::BypassWindowManagerHint | Qt::WindowStaysOnBottomHint | Qt::CustomizeWindowHint | Qt::X11BypassWindowManagerHint));	// Set the visual ghost window
-			view->setSource(QString(NotificationsPath)+Notifier::Notifications[type].filename);
-			
-			QQuickWindow *subWindow = view->findChild<QQuickWindow *>("__internalWindow");
-			QObject::connect(subWindow, &QObject::destroyed, view, &QObject::deleteLater);	// When destroying window, detroy visual root object too
-			
-			int * screenHeightOffset = &mScreenHeightOffset[screen->name()];	// Access optimization
-			QRect availableGeometry = screen->availableGeometry();
-			int heightOffset = availableGeometry.y() + (availableGeometry.height() - subWindow->height());//*screen->devicePixelRatio(); when using manual scaler
-			if(showAsTool)
-				subWindow->setProperty("showAsTool",true);
-			subWindow->setX(availableGeometry.x()+ (availableGeometry.width()-subWindow->property("width").toInt()));//*screen->devicePixelRatio()); when using manual scaler
-			subWindow->setY(heightOffset-(*screenHeightOffset % heightOffset));
-			
-			*screenHeightOffset = (subWindow->height() + *screenHeightOffset) + NotificationSpacing;
-			if (*screenHeightOffset - heightOffset + availableGeometry.y() >= 0)
-				*screenHeightOffset = 0;
-			
-			//			if(primaryScreen != screen){	//Useful when doing manual scaling jobs. Need to implement scaler in GUI objects
-			//				//subwindow->setProperty("xScale", (double)screen->availableVirtualGeometry().width()/availableGeometry.width() );
-			//				//subwindow->setProperty("yScale", (double)screen->availableVirtualGeometry().height()/availableGeometry.height());
-			//			}
-			wrapperItem = view->findChild<QQuickItem *>("__internalWrapper");
-			::setProperty(*wrapperItem, NotificationPropertyData,data);
-			view->setGeometry(subWindow->geometry());	// Ensure to have sufficient space to both let painter do job without error, and stay behind popup
-			
-			if(previousWrapper!=nullptr){	// Link objects in order to propagate events without having to store them
-				QObject::connect(previousWrapper, SIGNAL(deleteNotification(QVariant)), wrapperItem,SLOT(deleteNotificationSlot()));
-				QObject::connect(wrapperItem, SIGNAL(isOpened()), previousWrapper,SLOT(open()));
-				QObject::connect(wrapperItem, SIGNAL(isClosed()), previousWrapper,SLOT(close()));
-				QObject::connect(wrapperItem, &QObject::destroyed, previousWrapper, &QObject::deleteLater);
-			}
-			previousWrapper = wrapperItem;	// The last one is used as a point of start when deleting and openning
-			
-			view->show();
-		}
-		qInfo() << QStringLiteral("Create notifications:") << wrapperItem;
-	}
+	if(!wrapperItem)
+		wrapperItem = NotificationsDefault::create(type, data);
 	
 	mMutex->unlock();
+	if(wrapperItem)
+		++mInstancesNumber;
 	return wrapperItem;
 }
 

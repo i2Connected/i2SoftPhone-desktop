@@ -290,6 +290,7 @@ set(SOURCES
 	src/components/other/colors/ColorListModel.cpp
 	src/components/other/colors/ColorProxyModel.cpp
 	src/components/other/colors/ImageColorsProxyModel.cpp
+	src/components/other/desktop-tools/notifications/NotificationsDefault.cpp
 	src/components/other/images/ImageModel.cpp
 	src/components/other/images/ImageListModel.cpp
 	src/components/other/images/ImageProxyModel.cpp
@@ -438,6 +439,7 @@ set(HEADERS
 	src/components/other/images/ImageProxyModel.hpp
 	src/components/other/images/VideoFrameGrabber.hpp
 	src/components/other/desktop-tools/DesktopTools.hpp
+	src/components/other/desktop-tools/notifications/NotificationsDefault.hpp
 	src/components/other/text-to-speech/TextToSpeech.hpp
 	src/components/other/timeZone/TimeZoneModel.hpp
 	src/components/other/timeZone/TimeZoneListModel.hpp
@@ -529,6 +531,7 @@ else ()
 		src/app/single-application/SingleApplicationDBus.cpp
 		src/components/core/event-count-notifier/EventCountNotifierSystemTrayIcon.cpp
 		src/components/other/desktop-tools/DesktopToolsLinux.cpp
+		src/components/other/desktop-tools/notifications/NotificationsDBus.cpp
 		src/components/other/desktop-tools/screen-saver/ScreenSaverDBus.cpp
 		src/components/other/desktop-tools/screen-saver/ScreenSaverXdg.cpp
 		)
@@ -536,6 +539,7 @@ else ()
 		src/app/single-application/SingleApplicationDBusPrivate.hpp
 		src/components/core/event-count-notifier/EventCountNotifierSystemTrayIcon.hpp
 		src/components/other/desktop-tools/DesktopToolsLinux.hpp
+		src/components/other/desktop-tools/notifications/NotificationsDBus.hpp
 		src/components/other/desktop-tools/screen-saver/ScreenSaverDBus.hpp
 		src/components/other/desktop-tools/screen-saver/ScreenSaverXdg.hpp
 		)

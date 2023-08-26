@@ -39,9 +39,10 @@ class ChatMessage;
 }
 
 class Notifier : public QObject {
-	Q_OBJECT;
+	Q_OBJECT
 	
 public:
+	friend class NotificationsDefault;
 	Notifier (QObject *parent = Q_NULLPTR);
 	~Notifier ();
 	

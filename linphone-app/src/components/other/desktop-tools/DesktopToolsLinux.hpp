@@ -32,13 +32,15 @@ class DesktopTools : public QObject {
   Q_PROPERTY(bool screenSaverStatus READ getScreenSaverStatus WRITE setScreenSaverStatus NOTIFY screenSaverStatusChanged);
 
 public:
-  DesktopTools (QObject *parent = Q_NULLPTR) : QObject(parent) {}
+  DesktopTools (QObject *parent = Q_NULLPTR) : QObject(parent) {
+    
+  }
   ~DesktopTools ();
 
   bool getScreenSaverStatus () const;
   void setScreenSaverStatus (bool status);
 
-  static void init(){}
+  static void init();
   static void applicationStateChanged(Qt::ApplicationState){};
 
 signals:
