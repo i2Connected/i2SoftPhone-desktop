@@ -237,12 +237,14 @@ void SettingsModel::setAutoApplyProvisioningConfigUriHandlerEnabled (bool status
 // ---------------------------------------------------------------------------
 
 bool SettingsModel::getAssistantSupportsPhoneNumbers () const {
-	return !!mConfig->getInt(UiSection, "assistant_supports_phone_numbers", 1);
+	return !!mConfig->getInt(UiSection, getEntryFullName(UiSection, "assistant_supports_phone_numbers") , 1);
 }
 
 void SettingsModel::setAssistantSupportsPhoneNumbers (bool status) {
-	mConfig->setInt(UiSection, "assistant_supports_phone_numbers", status);
-	emit assistantSupportsPhoneNumbersChanged(status);
+	if(!isReadOnly(UiSection, "assistant_supports_phone_numbers")) {
+		mConfig->setInt(UiSection, "assistant_supports_phone_numbers", status);
+		emit assistantSupportsPhoneNumbersChanged(status);
+	}
 }
 
 bool SettingsModel::useWebview() const{
@@ -1142,6 +1144,17 @@ void SettingsModel::setContactsEnabled (bool status) {
 int SettingsModel::getIncomingCallTimeout() const {
 	return CoreManager::getInstance()->getCore()->getIncTimeout();
 }
+
+int SettingsModel::getCreateEphemeralChatRooms() const{
+	return mConfig->getInt(UiSection, "create_ephemeral_chat_rooms", 0);
+}
+
+void SettingsModel::setCreateEphemeralChatRooms(int seconds) {
+	if(!isReadOnly(UiSection, "create_ephemeral_chat_rooms"))
+		mConfig->setInt(UiSection, "create_ephemeral_chat_rooms", seconds);
+	emit createEphemeralsChatRoomsChanged();
+}
+
 // =============================================================================
 // Network.
 // =============================================================================
