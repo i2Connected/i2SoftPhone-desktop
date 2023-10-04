@@ -24,7 +24,7 @@ variables:
   ARCHLINUX_IMAGE_VERSION: latestupdated
   CENTOS_7_QT_IMAGE_VERSION: 20211012_add_qtwebview
   DEBIAN_9_QT_IMAGE_VERSION: 20230417_qtopen_gstreamer
-  DEBIAN_10_IMAGE_VERSION: 20210217_python3
+  DEBIAN_10_IMAGE_VERSION: 20230706_add_deps_for_av1
   UBUNTU_ROLLING_IMAGE_VERSION: 20211012_add_qtwebview
   UBUNTU_1804_IMAGE_VERSION: 20230706_add_deps_for_av1
 
@@ -56,7 +56,7 @@ workflow:
 include:
   - '.gitlab-ci-files/job-linux-prepare.yml'
   - '.gitlab-ci-files/job-linux-desktop.yml'
-  - '.gitlab-ci-files/job-linux-desktop-ubuntu-1804.yml'
+  - '.gitlab-ci-files/job-linux-desktop-debian10.yml'
   - '.gitlab-ci-files/job-windows-desktop.yml'
   - '.gitlab-ci-files/job-macosx-desktop.yml'
 
