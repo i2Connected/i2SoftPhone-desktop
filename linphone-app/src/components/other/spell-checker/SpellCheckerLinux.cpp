@@ -18,32 +18,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLIPBOARD_H_
-#define CLIPBOARD_H_
 
-#include <QObject>
+#import "SpellChecker.hpp"
 
-// =============================================================================
+void SpellChecker::setLanguage() {
+}
 
-class Clipboard : public QObject {
-  Q_OBJECT;
+bool SpellChecker::isValid(QString word) {
+}
 
-  Q_PROPERTY(QString text READ getText WRITE setText NOTIFY textChanged);
-  
-public:
-  Clipboard (QObject *parent = Q_NULLPTR);
-  Q_INVOKABLE void backup();
-  Q_INVOKABLE void restore();
-  Q_INVOKABLE QString getChatFormattedText() const;
+void SpellChecker::learn(QString word){
+}
 
-signals:
-  void textChanged ();
-
-private:
-
-  QString getText () const;
-  void setText (const QString &text);
-  QMimeData *mimeCopy;
-};
-
-#endif // ifndef CLIPBOARD_H_
+QStringList SpellChecker::suggestionsForWord(QString word) {
+	QStringList suggestions;
+	return suggestions;
+}

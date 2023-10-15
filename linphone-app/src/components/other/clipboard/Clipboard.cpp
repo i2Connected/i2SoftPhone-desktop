@@ -20,6 +20,7 @@
 
 #include <QClipboard>
 #include <QGuiApplication>
+#include <QMimeData>
 
 #include "Clipboard.hpp"
 
@@ -36,3 +37,35 @@ QString Clipboard::getText () const {
 void Clipboard::setText (const QString &text) {
   QGuiApplication::clipboard()->setText(text, QClipboard::Clipboard);
 }
+
+void Clipboard::backup () {
+	if (QGuiApplication::clipboard() != nullptr) {
+		const QMimeData * clipboardData = QGuiApplication::clipboard()->mimeData();
+		mimeCopy = new QMimeData();
+		foreach(const QString & format, clipboardData->formats())
+		mimeCopy->setData(format, clipboardData->data(format));
+	}
+}
+
+void Clipboard::restore () {
+	if (QGuiApplication::clipboard() != nullptr && mimeCopy != nullptr)
+		QGuiApplication::clipboard()->setMimeData(mimeCopy);
+}
+
+QString Clipboard::getChatFormattedText () const {
+	QString text = getText();
+	if (text.isEmpty())
+		return text;
+#ifdef linux
+	QString cr = "\n";
+#endif
+#ifdef WIN32
+	QString cr = "\n\r";
+#endif
+#ifdef __APPLE__
+	QString cr = "\n";
+#endif
+	return text.replace(cr,"\u2028");
+}
+
+
