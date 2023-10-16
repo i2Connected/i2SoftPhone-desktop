@@ -449,11 +449,25 @@ void CoreHandlers::onVersionUpdateCheckResultReceived (
 		const string &version,
 		const string &url
 		) {
-	if (result == linphone::VersionUpdateCheckResult::NewVersionAvailable)
-		App::getInstance()->getNotifier()->notifyNewVersionAvailable(
-					Utils::coreStringToAppString(version),
-					Utils::coreStringToAppString(url)
-					);
+	
+	if (App::getInstance()->mCheckForUpdateUserInitiated) {
+		if (result == linphone::VersionUpdateCheckResult::NewVersionAvailable) {
+			emit CoreManager::getInstance()->newVersionAvailable(Utils::coreStringToAppString(version), Utils::coreStringToAppString(url));
+		}
+		if (result == linphone::VersionUpdateCheckResult::UpToDate) {
+			emit CoreManager::getInstance()->noNewVersionAvailable();
+		}
+		if (result == linphone::VersionUpdateCheckResult::Error) {
+			emit CoreManager::getInstance()->newVersionCheckError();
+		}
+		App::getInstance()->mCheckForUpdateUserInitiated = false;
+	} else {
+		if (result == linphone::VersionUpdateCheckResult::NewVersionAvailable)
+			App::getInstance()->getNotifier()->notifyNewVersionAvailable(
+						Utils::coreStringToAppString(version),
+						Utils::coreStringToAppString(url)
+						);
+	}
 }
 void CoreHandlers::onEcCalibrationResult(
 		const std::shared_ptr<linphone::Core> &,

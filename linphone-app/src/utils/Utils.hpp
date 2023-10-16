@@ -26,6 +26,8 @@
 #include <QLocale>
 #include <QImage>
 #include <QDateTime>
+#include <QCoreApplication>
+
 
 #include <linphone++/address.hh>
 
@@ -113,6 +115,10 @@ public:
 	Q_INVOKABLE static QString getFileContent(const QString& filePath);
 	
 	Q_INVOKABLE static bool openWithPdfViewer(ContentModel *contentModel, const QString& filePath, const int& width, const int& height);	// return true if PDF is enabled
+	Q_INVOKABLE static QString applicationVersion() {
+		return QCoreApplication::applicationVersion();
+	}
+
 	
 //----------------------------------------------------------------------------------
 	
