@@ -57,6 +57,25 @@ ApplicationWindow {
 		target: CoreManager
 		onCoreManagerInitialized: mainLoader.active = true
 		onRemoteProvisioningFailed: if(mainLoader.active) Logic.warnProvisioningFailed(window)
+		onNewVersionCheckError: {
+			Utils.infoDialog(window, qsTr('newVersionCheckError'))
+		}
+		onNewVersionAvailable: {
+					window.attachVirtualWindow(Utils.buildCommonDialogUri('ConfirmDialog'), {
+										descriptionText:qsTr('newVersionAvailable').replace("%1",version)+"\n"+qsTr('newVersionAvailableInstructions'),
+										buttonTexts : [qsTr('cancel'),qsTr('downloadUpdate')]
+										}, function (status) {
+											if (status) {
+					    						Qt.openUrlExternally(url)
+											}
+										})
+		}
+		onNoNewVersionAvailable: {
+					Utils.infoDialog(window, qsTr('noNewVersionAvailable')+"\n"+UtilsCpp.applicationVersion())
+		}
+		onNewVersionInstalled: {
+					Utils.infoDialog(window, qsTr('newVersionInstalled')+"\n"+UtilsCpp.applicationVersion())
+		}
 	}
 	
 	Shortcut {

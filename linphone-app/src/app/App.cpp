@@ -1162,6 +1162,14 @@ void App::openAppAfterInit (bool mustBeIconified) {
 #endif
 	setOpened(true);
 	useFetchConfig(fetchFilePath);
+	
+	QString previousVersion = Utils::coreStringToAppString(CoreManager::getInstance()->getCore()->getConfig()->getString(SettingsModel::UiSection, "previous_version", "none"));
+	if (previousVersion != "none" && previousVersion != applicationVersion()) {
+		QTimer::singleShot(1000, [this](){
+			emit CoreManager::getInstance()->newVersionInstalled();
+		});
+	}
+	CoreManager::getInstance()->getCore()->getConfig()->setString(SettingsModel::UiSection, "previous_version", Utils::appStringToCoreString(applicationVersion()));
 }
 
 // -----------------------------------------------------------------------------
@@ -1191,6 +1199,7 @@ void App::checkForUpdates(bool force) {
 		CoreManager::getInstance()->getCore()->checkForUpdate(
 					Utils::appStringToCoreString(applicationVersion())
 					);
+	getInstance()->mCheckForUpdateUserInitiated = force;
 }
 
 bool App::isPdfAvailable(){
