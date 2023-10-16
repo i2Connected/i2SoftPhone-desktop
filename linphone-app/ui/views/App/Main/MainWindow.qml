@@ -56,6 +56,7 @@ ApplicationWindow {
 	Connections {
 		target: CoreManager
 		onCoreManagerInitialized: mainLoader.active = true
+		onRemoteProvisioningFailed: Logic.warnProvisioningFailed(window)
 	}
 	
 	Shortcut {
@@ -417,7 +418,12 @@ ApplicationWindow {
 			}
 		}
 	}
-	Component.onCompleted: if(Qt.platform.os === 'osx') menuBar = customMenuBar
+	Component.onCompleted: {
+		if(Qt.platform.os === 'osx') menuBar = customMenuBar
+		if(!CoreManager.isLastRemoteProvisioningGood()) {
+				warnProvisioningFailed(window)
+		}
+	}
 	// ---------------------------------------------------------------------------
 	// Url handlers.
 	// ---------------------------------------------------------------------------
