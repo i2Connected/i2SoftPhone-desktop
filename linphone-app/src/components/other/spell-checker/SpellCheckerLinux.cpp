@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 Belledonne Communications SARL.
+ * Copyright (c) 2010-2024 Belledonne Communications SARL.
  *
  * This file is part of linphone-desktop
  * (see https://www.linphone.org).
@@ -25,6 +25,7 @@ void SpellChecker::setLanguage() {
 }
 
 bool SpellChecker::isValid(QString word) {
+	return true;
 }
 
 void SpellChecker::learn(QString word){

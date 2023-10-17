@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 Belledonne Communications SARL.
+ * Copyright (c) 2010-2024 Belledonne Communications SARL.
  *
  * This file is part of linphone-desktop
  * (see https://www.linphone.org).
@@ -48,7 +48,7 @@ SpellChecker::~SpellChecker () {
 	graceTimer->stop();
 #ifdef WIN32
 	if (spellChecker != nullptr)
-		spellChecker->Release();
+		mNativeSpellChecker->Release();
 #endif
 
 }
@@ -79,7 +79,7 @@ QString SpellChecker::underLine(qreal minLength) {
 
 void SpellChecker::highlightDocument() {
 	
-	if (!fromTimer && QDateTime::currentMSecsSinceEpoch() <= lastHighlight + GRACE_PERIOD_SECS*1000) {
+	if (!fromTimer && QDateTime::currentMSecsSinceEpoch() <= mLastHightlight + GRACE_PERIOD_SECS*1000) {
 		scheduleHighlight();
 		return;
 	}
@@ -90,7 +90,7 @@ void SpellChecker::highlightDocument() {
 		return;
 	}
 	
-	lastHighlight = QDateTime::currentMSecsSinceEpoch();
+	mLastHightlight = QDateTime::currentMSecsSinceEpoch();
 	QTextBlock::iterator blockIterator = document()->begin().begin();
 	QStringList newWords;
 	bool hadActiveWord = false;

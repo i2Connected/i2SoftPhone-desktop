@@ -228,7 +228,7 @@ Item {
 							id: spellChecker
     					}
     					
-    					SpellCheckerMenu {
+						SpellCheckerMenu {
     						id: spellCheckerMenu
     					}
     					

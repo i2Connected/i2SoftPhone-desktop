@@ -43,7 +43,7 @@ private:
 
   QString getText () const;
   void setText (const QString &text);
-  QMimeData *mimeCopy;
+  QMimeData *mMimeCopy;
 };
 
 #endif // ifndef CLIPBOARD_H_

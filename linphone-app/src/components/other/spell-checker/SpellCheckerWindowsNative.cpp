@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 Belledonne Communications SARL.
+ * Copyright (c) 2010-2024 Belledonne Communications SARL.
  *
  * This file is part of linphone-desktop
  * (see https://www.linphone.org).
@@ -53,7 +53,7 @@ void SpellChecker::setLanguage() {
 		}
 	}
 	
-	hr = spellCheckerFactory->CreateSpellChecker(_locale, &spellChecker);
+	hr = spellCheckerFactory->CreateSpellChecker(_locale, &mNativeSpellChecker);
 	if (!SUCCEEDED(hr)) {
 		qWarning() << LOG_TAG << "Windows native spell checker unable to create spell checker";
 		return;
@@ -63,12 +63,12 @@ void SpellChecker::setLanguage() {
 
 
 bool SpellChecker::isValid(QString word) {
-	if (spellChecker == nullptr)
+	if (mNativeSpellChecker == nullptr)
 		return true;
 	wchar_t *text = reinterpret_cast<wchar_t *>(word.data());
 	IEnumSpellingError* enumSpellingError = nullptr;
 	ISpellingError* spellingError = nullptr;
-	HRESULT hr = spellChecker->Check(text, &enumSpellingError);
+	HRESULT hr = mNativeSpellChecker->Check(text, &enumSpellingError);
 	if (SUCCEEDED(hr)) {
 		hr = enumSpellingError->Next(&spellingError);
 		enumSpellingError->Release();
@@ -78,10 +78,10 @@ bool SpellChecker::isValid(QString word) {
 }
 
 void SpellChecker::learn(QString word){
-	if (spellChecker == nullptr)
+	if (mNativeSpellChecker == nullptr)
 		return;
 	wchar_t *text = reinterpret_cast<wchar_t *>(word.data());
-	HRESULT hr = spellChecker->Add(text);
+	HRESULT hr = mNativeSpellChecker->Add(text);
 	if (!SUCCEEDED(hr))
 		qWarning() << LOG_TAG << "Windows native spell checke unable to add word to dictionary" << word;
 	highlightDocument();
@@ -89,11 +89,11 @@ void SpellChecker::learn(QString word){
 
 QStringList SpellChecker::suggestionsForWord(QString word) {
 	QStringList suggestions;
-	if (spellChecker == nullptr)
+	if (mNativeSpellChecker == nullptr)
 		return suggestions;
 	wchar_t *text = reinterpret_cast<wchar_t *>(word.data());
 	IEnumString* enumString = nullptr;
-	HRESULT hr = spellChecker->Suggest(text, &enumString);
+	HRESULT hr = mNativeSpellChecker->Suggest(text, &enumString);
 	if (SUCCEEDED(hr)) {
 		while (S_OK == hr) {
 			LPOLESTR string = nullptr;

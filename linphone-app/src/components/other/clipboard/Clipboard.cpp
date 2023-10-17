@@ -41,15 +41,15 @@ void Clipboard::setText (const QString &text) {
 void Clipboard::backup () {
 	if (QGuiApplication::clipboard() != nullptr) {
 		const QMimeData * clipboardData = QGuiApplication::clipboard()->mimeData();
-		mimeCopy = new QMimeData();
+		mMimeCopy = new QMimeData();
 		foreach(const QString & format, clipboardData->formats())
-		mimeCopy->setData(format, clipboardData->data(format));
+		mMimeCopy->setData(format, clipboardData->data(format));
 	}
 }
 
 void Clipboard::restore () {
-	if (QGuiApplication::clipboard() != nullptr && mimeCopy != nullptr)
-		QGuiApplication::clipboard()->setMimeData(mimeCopy);
+	if (QGuiApplication::clipboard() != nullptr && mMimeCopy != nullptr)
+		QGuiApplication::clipboard()->setMimeData(mMimeCopy);
 }
 
 QString Clipboard::getChatFormattedText () const {

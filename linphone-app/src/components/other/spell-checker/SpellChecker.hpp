@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2020 Belledonne Communications SARL.
+ * Copyright (c) 2010-2024 Belledonne Communications SARL.
  *
  * This file is part of linphone-desktop
  * (see https://www.linphone.org).
@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SpellChecker_hpp
-#define SpellChecker_hpp
+#ifndef SPELLCHECKER_HPP_
+#define SPELLCHECKER_HPP_
 
 #include <stdio.h>
 #include <QObject>
@@ -89,7 +89,7 @@ private:
 	QHash<int,QString> ignoredOnce;
 	QString wave;
 	qreal waveWidth;
-	qint64 lastHighlight;
+	qint64 mLastHightlight;
 
 	void setLanguage();
 	bool isWordActive(QStringList words, QString word, int index);
@@ -97,10 +97,10 @@ private:
 	void scheduleHighlight();
 	QString underLine(qreal minLength);
 #ifdef WIN32
-	ISpellChecker* spellChecker = nullptr;
+	ISpellChecker* mNativeSpellChecker = nullptr;
 #endif
 };
 
 
 
-#endif /* SpellChecker_hpp */
+#endif /* SPELLCHECKER_HPP_ */

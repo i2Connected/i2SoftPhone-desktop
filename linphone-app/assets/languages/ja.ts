@@ -5143,23 +5143,4 @@
         </translation>
     </message>
 </context>
-<context>
-    <name>SpellCheckerMenu</name>
-    <message>
-        <source>spellCheckingMenuDidYouMean</source>
-        <translation>Did you mean ?</translation>
-    </message>
-    <message>
-        <source>spellCheckingMenuAddToDictionary</source>
-        <translation>Add to Dictionnary</translation>
-    </message>
-    <message>
-        <source>spellCheckingMenuIgnoreOnce</source>
-        <translation>Ignore Once</translation>
-    </message>
-    <message>
-        <source>spellCheckingMenuDidYouMean</source>
-        <translation>Ignore All</translation>
-    </message>
-</context>
 </TS>
