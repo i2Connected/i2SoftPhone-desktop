@@ -421,7 +421,7 @@ ApplicationWindow {
 	Component.onCompleted: {
 		if(Qt.platform.os === 'osx') menuBar = customMenuBar
 		if(!CoreManager.isLastRemoteProvisioningGood()) {
-				warnProvisioningFailed(window)
+			warnProvisioningFailed(window)
 		}
 	}
 	// ---------------------------------------------------------------------------
