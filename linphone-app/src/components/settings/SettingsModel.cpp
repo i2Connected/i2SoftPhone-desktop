@@ -1690,7 +1690,7 @@ void SettingsModel::setVersionCheckUrl(const QString& url){
 }
 
 QString SettingsModel::getLastRunningVersionOfApp(){
-	auto version = mConfig->getString("app_version", "last_running", "none");
+	auto version = mConfig->getString("app_version", "last_running", "unknown");
 	return Utils::coreStringToAppString(version);
 }
 

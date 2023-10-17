@@ -451,16 +451,14 @@ void CoreHandlers::onVersionUpdateCheckResultReceived (
 		) {
 	
 	if (App::getInstance()->mCheckForUpdateUserInitiated) {
-		if (result == linphone::VersionUpdateCheckResult::NewVersionAvailable) {
-			emit CoreManager::getInstance()->newVersionAvailable(Utils::coreStringToAppString(version), Utils::coreStringToAppString(url));
-		}
-		if (result == linphone::VersionUpdateCheckResult::UpToDate) {
-			emit CoreManager::getInstance()->noNewVersionAvailable();
-		}
-		if (result == linphone::VersionUpdateCheckResult::Error) {
-			emit CoreManager::getInstance()->newVersionCheckError();
-		}
 		App::getInstance()->mCheckForUpdateUserInitiated = false;
+		if (result == linphone::VersionUpdateCheckResult::Error) {
+			emit CoreManager::getInstance()->userInitiatedVersionUpdateCheckResult(0);
+		} else if (result == linphone::VersionUpdateCheckResult::NewVersionAvailable) {
+			emit CoreManager::getInstance()->userInitiatedVersionUpdateCheckResult(1, Utils::coreStringToAppString(version), Utils::coreStringToAppString(url));
+		} else if (result == linphone::VersionUpdateCheckResult::UpToDate) {
+			emit CoreManager::getInstance()->userInitiatedVersionUpdateCheckResult(2);
+		}
 	} else {
 		if (result == linphone::VersionUpdateCheckResult::NewVersionAvailable)
 			App::getInstance()->getNotifier()->notifyNewVersionAvailable(
