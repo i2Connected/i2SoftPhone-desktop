@@ -297,6 +297,7 @@ App::App (int &argc, char *argv[]) : SingleApplication(argc, argv, true, Mode::U
 		qInfo() << QStringLiteral("Received command from other application: `%1`.").arg(command);
 		Cli::executeCommand(command);
 	});
+	mCheckForUpdateUserInitiated = false;
 }
 
 App::~App () {
@@ -1161,13 +1162,13 @@ void App::openAppAfterInit (bool mustBeIconified) {
 	setOpened(true);
 	useFetchConfig(fetchFilePath);
 	
-	QString previousVersion = Utils::coreStringToAppString(CoreManager::getInstance()->getCore()->getConfig()->getString(SettingsModel::UiSection, "previous_version", "none"));
-	if (previousVersion != "none" && previousVersion != applicationVersion()) {
+	QString lastRunningVersion = CoreManager::getInstance()->getSettingsModel()->getLastRunningVersionOfApp();
+	if (lastRunningVersion != "none" && lastRunningVersion != applicationVersion()) {
 		QTimer::singleShot(1000, [this](){
 			emit CoreManager::getInstance()->newVersionInstalled();
 		});
 	}
-	CoreManager::getInstance()->getCore()->getConfig()->setString(SettingsModel::UiSection, "previous_version", Utils::appStringToCoreString(applicationVersion()));
+	CoreManager::getInstance()->getSettingsModel()->setLastRunningVersionOfApp(applicationVersion());
 }
 
 // -----------------------------------------------------------------------------
@@ -1193,11 +1194,11 @@ void App::checkForUpdate() {
 	checkForUpdates(false);
 }
 void App::checkForUpdates(bool force) {
-	if(force || CoreManager::getInstance()->getSettingsModel()->isCheckForUpdateEnabled())
+	if(force || CoreManager::getInstance()->getSettingsModel()->isCheckForUpdateEnabled()) {
+		getInstance()->mCheckForUpdateUserInitiated = force;
 		CoreManager::getInstance()->getCore()->checkForUpdate(
-					Utils::appStringToCoreString(applicationVersion())
-					);
-	getInstance()->mCheckForUpdateUserInitiated = force;
+			Utils::appStringToCoreString(applicationVersion()));
+	}
 }
 
 bool App::isPdfAvailable(){
