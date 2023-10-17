@@ -47,7 +47,7 @@ SpellChecker::SpellChecker(QObject *parent) : QSyntaxHighlighter(parent) {
 SpellChecker::~SpellChecker () {
 	graceTimer->stop();
 #ifdef WIN32
-	if (spellChecker != nullptr)
+	if (mNativeSpellChecker != nullptr)
 		mNativeSpellChecker->Release();
 #endif
 
