@@ -71,10 +71,10 @@ ApplicationWindow {
 										})
 		}
 		onNoNewVersionAvailable: {
-					Utils.infoDialog(window, qsTr('noNewVersionAvailable')+"\n"+UtilsCpp.applicationVersion())
+					Utils.infoDialog(window, qsTr('noNewVersionAvailable')+"\n"+Qt.application.version)
 		}
 		onNewVersionInstalled: {
-					Utils.infoDialog(window, qsTr('newVersionInstalled')+"\n"+UtilsCpp.applicationVersion())
+					Utils.infoDialog(window, qsTr('newVersionInstalled')+"\n"+Qt.application.version)
 		}
 	}
 	
