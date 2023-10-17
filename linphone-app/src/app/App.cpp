@@ -1163,10 +1163,8 @@ void App::openAppAfterInit (bool mustBeIconified) {
 	useFetchConfig(fetchFilePath);
 	
 	QString lastRunningVersion = CoreManager::getInstance()->getSettingsModel()->getLastRunningVersionOfApp();
-	if (lastRunningVersion != "none" && lastRunningVersion != applicationVersion()) {
-		QTimer::singleShot(1000, [this](){
-			emit CoreManager::getInstance()->newVersionInstalled();
-		});
+	if (lastRunningVersion != "unknown" && lastRunningVersion != applicationVersion()) {
+		emit CoreManager::getInstance()->userInitiatedVersionUpdateCheckResult(3, "", "");
 	}
 	CoreManager::getInstance()->getSettingsModel()->setLastRunningVersionOfApp(applicationVersion());
 }

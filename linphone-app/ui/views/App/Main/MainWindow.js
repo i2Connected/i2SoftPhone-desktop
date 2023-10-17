@@ -116,3 +116,14 @@ function handleAuthenticationRequested (authInfo, realm, sipAddress, userId) {
     virtualWindowHash:Qt.md5('Dialogs/AuthenticationRequest.qml'+realm+sipAddress+userId)
   })
 }
+
+function proposeDownloadUpdate(window, version, url) {
+	window.attachVirtualWindow(Utils.buildCommonDialogUri('ConfirmDialog'), {
+		descriptionText:qsTr('newVersionAvailable').replace("%1", version)+"\n"+qsTr('newVersionAvailableInstructions'),
+		buttonTexts : [qsTr('cancel'),qsTr('downloadUpdate')]
+	}, function (status) {
+		if (status) {
+			Qt.openUrlExternally(url)
+		}
+	})
+}
