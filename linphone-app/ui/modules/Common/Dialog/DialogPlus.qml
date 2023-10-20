@@ -86,7 +86,7 @@ Rectangle {
     DialogDescription {
       id: description
 
-      Layout.fillHeight: true //dialog.contentIsEmpty
+      Layout.fillHeight: dialog.contentIsEmpty
       Layout.fillWidth: true
 	  visible: text!=''
     }
