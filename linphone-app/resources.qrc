@@ -1,5 +1,6 @@
 <RCC>
 	<qresource prefix="/">
+		<file>assets/fonts/NotoColor-emoji/NotoColorEmoji-Regular.ttf</file>
 		<file>assets/fonts/NotoSans-hinted/NotoSans-BoldItalic.ttf</file>
 		<file>assets/fonts/NotoSans-hinted/NotoSans-Bold.ttf</file>
 		<file>assets/fonts/NotoSans-hinted/NotoSans-Italic.ttf</file>
