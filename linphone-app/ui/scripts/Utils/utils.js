@@ -733,7 +733,6 @@ function infoDialog(window, message) {
 	window.attachVirtualWindow(buildCommonDialogUri('ConfirmDialog'), {
 		buttonTexts : ['',qsTr('okButton')],
 		descriptionText: message,
-		showButtonOnly: 1,
-		hideContent: true
+		showButtonOnly: 1
 	}, function (status) {})
 }

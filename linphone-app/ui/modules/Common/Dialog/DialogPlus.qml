@@ -16,7 +16,6 @@ Rectangle {
   property alias descriptionText: description.text // Optionnal.
   property int buttonsAlignment : Qt.AlignLeft  
   property bool flat : false
-  property bool hideContent : false
 	
   property bool showMargins: !flat
   property bool expandHeight: flat
@@ -93,7 +92,7 @@ Rectangle {
 
     Item {
       id: content
-      visible: !hideContent
+      visible: children.length > 0
 	  Layout.fillHeight: (expandHeight ? true : !dialog.contentIsEmpty)
       Layout.fillWidth: true
       Layout.topMargin: (showMargins ? titleBar.showBar ? 1 : 2 : 0) * DialogStyle.content.topMargin
