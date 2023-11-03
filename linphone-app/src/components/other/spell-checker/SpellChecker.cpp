@@ -33,14 +33,25 @@ SpellChecker::SpellChecker(QObject *parent) : QSyntaxHighlighter(parent) {
 	errorFormater.setUnderlineColor(Qt::red); // not supported before Qt6.2
 	
 	QFontMetrics fm = QFontMetrics(QApplication::font());
+#ifdef linux
+	wave = QString("^");
+	QRect boundingRect = fm.boundingRect(wave);
+	waveWidth = boundingRect.width()/2; // Work around QT miscalculation of bounding box of "^"
+	waveHeight = 10;
+	waveTopPadding = 5;
+#else
 	wave = QString(u8"\uFE4B");
 	QRect boundingRect = fm.boundingRect(wave);
 	waveWidth = boundingRect.width();
+	waveHeight = 5;
+	waveTopPadding = 3
+#endif
 	
 	graceTimer = new QTimer(this);
 	graceTimer->setSingleShot(true);
 	connect(graceTimer, SIGNAL(timeout()), SLOT(highlightAfterGracePeriod()));
 	
+	mAvailable = false;
 	setLanguage();
 }
 
@@ -112,7 +123,7 @@ void SpellChecker::highlightDocument() {
 				QRectF boundingRect = fragment.glyphRuns(begin,length).first().boundingRect();
 				QPointF start = boundingRect.bottomLeft();
 				qreal width = boundingRect.width();
-				redLines.append(QString::number(start.x())+","+QString::number(start.y())+","+QString::number(width)+","+underLine(width));
+				redLines.append(QString::number(start.x())+","+QString::number(start.y())+","+QString::number(width)+","+underLine(width)+","+QString::number(waveHeight)+","+QString::number(waveTopPadding));
 			}
 			if (wordActive) {
 				hadActiveWord = wordActive;
