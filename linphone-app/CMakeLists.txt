@@ -728,7 +728,9 @@ include_directories("${LINPHONE_OUTPUT_DIR}/include/OpenGL")
 include_directories("${LINPHONE_OUTPUT_DIR}/include/")
 include_directories("${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/")
 include_directories("${QTKEYCHAIN_OUTPUT_DIR}/include/")
-include_directories("${ISpell_BINARY_DIR}/include")
+if(NOT APPLE AND NOT WIN32)
+	include_directories("${ISpell_BINARY_DIR}/include")
+endif ()
 
 if (CMAKE_INSTALL_RPATH)
 	#Retrieve lib path from a know QT executable

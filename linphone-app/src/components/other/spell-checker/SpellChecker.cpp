@@ -23,6 +23,9 @@
 #include <QTimer>
 #include <QAbstractTextDocumentLayout>
 #include <QTextEdit>
+#include "components/core/CoreManager.hpp"
+#include "components/settings/SettingsModel.hpp"
+
 #ifdef WIN32
 #include <spellcheck.h>
 #endif
@@ -32,20 +35,19 @@ SpellChecker::SpellChecker(QObject *parent) : QSyntaxHighlighter(parent) {
 	errorFormater.setFontUnderline(true);
 	errorFormater.setUnderlineColor(Qt::red); // not supported before Qt6.2
 	
-	QFontMetrics fm = QFontMetrics(QApplication::font());
-#ifdef linux
+	QFontMetrics fm = QFontMetrics(CoreManager::getInstance()->getSettingsModel()->getTextMessageFont());
+#ifdef __linux__
 	wave = QString("‾");
 	QRect boundingRect = fm.boundingRect(wave);
-	waveWidth = boundingRect.width()/2; // Work around QT miscalculation of bounding box of "‾"
 	waveHeight = 10;
 	waveTopPadding = 5;
 #else
 	wave = QString(u8"\uFE4B");
 	QRect boundingRect = fm.boundingRect(wave);
-	waveWidth = boundingRect.width();
 	waveHeight = 5;
 	waveTopPadding = 3;
 #endif
+	waveWidth = boundingRect.width();
 	
 	graceTimer = new QTimer(this);
 	graceTimer->setSingleShot(true);

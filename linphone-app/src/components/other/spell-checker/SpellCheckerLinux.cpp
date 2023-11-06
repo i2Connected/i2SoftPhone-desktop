@@ -76,7 +76,7 @@ void SpellChecker::setLanguage() {
 	if (gISpellCheckerThread != nullptr) // Language change
 		stopISpellChecker();
 	
-	QString dict = QString(Paths::getISpellDictsDirPath()+locale+".hash");
+	QString dict = Paths::getISpellDictsDirPath()+locale+".hash";
 	gIspellDictionariesFolder = Paths::getISpellDictsDirPath().toStdString();
 	
 	if (!QFile::exists(dict)) {
@@ -103,29 +103,32 @@ void SpellChecker::setLanguage() {
 	qDebug() << LOG_TAG << "Linux ispell language loaded from " << dict;
 }
 
-bool SpellChecker::wordValidWith_fr_Variants(QString word) {
+// Few special situation in French language not detected by the fr.hash.
+
+bool SpellChecker::wordValidWithFrVariants(QString word) {
 	if (word.toLower().contains("qu'")) {
 		QString replace = word.toLower().replace("qu'","que ");
-		if (isValid(replace)||(isValid(replace.split(" ")[0]) && isValid(replace.split(" ")[1])))
+		if (isValid(replace)||validSplittedOn(" ",replace))
 			return true;
 	}
 	if (word.toLower().contains("s'")) {
 		QString replace = word.toLower().replace("s'","se ");
-		if (isValid(replace)||(isValid(replace.split(" ")[0]) && isValid(replace.split(" ")[1])))
+		if (isValid(replace)||validSplittedOn(" ",replace))
 			return true;
 	}
 	return false;
 }
 
+bool SpellChecker::validSplittedOn(QString pattern, QString word) {
+	if (!word.contains(pattern))
+		return false;
+	auto split = word.split(pattern);
+	return isValid(split[0]) && isValid(split[1]);
+}
+
 bool SpellChecker::isValid(QString word) {
 	
-	if (!mAvailable)
-		return true;
-	
-	if (word.length() == 1)
-		return true;
-	
-	if (isLearnt(word))
+	if (!mAvailable || word.length() == 1 || isLearnt(word))
 		return true;
 	
 	// no letters in word -> valid
@@ -136,15 +139,11 @@ bool SpellChecker::isValid(QString word) {
 		return true;
 	
 	// Some preformating
-	if (word.contains("’"))
-		word = word.replace("’","'");
-	if (word.contains("("))
-		word = word.replace("(","");
-	if (word.contains(")"))
-		word = word.replace(")","");
-	if (word.contains("‘"))
-		word = word.replace("‘","'");
 	
+	word = word.replace("’","'");
+	word = word.replace("(","");
+	word = word.replace(")","");
+	word = word.replace("‘","'");
 	
 	while (word.endsWith(".") || word.endsWith("!") || word.endsWith(",") || word.endsWith(","))
 		word.chop(1);
@@ -166,29 +165,19 @@ bool SpellChecker::isValid(QString word) {
 	char buffer[buffer_size] = {0};
 	ssize_t amnt_read = read(gISpell_app_read_fd, &buffer[0], buffer_size);
 	QString returned = QString::fromUtf8(buffer);
-	bool valid = returned == "1";
-	
-	// If not valid attempt a few alternatives
-	
-	if (!valid && gISpellCheckeCurrentLanguage == "fr" && wordValidWith_fr_Variants(word)) {// Work around fr dictionary limitations of FR dictionary
+	if (returned == "1") {
 		return true;
+	} else {
+		if (!gISpellSuggestions.contains(word)) { // Record returned suggestions if any
+			QStringList returnedUggestions = returned.split(", ");
+			returnedUggestions.removeFirst();
+			gISpellSuggestions.insert(word,returnedUggestions);
+		}
+		return	(gISpellCheckeCurrentLanguage == "fr" && wordValidWithFrVariants(word)) ||
+			validSplittedOn("'",word) ||
+			validSplittedOn("-",word);
 	}
-	
-	if (!valid && word.contains("'"))
-		return isValid(word.split("'")[0]) && isValid(word.split("'")[1]);
-	
-	if (!valid && word.contains("-"))
-		return isValid(word.split("-")[0]) && isValid(word.split("-")[1]);
-	
-	
-	if (!valid && !gISpellSuggestions.contains(word)) {
-		QStringList returnedUggestions = returned.split(", ");
-		returnedUggestions.removeFirst();
-		gISpellSuggestions.insert(word,returnedUggestions);
-		qDebug() << LOG_TAG << returnedUggestions;
-	}
-	return valid;
-	
+
 }
 
 void SpellChecker::learn(QString word){

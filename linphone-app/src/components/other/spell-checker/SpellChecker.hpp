@@ -36,7 +36,7 @@
 #include <QTimer>
 #include "app/App.hpp"
 
-#ifdef linux
+#ifdef __linux__
 #include <thread>
 #endif
 
@@ -108,7 +108,7 @@ private:
 #endif
 	
 // ISpell linux
-#ifdef linux
+#ifdef __linux__
 	static int gISpell_sc_read_fd;
 	static int gISpell_sc_write_fd;
 	static int gISpell_app_read_fd;
@@ -120,7 +120,8 @@ private:
 	void stopISpellChecker();
 	static std::shared_ptr<linphone::Config> gISpellSelfDictionary;
 	bool isLearnt(QString word);
-	bool wordValidWith_fr_Variants(QString word);
+	bool wordValidWithFrVariants(QString word);
+	bool validSplittedOn(QString pattern, QString word);
 #endif
 	
 };
