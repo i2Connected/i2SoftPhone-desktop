@@ -683,7 +683,7 @@ public:
 	QString getLogsEmail () const;
 	void setLogsEmail (const QString &email);
 	
-	bool getVfsEncrypted ();
+	static bool getVfsEncrypted ();
 	Q_INVOKABLE void setVfsEncrypted (bool encrypted, const bool deleteUserData);
 	
 	Q_INVOKABLE bool isLdapAvailable();
@@ -702,6 +702,7 @@ public:
 	// ---------------------------------------------------------------------------
 	
 	static QString getLogsFolder (const std::shared_ptr<linphone::Config> &config);
+	static size_t getMaxLogsCollectionSize (const std::shared_ptr<linphone::Config> &config);
 	static bool getLogsEnabled (const std::shared_ptr<linphone::Config> &config);
 	static bool getFullLogsEnabled (const std::shared_ptr<linphone::Config> &config);
 	

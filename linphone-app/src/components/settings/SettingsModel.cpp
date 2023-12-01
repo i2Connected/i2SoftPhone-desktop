@@ -1979,6 +1979,12 @@ QString SettingsModel::getLogsFolder (const shared_ptr<linphone::Config> &config
 					    : Paths::getLogsDirPath());
 }
 
+size_t SettingsModel::getMaxLogsCollectionSize (const shared_ptr<linphone::Config> &config) {
+	return config
+					    ? config->getInt(UiSection, "logs_max_size", Constants::MaxLogsCollectionSize)
+					    : Constants::MaxLogsCollectionSize;
+}
+
 bool SettingsModel::getLogsEnabled (const shared_ptr<linphone::Config> &config) {
 	return config ? config->getInt(UiSection, "logs_enabled", false) : true;
 }
@@ -1999,6 +2005,8 @@ void SettingsModel::setVfsEncrypted (bool encrypted, const bool deleteUserData){
 	if(getVfsEncrypted() != encrypted){
 		if(encrypted) {
 			mVfsUtils.newEncryptionKeyAsync();
+			shared_ptr<linphone::Factory> factory = linphone::Factory::get();
+			factory->setDownloadDir(Utils::appStringToCoreString(getDownloadFolder()));
 		}else{// Remove key, stop core, delete data and initiate reboot
 			mVfsUtils.needToDeleteUserData(deleteUserData);
 			mVfsUtils.deleteKey(mVfsUtils.getApplicationVfsEncryptionKey());
