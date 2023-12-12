@@ -118,7 +118,7 @@ Loader{
 					resetAtEnd: false
 					backgroundColor: ChatAudioMessageStyle.backgroundColor.color
 					colorSet: ChatAudioMessageStyle.progressionWave
-					durationTextColor: mainItem.isOutgoing ? ChatStyle.entry.message.outgoing.text.colorModel.color : ChatStyle.entry.message.incoming.text.colorModel.color
+					durationTextColor: mainItem.isOutgoing ? ChatStyle.entry.message.outgoing.text.color : ChatStyle.entry.message.incoming.text.color
 					function refresh(){
 						if( vocalPlayer.item){
 							progressPosition = vocalPlayer.item.getPosition()
