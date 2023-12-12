@@ -2012,15 +2012,15 @@ Klikněte zde: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     </message>
     <message>
         <source>remoteProvisioningWarnAccountOverwrite</source>
-        <translation type="unfinished">An account is already provisioned. This action will erase the existing account. : Warn user about it.</translation>
+        <translation>An account is already provisioned. This action will erase the existing account. : Warn user about it.</translation>
     </message>
     <message>
         <source>lastProvisioningFailed</source>
-        <translation type="unfinished">Vzdálené poskytování nastavení selhalo. Odkaz může být použit nebo jeho platnost vypršela. Pokud vám byl poskytnut, obraťte se na správce.</translation>
+        <translation>Vzdálené poskytování nastavení selhalo. Odkaz může být použit nebo jeho platnost vypršela. Pokud vám byl poskytnut, obraťte se na správce.</translation>
     </message>
     <message>
         <source>newVersionAvailable</source>
-        <translation type="unfinished">K dispozici je nová verze (%1)!</translation>
+        <translation>K dispozici je nová verze (%1)!</translation>
     </message>
     <message>
         <source>newVersionAvailableInstructions</source>
