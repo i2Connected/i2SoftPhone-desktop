@@ -4069,7 +4069,7 @@ Cliquez ici : &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;
     <message>
         <source>timelineFilterChatGroups</source>
         <extracomment>&apos;Chat groups&apos; : Filter item. Selecting it will show all chat groups (with more than one participant).</extracomment>
-        <translation>Groupes standards</translation>
+        <translation>Groupes</translation>
     </message>
     <message>
         <source>timelineSearchPlaceholderText</source>
