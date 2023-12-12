@@ -210,9 +210,9 @@ Loader{// Use of Loader because of Repeater (items cannot be loaded dynamically)
 					onLastTextSelectedChanged: mainItem.lastTextSelectedChanged(lastTextSelected)
 					color: mainItem.useTextColor
 								? mainItem.textColor
-								: $modelData.isOutgoing
-									? ChatStyle.entry.message.outgoing.text.colorModel.color
-									: ChatStyle.entry.message.incoming.text.colorModel.color
+								: chatMessageModel.isOutgoing
+									? ChatStyle.entry.message.outgoing.text.color
+									: ChatStyle.entry.message.incoming.text.color
 					onRightClicked: mainItem.rightClicked()
 					onFitWidthChanged: messagesTextsList.updateBestWidth()
 					Component.onCompleted: messagesTextsList.updateBestWidth()
