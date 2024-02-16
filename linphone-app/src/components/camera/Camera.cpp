@@ -78,16 +78,16 @@ Camera::~Camera(){
 void Camera::resetWindowId() const{
 	auto core = CoreManager::getInstance()->getCore();
 	if(core && mIsWindowIdSet){
-		QQuickFramebufferObject::Renderer * oldRenderer = NULL;
+		void * oldRenderer = NULL;
 		if(mWindowIdLocation == CorePreview){
-			oldRenderer = (QQuickFramebufferObject::Renderer *)core->getNativePreviewWindowId();
+			oldRenderer = core->getNativePreviewWindowId();
 			if(oldRenderer)
 				core->setNativePreviewWindowId(NULL);
 		}else if( mWindowIdLocation == Call){
 			if(mCallModel){
 				auto call = mCallModel->getCall();
 				if( call && call->getState() != linphone::Call::State::End && call->getState() != linphone::Call::State::Released){
-					oldRenderer = (QQuickFramebufferObject::Renderer *) call->getNativeVideoWindowId();
+					oldRenderer = call->getNativeVideoWindowId();
 					if(oldRenderer)
 						call->setNativeVideoWindowId(NULL);
 				}
@@ -96,13 +96,13 @@ void Camera::resetWindowId() const{
 			if(mParticipantDeviceModel){
 				auto device = mParticipantDeviceModel->getDevice();
 				if( device ){
-					oldRenderer = (QQuickFramebufferObject::Renderer *)device->getNativeVideoWindowId();
+					oldRenderer = device->getNativeVideoWindowId();
 					if(oldRenderer)
 						mParticipantDeviceModel->getDevice()->setNativeVideoWindowId(NULL);
 				}
 			}
 		}else if( mWindowIdLocation == Core){
-			oldRenderer = (QQuickFramebufferObject::Renderer *)core->getNativeVideoWindowId();
+			oldRenderer = core->getNativeVideoWindowId();
 			if(oldRenderer)
 				core->setNativeVideoWindowId(NULL);
 		}else if(mWindowIdLocation == Player){
@@ -110,6 +110,7 @@ void Camera::resetWindowId() const{
 				mLinphonePlayer->getLinphonePlayer()->setWindowId(nullptr);
 		}
 		qInfo() << "[Camera] (" << mQmlName << ") Removed " << oldRenderer << " at " << mWindowIdLocation << " for " << this << " Device(" << mParticipantDeviceModel << ")";
+		if(oldRenderer) ((QObject*)oldRenderer)->deleteLater();
 		mIsWindowIdSet = false;
 	}
 }
@@ -179,20 +180,22 @@ void Camera::removeLinphonePlayer(){
 }
 
 QQuickFramebufferObject::Renderer *Camera::createRenderer () const {
+	resetWindowId();
 	QQuickFramebufferObject::Renderer * renderer = NULL;
+	void * windowId = NULL;
 	if(mWindowIdLocation == CorePreview){
 		qInfo() << "[Camera] (" << mQmlName << ") Setting Camera to Preview";
-		renderer=(QQuickFramebufferObject::Renderer *)CoreManager::getInstance()->getCore()->createNativePreviewWindowId();
-		if(renderer)
-			CoreManager::getInstance()->getCore()->setNativePreviewWindowId(renderer);
+		windowId=CoreManager::getInstance()->getCore()->createNativePreviewWindowId();
+		if(windowId)
+			CoreManager::getInstance()->getCore()->setNativePreviewWindowId(windowId);
 	}else if(mWindowIdLocation == Call){
 		if(mCallModel){
 			auto call = mCallModel->getCall();
 			if(call){
 				qInfo() << "[Camera] (" << mQmlName << ") Setting Camera to CallModel";
-				renderer = (QQuickFramebufferObject::Renderer *) call->createNativeVideoWindowId();
-				if(renderer)
-					call->setNativeVideoWindowId(renderer);
+				windowId = call->createNativeVideoWindowId();
+				if(windowId)
+					call->setNativeVideoWindowId(windowId);
 			}
 		}
 	}else if( mWindowIdLocation == Device) {
@@ -200,25 +203,25 @@ QQuickFramebufferObject::Renderer *Camera::createRenderer () const {
 		if(participantDevice){
 			qInfo() << "[Camera] (" << mQmlName << ") Setting Camera to Participant Device";
 			qInfo() << "[Camera] (" << mQmlName << ") Trying to create new window ID for " << participantDevice->getName().c_str() << ", addr=" << participantDevice->getAddress()->asString().c_str();
-			renderer = (QQuickFramebufferObject::Renderer *) participantDevice->createNativeVideoWindowId();
-			if(renderer)
-				participantDevice->setNativeVideoWindowId(renderer);
+			windowId = participantDevice->createNativeVideoWindowId();
+			if(windowId)
+				participantDevice->setNativeVideoWindowId(windowId);
 		}
 	}else if( mWindowIdLocation == Core){
 		qInfo() << "[Camera] (" << mQmlName << ") Setting Camera to Default Window";
-		renderer = (QQuickFramebufferObject::Renderer *) CoreManager::getInstance()->getCore()->createNativeVideoWindowId();
-		if(renderer)
-			CoreManager::getInstance()->getCore()->setNativeVideoWindowId(renderer);
+		windowId = CoreManager::getInstance()->getCore()->createNativeVideoWindowId();
+		if(windowId)
+			CoreManager::getInstance()->getCore()->setNativeVideoWindowId(windowId);
 	}else if( mWindowIdLocation == Player){
 		auto player = mLinphonePlayer->getLinphonePlayer();
 		if(player){
 			qInfo() << "[Camera] (" << mQmlName << ") Setting Camera to Player";
-			renderer = (QQuickFramebufferObject::Renderer *) player->createWindowId();
-			if(renderer)
-				player->setWindowId(renderer);
+			windowId = player->createWindowId();
+			if(windowId)
+				player->setWindowId(windowId);
 		}
 	}
-	if( !renderer){
+	if( !windowId){
 		QTimer::singleShot(1, this, &Camera::isNotReady);// Workaround for const createRenderer
 		qWarning() << "[Camera] (" << mQmlName << ") Stream couldn't start for Rendering. Retrying in 1s";
 		renderer = new CameraDummy();
@@ -226,8 +229,10 @@ QQuickFramebufferObject::Renderer *Camera::createRenderer () const {
 		
 	}else{
 		mIsWindowIdSet = true;
-		qInfo() << "[Camera] (" << mQmlName << ") Added " << renderer << " at " << mWindowIdLocation << " for " << this << " Device(" << mParticipantDeviceModel << ")";
+		qInfo() << "[Camera] (" << mQmlName << ") Added " << windowId << " at " << mWindowIdLocation << " for " << this << " Device(" << mParticipantDeviceModel << ")";
 		QTimer::singleShot(1, this, &Camera::isReady);// Workaround for const createRenderer.
+		QMetaObject::invokeMethod((QObject*)windowId, "getRenderer", Qt::DirectConnection,
+                           Q_RETURN_ARG(QQuickFramebufferObject::Renderer *, renderer));
 	}
 	return renderer;
 }
