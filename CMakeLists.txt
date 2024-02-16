@@ -66,7 +66,8 @@ if( APPLE )
 	set(CMAKE_INSTALL_DATAROOTDIR "${APPLICATION_NAME}.app/Contents/Resources/share")
 
 	if( NOT CMAKE_OSX_DEPLOYMENT_TARGET)
-		set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15")#Qt: 'path' is unavailable: introduced in macOS 10.15
+		#set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15")#Qt: 'path' is unavailable: introduced in macOS 10.15
+		set(CMAKE_OSX_DEPLOYMENT_TARGET "12.3")#ScreenSharing: 'SCStreamConfiguration' has been introduced in macOS 12.3
 	endif()
 	if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "arm64")# TODO: add universal build
 		set(LINPHONESDK_MACOS_ARCHS "x86_64" CACHE STRING "MacOS architectures to build for: comma-separated list of values in [x86_64]")
@@ -155,6 +156,7 @@ add_option(OPTION_LIST ENABLE_QT_KEYCHAIN "Build QtKeychain to manage VFS from S
 add_option(OPTION_LIST ENABLE_QRCODE "Enable QRCode support" OFF)#Experimental
 add_option(OPTION_LIST ENABLE_RELATIVE_PREFIX "Set Internal packages relative to the binary" ON)
 add_option(OPTION_LIST ENABLE_SANITIZER "Enable sanitizer." OFF)
+add_option(OPTION_LIST ENABLE_SCREENSHARING "Enable screen sharing." ON)
 add_option(OPTION_LIST ENABLE_STRICT "Build with strict compilator flags e.g. -Wall -Werror" OFF)
 add_option(OPTION_LIST ENABLE_TESTS "Build with testing binaries of SDK" OFF)
 add_option(OPTION_LIST ENABLE_TESTS_COMPONENTS "Build libbctoolbox-tester" OFF)
