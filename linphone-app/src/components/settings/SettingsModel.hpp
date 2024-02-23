@@ -126,8 +126,8 @@ class SettingsModel : public QObject {
 	Q_PROPERTY(CameraMode callCameraMode READ getCallCameraMode WRITE setCallCameraMode NOTIFY callCameraModeChanged)
 	Q_PROPERTY(LinphoneEnums::ConferenceLayout videoConferenceLayout READ getVideoConferenceLayout WRITE
 	               setVideoConferenceLayout NOTIFY videoConferenceLayoutChanged)
-	Q_PROPERTY(int conferenceMaxMiniatures READ getConferenceMaxMiniatures WRITE setConferenceMaxMiniatures NOTIFY
-	               conferenceMaxMiniaturesChanged)
+	Q_PROPERTY(int conferenceMaxThumbnails READ getConferenceMaxThumbnails WRITE setConferenceMaxThumbnails NOTIFY
+	               conferenceMaxThumbnailsChanged)
 
 	// Chat & calls. -------------------------------------------------------------
 
@@ -466,8 +466,8 @@ public:
 	LinphoneEnums::ConferenceLayout getVideoConferenceLayout() const;
 	void setVideoConferenceLayout(LinphoneEnums::ConferenceLayout layout);
 
-	int getConferenceMaxMiniatures() const;
-	void setConferenceMaxMiniatures(int limit);
+	int getConferenceMaxThumbnails() const;
+	void setConferenceMaxThumbnails(int limit);
 
 	// Chat & calls. -------------------------------------------------------------
 
@@ -840,7 +840,7 @@ signals:
 	void activeSpeakerCameraModeChanged();
 	void callCameraModeChanged();
 	void videoConferenceLayoutChanged();
-	void conferenceMaxMiniaturesChanged();
+	void conferenceMaxThumbnailsChanged();
 
 	void haveAtLeastOneVideoCodecChanged();
 

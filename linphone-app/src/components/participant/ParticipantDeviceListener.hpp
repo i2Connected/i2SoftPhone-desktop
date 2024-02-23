@@ -38,7 +38,7 @@ public:
     
 	virtual void onIsSpeakingChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, bool isSpeaking) override;
 	virtual void onIsMuted(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, bool isMuted) override;
-	virtual void onIsScreenSharing(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, bool isScreenSharing) override;
+	virtual void onScreenSharingChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, bool isScreenSharing) override;
 	virtual void onStateChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, linphone::ParticipantDevice::State state) override;
 	virtual void onStreamCapabilityChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, linphone::MediaDirection direction, linphone::StreamType streamType) override;
 	virtual void onStreamAvailabilityChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, bool available, linphone::StreamType streamType) override;

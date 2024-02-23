@@ -38,7 +38,7 @@ void ParticipantDeviceListener::onIsMuted(const std::shared_ptr<linphone::Partic
 	emit isMuted(participantDevice, isMutedVar);
 }
 
-void ParticipantDeviceListener::onIsScreenSharing(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, bool isScreenSharing) {
+void ParticipantDeviceListener::onScreenSharingChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, bool isScreenSharing) {
 	emit isScreenSharingChanged(participantDevice, isScreenSharing);
 }
 

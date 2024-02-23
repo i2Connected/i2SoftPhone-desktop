@@ -313,9 +313,9 @@ TabContainer {
 					NumericField {
 						maxValue: 60
 						minValue: 0
-						text: SettingsModel.conferenceMaxMiniatures
+						text: SettingsModel.conferenceMaxThumbnails
 						
-						onEditingFinished: SettingsModel.conferenceMaxMiniatures = text
+						onEditingFinished: SettingsModel.conferenceMaxThumbnails = text
 					}
 				}
 			}

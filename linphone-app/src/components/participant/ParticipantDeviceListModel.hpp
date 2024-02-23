@@ -66,7 +66,7 @@ public slots:
 	void onParticipantDeviceMediaAvailabilityChanged(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice);
 	void onParticipantDeviceIsSpeakingChanged(const std::shared_ptr<const linphone::ParticipantDevice> & device, bool isSpeaking);
 	void onParticipantDeviceSpeaking();
-	void onParticipantDeviceIsScreenSharingChanged(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice);
+	void onParticipantDeviceScreenSharingChanged(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice);
 
 signals:
 	void activeSpeakerChanged();

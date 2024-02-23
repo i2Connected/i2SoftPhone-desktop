@@ -70,7 +70,7 @@ void ParticipantDeviceListModel::initConferenceModel(){
 			connect(conferenceModel.get(), &ConferenceModel::participantDeviceMediaCapabilityChanged, this, &ParticipantDeviceListModel::onParticipantDeviceMediaCapabilityChanged);
 			connect(conferenceModel.get(), &ConferenceModel::participantDeviceMediaAvailabilityChanged, this, &ParticipantDeviceListModel::onParticipantDeviceMediaAvailabilityChanged);
 			connect(conferenceModel.get(), &ConferenceModel::participantDeviceIsSpeakingChanged, this, &ParticipantDeviceListModel::onParticipantDeviceIsSpeakingChanged);
-			connect(conferenceModel.get(), &ConferenceModel::participantDeviceIsScreenSharingChanged, this, &ParticipantDeviceListModel::onParticipantDeviceIsScreenSharingChanged);
+			connect(conferenceModel.get(), &ConferenceModel::participantDeviceScreenSharingChanged, this, &ParticipantDeviceListModel::onParticipantDeviceScreenSharingChanged);
 			
 			// TODO activeSpeaker
 			//auto activeSpeaker = conferenceModel->getConference()->getScreenSharingParticipantDevice();
@@ -150,7 +150,7 @@ bool ParticipantDeviceListModel::add(std::shared_ptr<linphone::ParticipantDevice
 		emit meChanged();
 	}else{
 	// Todo ActiveSpeaker
-		//if(deviceToAdd->getIsScreenSharing())
+		//if(deviceToAdd->screenSharingEnabled())
 		//	mActiveSpeaker = deviceModel;
 		//else
 		mActiveSpeaker = get(mCallModel->getConferenceSharedModel()->getConference()->getActiveSpeakerParticipantDevice());
@@ -330,14 +330,14 @@ void ParticipantDeviceListModel::onParticipantDeviceIsSpeakingChanged(const std:
 	if( device)
 		emit participantSpeaking(device.get());
 }
-void ParticipantDeviceListModel::onParticipantDeviceIsScreenSharingChanged(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice){
+void ParticipantDeviceListModel::onParticipantDeviceScreenSharingChanged(const std::shared_ptr<const linphone::ParticipantDevice> & participantDevice){
 // TODO activeSpeaker
 	//auto activeSpeaker = mCallModel->getConferenceSharedModel()->getConference()->getScreenSharingParticipantDevice();
 	//if(!activeSpeaker)
 	auto activeSpeaker = mCallModel->getConferenceSharedModel()->getConference()->getActiveSpeakerParticipantDevice();
-	qDebug() << "onParticipantDeviceIsScreenSharingChanged " << participantDevice.get() << " == " << get(participantDevice) << " ; "
+	qDebug() << "onParticipantDeviceScreenSharingChanged " << participantDevice.get() << " == " << get(participantDevice) << " ; "
 		<< activeSpeaker.get() << " == " << get(activeSpeaker) << " : " << (activeSpeaker ? activeSpeaker->getAddress()->asStringUriOnly().c_str() : "") 
-		<< ", ScreenShared:" << participantDevice->getIsScreenSharing();
+		<< ", ScreenShared:" << participantDevice->screenSharingEnabled();
 	setActiveSpeaker(get(activeSpeaker));
 }
 

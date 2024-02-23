@@ -816,14 +816,14 @@ void SettingsModel::setVideoConferenceLayout(LinphoneEnums::ConferenceLayout lay
 	emit videoConferenceLayoutChanged();
 }
 
-int SettingsModel::getConferenceMaxMiniatures() const {
-	return CoreManager::getInstance()->getCore()->getConferenceMaxMinatures();
+int SettingsModel::getConferenceMaxThumbnails() const {
+	return CoreManager::getInstance()->getCore()->getConferenceMaxThumbnails();
 }
 
-void SettingsModel::setConferenceMaxMiniatures(int limit) {
-	if( getConferenceMaxMiniatures() != limit) { 
-		CoreManager::getInstance()->getCore()->setConferenceMaxMinatures(limit);
-		emit conferenceMaxMiniaturesChanged();
+void SettingsModel::setConferenceMaxThumbnails(int limit) {
+	if( getConferenceMaxThumbnails() != limit) { 
+		CoreManager::getInstance()->getCore()->setConferenceMaxThumbnails(limit);
+		emit conferenceMaxThumbnailsChanged();
 	}
 }
 

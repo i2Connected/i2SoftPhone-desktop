@@ -242,7 +242,7 @@ Rectangle{
 				Repeater{
 				//: 'Mosaic mode' : Grid layout for video conference.
 					model: [{text: qsTr('incallMenuGridLayout'), icon: IncallMenuStyle.modeIcons.gridIcon, value:LinphoneEnums.ConferenceLayoutGrid, enabled: (!mainItem.conferenceModel 
-					|| (mainItem.conferenceModel.participantDeviceCount <= SettingsModel.conferenceMaxMiniatures+1 && !mainItem.conferenceModel.isScreenSharingEnabled))}
+					|| (mainItem.conferenceModel.participantDeviceCount <= SettingsModel.conferenceMaxThumbnails+1 && !mainItem.conferenceModel.isScreenSharingEnabled))}
 				//: 'Active speaker mode' : Active speaker layout for video conference.
 						, {text: qsTr('incallMenuActiveSpeakerLayout'), icon: IncallMenuStyle.modeIcons.activeSpeakerIcon, value:LinphoneEnums.ConferenceLayoutActiveSpeaker, enabled: true}
 				//: 'Audio only mode' : Audio only layout for video conference.

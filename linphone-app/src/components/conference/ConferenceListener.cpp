@@ -87,8 +87,8 @@ void ConferenceListener::onParticipantDeviceIsSpeakingChanged(const std::shared_
 	//qDebug() << "onParticipantDeviceIsSpeakingChanged: "  << participantDevice->getAddress()->asString().c_str() << ". Speaking:" << isSpeaking;
 	emit participantDeviceIsSpeakingChanged(participantDevice, isSpeaking);
 }
-void ConferenceListener::onParticipantDeviceIsScreenSharingChanged(const std::shared_ptr<linphone::Conference> & conference, const std::shared_ptr<const linphone::ParticipantDevice> & device, bool enabled) {
-	emit participantDeviceIsScreenSharingChanged(device,enabled);
+void ConferenceListener::onParticipantDeviceScreenSharingChanged(const std::shared_ptr<linphone::Conference> & conference, const std::shared_ptr<const linphone::ParticipantDevice> & device, bool enabled) {
+	emit participantDeviceScreenSharingChanged(device,enabled);
 }
 void ConferenceListener::onStateChanged(const std::shared_ptr<linphone::Conference> & conference, linphone::Conference::State newState){
 	qDebug() << "onStateChanged:" << (int)newState;

@@ -29,7 +29,7 @@
 void ParticipantDeviceModel::connectTo(ParticipantDeviceListener * listener){
 	connect(listener, &ParticipantDeviceListener::isSpeakingChanged, this, &ParticipantDeviceModel::onIsSpeakingChanged);
 	connect(listener, &ParticipantDeviceListener::isMuted, this, &ParticipantDeviceModel::onIsMuted);
-	connect(listener, &ParticipantDeviceListener::isScreenSharingChanged, this, &ParticipantDeviceModel::onIsScreenSharingChanged);
+	connect(listener, &ParticipantDeviceListener::isScreenSharingChanged, this, &ParticipantDeviceModel::onScreenSharingChanged);
 	connect(listener, &ParticipantDeviceListener::stateChanged, this, &ParticipantDeviceModel::onStateChanged);
 	connect(listener, &ParticipantDeviceListener::streamCapabilityChanged, this, &ParticipantDeviceModel::onStreamCapabilityChanged);
 	connect(listener, &ParticipantDeviceListener::streamAvailabilityChanged, this, &ParticipantDeviceModel::onStreamAvailabilityChanged);
@@ -110,7 +110,7 @@ bool ParticipantDeviceModel::getIsMuted() const{
 }
 
 bool ParticipantDeviceModel::getIsScreenSharingEnabled() const {
-	return mParticipantDevice ? mParticipantDevice->getIsScreenSharing() : false;
+	return mParticipantDevice ? mParticipantDevice->screenSharingEnabled() : false;
 }
 
 LinphoneEnums::ParticipantDeviceState ParticipantDeviceModel::getState() const{
@@ -233,7 +233,7 @@ void ParticipantDeviceModel::onCallStatusChanged(){
 }
 
 //--------------------------------------------------------------------
-void ParticipantDeviceModel::onIsScreenSharingChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, bool isScreenSharing) {
+void ParticipantDeviceModel::onScreenSharingChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, bool isScreenSharing) {
 	emit isScreenSharingEnabledChanged();
 }
 void ParticipantDeviceModel::onIsSpeakingChanged(const std::shared_ptr<linphone::ParticipantDevice> & participantDevice, bool isSpeaking) {
