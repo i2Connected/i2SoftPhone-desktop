@@ -253,8 +253,6 @@ signals:
 	
 	void conferenceVideoLayoutChanged();
 	void videoDescriptorChanged();
-	void screenSharingAccepted();
-	
 public:
 	void handleCallEncryptionChanged (const std::shared_ptr<linphone::Call> &call);
 	void handleCallStateChanged (const std::shared_ptr<linphone::Call> &call, linphone::Call::State state);

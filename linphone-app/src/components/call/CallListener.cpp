@@ -38,7 +38,3 @@ void CallListener::onRemoteRecording(const std::shared_ptr<linphone::Call> & cal
 	qDebug() << "onRemoteRecording: " << recording;
 	emit remoteRecording(call, recording);
 }
-void CallListener::onScreenSharingAccepted(const std::shared_ptr<linphone::Call> & call) {
-	qDebug() << "onScreenSharingAccepted";
-	emit screenSharingAccepted(call);
-};

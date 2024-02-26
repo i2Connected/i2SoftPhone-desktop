@@ -447,8 +447,8 @@ Rectangle{
 						capitalization: Font.AllUppercase
 						onClicked: mainItem.conferenceModel.toggleScreenSharing()
 						Connections{
-							target: mainItem.callModel
-							onScreenSharingAccepted: mainItem.callModel.setVideoSourceDescriptorModel(screenSharingItem.desc)
+							target: mainItem.conferenceModel
+							onLocalScreenSharingChanged: (enabled) => {if(enabled) mainItem.callModel.setVideoSourceDescriptorModel(screenSharingItem.desc) }
 						}
 					}
 				}

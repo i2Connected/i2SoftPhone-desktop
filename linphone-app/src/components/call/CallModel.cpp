@@ -55,7 +55,6 @@ constexpr char AutoAnswerObjectName[] = "auto-answer-timer";
 }
 void CallModel::connectTo(CallListener * listener){
 	connect(listener, &CallListener::remoteRecording, this, &CallModel::onRemoteRecording);
-	connect(listener, &CallListener::screenSharingAccepted, this, &CallModel::screenSharingAccepted);
 }
 
 CallModel::CallModel (shared_ptr<linphone::Call> call){
