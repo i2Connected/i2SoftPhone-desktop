@@ -833,8 +833,8 @@ QString Utils::encodeTextToQmlRichFormat(const QString& text, const QVariantMap&
 		
 		for(int i = 0 ; i < iriParsed.size() ; ++i){
 			QString iri = iriParsed[i].second.replace('&', "&amp;")
-						.replace('<', "\u2063&lt;")
-						.replace('>', "\u2063&gt;")
+						.replace('<', "&#x2063;&lt;")
+						.replace('>', "&#x2063;&gt;")
 						.replace('"', "&quot;")
 						.replace('\'', "&#039;");
 			if(!iriParsed[i].first){

@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Empty route can now be set in account settings.
 - Network remote file can be used in chat attachment on Windows.
 - Some crashs.
+- Question mark before '<' and '>'
 - Update SDK to 5.3.26.
 
 ### Added
