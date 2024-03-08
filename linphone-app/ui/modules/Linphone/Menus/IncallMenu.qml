@@ -25,7 +25,7 @@ Rectangle{
 	property bool isMeAdmin: me && me.adminStatus
 	property bool isParticipantsMenu: false
 	property bool isScreenSharingMenu: false
-	property bool screenSharingAvailable: conferenceModel && (!conferenceModel.isScreenSharingEnabled || conferenceModel.isLocalScreenSharingEnabled)
+	property bool screenSharingAvailable: SettingsModel.isScreenSharingEnabled && conferenceModel && (!conferenceModel.isScreenSharingEnabled || conferenceModel.isLocalScreenSharingEnabled)
 	signal close()
 	signal layoutChanging(int layoutMode)
 	
@@ -377,6 +377,7 @@ Rectangle{
 								backgroundColor: 'white'
 								source: 'image://screen/'+index
 								radius: 10
+								cache: false
 							}
 							Text{
 								Layout.fillWidth: true
@@ -421,6 +422,18 @@ Rectangle{
 									 mainItem.callModel.setVideoSourceDescriptorModel(screenSharingItem.desc)
 					}
 				}
+				
+				RoundedImage{
+					visible: windowSharingRadioButton.checked
+					Layout.leftMargin: 15
+					Layout.preferredWidth: 114
+					Layout.preferredHeight: 64
+					backgroundColor: 'white'
+					source: windowSharingRadioButton.checked ? 'image://window/'+screenSharingItem.desc.windowId : ''
+					radius: 10
+					cache: false
+				}
+							
 				Rectangle{
 					Layout.fillWidth: true
 					Layout.preferredHeight: IncallMenuStyle.list.border.width

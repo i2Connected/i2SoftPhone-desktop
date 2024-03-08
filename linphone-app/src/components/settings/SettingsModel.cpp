@@ -252,11 +252,11 @@ void SettingsModel::setAssistantSupportsPhoneNumbers(bool status) {
 }
 
 int SettingsModel::getAssistantDefaultTransport() const {
-	return mConfig->getInt(UiSection, getEntryFullName(UiSection, "assistant_default_transport") , 2);
+	return mConfig->getInt(UiSection, getEntryFullName(UiSection, "assistant_default_transport"), 2);
 }
 
 void SettingsModel::setAssistantDefaultTransport(int transport) {
-	if(!isReadOnly(UiSection, "assistant_default_transport")) {
+	if (!isReadOnly(UiSection, "assistant_default_transport")) {
 		mConfig->setInt(UiSection, "assistant_default_transport", transport);
 		emit assistantSupportsPhoneNumbersChanged(transport);
 	}
@@ -355,7 +355,7 @@ void SettingsModel::createCaptureGraph() {
 	emit captureGraphRunningChanged(getCaptureGraphRunning());
 }
 void SettingsModel::startCaptureGraph() {
-	if(!getIsInCall()) {
+	if (!getIsInCall()) {
 		if (!mSimpleCaptureGraph) createCaptureGraph();
 		++mCaptureGraphListenerCount;
 	}
@@ -391,7 +391,8 @@ void SettingsModel::accessAudioSettings() {
 	emit playbackGainChanged(getPlaybackGain());
 	emit captureGainChanged(getCaptureGain());
 
-	// Media cards must not be used twice (capture card + call) else we will get latencies issues and bad echo calibrations in call.
+	// Media cards must not be used twice (capture card + call) else we will get latencies issues and bad echo
+	// calibrations in call.
 	if (!getIsInCall()) {
 		startCaptureGraph();
 	}
@@ -594,31 +595,12 @@ void SettingsModel::setVideoDevice(const QString &device) {
 	emit videoDeviceChanged(device);
 }
 
-void SettingsModel::saveCaptureWindowId(void *windowId) {
-	mCaptureWindowId = windowId;
-	//CoreManager::getInstance()->getCore()->setVideoCaptureWindowId(mCaptureWindowId);
-	emit captureScreenIndexChanged(-1);
-	qDebug() << -1;
-}
-
-void SettingsModel::saveCaptureScreenIndex(int index) {
-	mCaptureWindowId = reinterpret_cast<void*>(-index);
-	//CoreManager::getInstance()->getCore()->setVideoCaptureWindowId(mCaptureWindowId);
-	emit captureScreenIndexChanged(index);
-	qDebug() << index;
-}
-
-int SettingsModel::getCaptureScreenIndex() {
-/*
-	int64_t id = (int64_t)CoreManager::getInstance()->getCore()->getVideoCaptureWindowId();
-	if(id <= 0){
-		return -id;
-	}else*/
-		return -1;
-}
-
-void SettingsModel::setCaptureWindowId() {
-	//CoreManager::getInstance()->getCore()->setVideoCaptureWindowId(mCaptureWindowId);
+bool SettingsModel::getIsScreenSharingEnabled() const {
+#ifdef ENABLE_SCREENSHARING
+	return true;
+#else
+	return false;
+#endif
 }
 // -----------------------------------------------------------------------------
 
@@ -821,7 +803,7 @@ int SettingsModel::getConferenceMaxThumbnails() const {
 }
 
 void SettingsModel::setConferenceMaxThumbnails(int limit) {
-	if( getConferenceMaxThumbnails() != limit) { 
+	if (getConferenceMaxThumbnails() != limit) {
 		CoreManager::getInstance()->getCore()->setConferenceMaxThumbnails(limit);
 		emit conferenceMaxThumbnailsChanged();
 	}
@@ -2058,13 +2040,13 @@ void SettingsModel::setDeveloperSettingsEnabled(bool status) {
 
 void SettingsModel::handleCallCreated(const shared_ptr<linphone::Call> &) {
 	bool isInCall = getIsInCall();
-	if(isInCall) stopCaptureGraphs(); // Ensure to stop all graphs
+	if (isInCall) stopCaptureGraphs(); // Ensure to stop all graphs
 	emit isInCallChanged(isInCall);
 }
 
 void SettingsModel::handleCallStateChanged(const shared_ptr<linphone::Call> &, linphone::Call::State) {
 	bool isInCall = getIsInCall();
-	if(isInCall) stopCaptureGraphs(); // Ensure to stop all graphs
+	if (isInCall) stopCaptureGraphs(); // Ensure to stop all graphs
 	emit isInCallChanged(isInCall);
 }
 void SettingsModel::handleEcCalibrationResult(linphone::EcCalibratorStatus status, int delayMs) {

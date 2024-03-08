@@ -256,7 +256,8 @@ Rectangle {
 		// Mode buttons
 		TextButtonB{
 			id: screenSharingButton
-			visible: mainItem.isScreenSharingEnabled
+			visible: mainItem.isScreenSharingEnabled && (SettingsModel.isScreenSharingEnabled || !mainItem.isLocalScreenSharingEnabled)
+			interactive: mainItem.isLocalScreenSharingEnabled
 			Layout.preferredWidth: fitWidth
 			Icon{
 				id: screenSharingIcon
@@ -279,7 +280,7 @@ Rectangle {
 			onClicked: if(mainItem.isLocalScreenSharingEnabled) conferenceModel.toggleScreenSharing()
 		}
 		ActionButton{
-			visible: !screenSharingButton.visible && callModel && mainItem.conferenceModel && callModel.videoEnabled
+			visible: SettingsModel.isScreenSharingEnabled  && !screenSharingButton.visible && callModel && mainItem.conferenceModel && callModel.videoEnabled
 			isCustom: true
 			backgroundRadius: width/2
 			colorSet: IncallStyle.buttons.screenSharing
@@ -675,12 +676,18 @@ Rectangle {
 	}
 	Connections{
 		target: DesktopTools
-		onWindowIdSelectionStarted: window.attachVirtualWindow(Utils.buildCommonDialogUri('ConfirmDialog'), {
-			descriptionText: "Click on the window that you want to share."
-			, showButtonOnly: 42
-			, buttonTexts : ['']
-			})
-		onWindowIdSelectionEnded: window.detachVirtualWindow()
+		onWindowIdSelectionStarted: {
+			mainItem.enabled = false
+			window.attachVirtualWindow(Utils.buildCommonDialogUri('ConfirmDialog'), {
+				descriptionText: "Click on the window that you want to share."
+				, showButtonOnly: 42
+				, buttonTexts : ['']
+				})
+			}
+		onWindowIdSelectionEnded: {
+			window.detachVirtualWindow()
+			mainItem.enabled = true
+		}
 	}
 	
 	// ---------------------------------------------------------------------------
