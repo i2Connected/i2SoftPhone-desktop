@@ -5,7 +5,7 @@
     <name>About</name>
     <message>
         <source>ok</source>
-        <translation type="unfinished">OK</translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>aboutTranslation</source>
@@ -225,27 +225,27 @@
     </message>
     <message>
         <source>phoneNumberStatusInvalid</source>
-        <translation type="unfinished"></translation>
+        <translation>არასწორი ტელეფონის ნომერი!</translation>
     </message>
     <message>
         <source>phoneNumberStatusTooShort</source>
-        <translation type="unfinished"></translation>
+        <translation>ნამეტანი მოკლე!</translation>
     </message>
     <message>
         <source>phoneNumberStatusTooLong</source>
-        <translation type="unfinished"></translation>
+        <translation>ნამეტანი გრძელი!</translation>
     </message>
     <message>
         <source>phoneNumberStatusInvalidCountryCode</source>
-        <translation type="unfinished"></translation>
+        <translation>არასწორი ქვეყნის კოდი!</translation>
     </message>
     <message>
         <source>loginWithPhoneNumberFailed</source>
-        <translation type="unfinished"></translation>
+        <translation>შესვლა ჩაიშალა. გთხოვთ, შეამოწმოთ თქვენი ტელეფონის ნომერი.</translation>
     </message>
     <message>
         <source>unableToAddAccount</source>
-        <translation type="unfinished"></translation>
+        <translation>ამ ანგარიშის დამატება ვერ ხერხდება.</translation>
     </message>
 </context>
 <context>
@@ -4970,6 +4970,33 @@
             <numerusform></numerusform>
             <numerusform></numerusform>
         </translation>
+    </message>
+</context>
+<context>
+    <name></name>
+    <message>
+        <source>noAccount</source>
+        <extracomment>&apos;No account configured&apos; : Status text when there is no configured account.</extracomment>
+        <translation>არცერთი ანგარიში არ არის კონფიგურირებული</translation>
+    </message>
+    <message>
+        <source>noAccountExists</source>
+        <extracomment>&quot;Account doesn&apos;t exist&quot; : Warning message when no account has been found</extracomment>
+        <translation>ანგარიში არ არსებობს</translation>
+    </message>
+    <message>
+        <source>commandLineOptionQtLogsOnly</source>
+        <translation>მხოლოდ აპლიკაციიდან ჟურნალების დაბეჭვდა</translation>
+    </message>
+    <message>
+        <source>recoveringAccount</source>
+        <extracomment>&apos;Recovering account&apos; : User message for recovering step.</extracomment>
+        <translation>ანგარიშის აღდგენა</translation>
+    </message>
+    <message>
+        <source>Cannot open validation url for the account creation request token</source>
+        <extracomment>&quot;Cannot open validation URL for the account creation request token&quot; : Warning message.</extracomment>
+        <translation>დადასტურების URL-ის გახსნა ანგარიშის შექმნის მოთხოვნის ტოკენისთვის ვერ ხერხდება</translation>
     </message>
 </context>
 </TS>
