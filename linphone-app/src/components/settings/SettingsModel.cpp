@@ -36,6 +36,7 @@
 #include "SettingsModel.hpp"
 #include "components/assistant/AssistantModel.hpp"
 #include "components/core/CoreManager.hpp"
+#include "components/notifier/Notifier.hpp"
 #include "components/tunnel/TunnelModel.hpp"
 #include "include/LinphoneApp/PluginNetworkHelper.hpp"
 #include "utils/Constants.hpp"
@@ -552,6 +553,10 @@ void SettingsModel::setEchoCancellationEnabled(bool status) {
 void SettingsModel::startEchoCancellerCalibration() {
 	CoreManager::getInstance()->getCore()->startEchoCancellerCalibration();
 }
+
+int SettingsModel::getEchoCancellationCalibration() const {
+	return CoreManager::getInstance()->getCore()->getEchoCancellationCalibration();
+}
 // -----------------------------------------------------------------------------
 
 bool SettingsModel::getShowAudioCodecs() const {
@@ -1039,7 +1044,6 @@ void SettingsModel::setChatNotificationSoundEnabled(bool status) {
 	mConfig->setInt(UiSection, "chat_sound_notification_enabled", status);
 	emit chatNotificationSoundEnabledChanged(status);
 }
-
 // -----------------------------------------------------------------------------
 
 QString SettingsModel::getChatNotificationSoundPath() const {
@@ -1051,6 +1055,28 @@ void SettingsModel::setChatNotificationSoundPath(const QString &path) {
 	QString cleanedPath = QDir::cleanPath(path);
 	mConfig->setString(UiSection, "chat_sound_notification_file", Utils::appStringToCoreString(cleanedPath));
 	emit chatNotificationSoundPathChanged(cleanedPath);
+}
+
+int SettingsModel::getNotificationOrigin() const {
+	return mConfig->getInt(UiSection, "notification_origin",
+#ifdef __APPLE__
+	                       Notifier::NotificationOrigin::Top
+#else
+	                       Notifier::NotificationOrigin::BottomRight
+#endif
+	);
+}
+
+bool SettingsModel::isSystrayNotificationBlinkEnabled() const {
+	return !!mConfig->getInt(UiSection, "systray_notification_blink", 1);
+}
+
+bool SettingsModel::isSystrayNotificationGlobal() const {
+	return !!mConfig->getInt(UiSection, "systray_notification_global", 1);
+}
+
+bool SettingsModel::isSystrayNotificationFiltered() const {
+	return !!mConfig->getInt(UiSection, "systray_notification_filtered", 0);
 }
 
 // -----------------------------------------------------------------------------
@@ -2051,6 +2077,7 @@ void SettingsModel::handleCallStateChanged(const shared_ptr<linphone::Call> &, l
 }
 void SettingsModel::handleEcCalibrationResult(linphone::EcCalibratorStatus status, int delayMs) {
 	emit echoCancellationStatus((int)status, delayMs);
+	emit echoCancellationCalibrationChanged();
 }
 bool SettingsModel::getIsInCall() const {
 	return CoreManager::getInstance()->getCore()->getCallsNb() != 0;

@@ -1,4 +1,4 @@
-import QtQuick 2.7
+import QtQuick 2.9
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 import Qt.labs.platform 1.0
@@ -72,8 +72,41 @@ ApplicationWindow {
 	}
 	
 	Shortcut {
+		context: Qt.ApplicationShortcut
 		sequence: StandardKey.Close
 		onActivated: window.hide()
+	}
+	Shortcut {
+		context: Qt.ApplicationShortcut
+		sequences: ['Ctrl+Shift+W', 'Ctrl+Shift+V']
+		onActivated: CallsListModel.acceptLastIncomingCall(true)
+	}
+	Shortcut {
+		context: Qt.ApplicationShortcut
+		sequence: 'Ctrl+Shift+A'
+		onActivated: CallsListModel.acceptLastIncomingCall(false)
+	}
+	Shortcut {
+		sequence: 'Ctrl+Shift+D'
+		context: Qt.ApplicationShortcut
+		onActivated: CallsListModel.terminateLastCall(true)
+	}
+	Shortcut {
+		sequence: 'Ctrl+Shift+E'
+		context: Qt.ApplicationShortcut
+		onActivated: {// startEchoCancellerCalibration is unsupported while being in call.
+			SettingsModel.echoCancellationEnabled = !SettingsModel.echoCancellationEnabled;
+		}
+	}
+	Shortcut {
+		sequence: 'Ctrl+Shift+L'
+		context: Qt.ApplicationShortcut
+		onActivated: CallsListModel.toggleMuteSpeaker()
+	}
+	Shortcut {
+		sequence: 'Ctrl+Shift+M'
+		context: Qt.ApplicationShortcut
+		onActivated: CallsListModel.toggleMuteMicrophone()
 	}
 	// ---------------------------------------------------------------------------
 	

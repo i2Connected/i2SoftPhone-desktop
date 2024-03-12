@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Screen Sharing
 
-## 5.2.2 - 2024-03-07
+## 5.2.2 - 2024-03-11
 
 ### Fixed
 - Day offset in start date when scheduling a conference.
@@ -18,10 +18,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Empty route can now be set in account settings.
 - Network remote file can be used in chat attachment on Windows.
 - Crash on forwarding a message to a new secure chat room.
+- URI handlers and remote provisioning.
+- Avoid to remove file on cancelling upload and fix cancelling file transfers.
 - Update SDK to 5.3.26.
 
 ### Added
 - '[ui] logs_max_size' : option to set the max size of one log file.
+- '[ui] notification_origin' : option to specify where to display notifications (only supported: 0=bottom-right and 1=top-right).
+- '[ui] systray_notification_blink' : option to activate/deactivate the blinking systray on unread notifications.
+- '[ui] systray_notification_global' : option to display notification number from all accounts or only selected.
+- '[ui] systray_notification_filtered' : option to filter the notification number (not count if chat room is muted).
+- Keyboard shortcuts:
+    * 'Ctrl+Shift+W' (or V): accept with video the last incoming call.
+    * 'Ctrl+Shift+A': accept without video the last incoming call.
+    * 'Ctrl+Shift+D': terminate the last call.
+    * 'Ctrl+Shift+E': Enable/disable echo cancellation.
+    * 'Ctrl+Shift+L': Unmute/Mute speaker.
+    * 'Ctrl+Shift+M': Unmute/Mute microphone.
+- Request application focus when hovering a call notification.
 
 ## 5.2.1 - 2024-02-01
 

@@ -93,10 +93,10 @@ class SettingsModel : public QObject {
 	Q_PROPERTY(QString ringerDevice READ getRingerDevice WRITE setRingerDevice NOTIFY ringerDeviceChanged)
 
 	Q_PROPERTY(QString ringPath READ getRingPath WRITE setRingPath NOTIFY ringPathChanged)
-
 	Q_PROPERTY(bool echoCancellationEnabled READ getEchoCancellationEnabled WRITE setEchoCancellationEnabled NOTIFY
 	               echoCancellationEnabledChanged)
-
+	Q_PROPERTY(
+	    int echoCancellationCalibration READ getEchoCancellationCalibration NOTIFY echoCancellationCalibrationChanged)
 	Q_PROPERTY(bool showAudioCodecs READ getShowAudioCodecs WRITE setShowAudioCodecs NOTIFY showAudioCodecsChanged)
 
 	// Video. --------------------------------------------------------------------
@@ -372,7 +372,7 @@ public:
 
 	Q_INVOKABLE void startCaptureGraph();
 	Q_INVOKABLE void stopCaptureGraph();
-	;
+
 	Q_INVOKABLE void stopCaptureGraphs();
 	Q_INVOKABLE void resetCaptureGraph();
 	void createCaptureGraph();
@@ -406,6 +406,7 @@ public:
 
 	bool getEchoCancellationEnabled() const;
 	void setEchoCancellationEnabled(bool status);
+	int getEchoCancellationCalibration() const;
 
 	Q_INVOKABLE void startEchoCancellerCalibration();
 
@@ -529,6 +530,12 @@ public:
 
 	QString getChatNotificationSoundPath() const;
 	void setChatNotificationSoundPath(const QString &path);
+
+	int getNotificationOrigin() const;
+
+	bool isSystrayNotificationBlinkEnabled() const;
+	bool isSystrayNotificationGlobal() const;
+	bool isSystrayNotificationFiltered() const;
 
 	QString getFileTransferUrl() const;
 	void setFileTransferUrl(const QString &url);
@@ -813,9 +820,9 @@ signals:
 
 	void echoCancellationEnabledChanged(bool status);
 	void echoCancellationStatus(int status, int msDelay);
+	void echoCancellationCalibrationChanged();
 
 	void showAudioCodecsChanged(bool status);
-
 	// Video. --------------------------------------------------------------------
 	void videoEnabledChanged();
 	void videoAvailableChanged();
