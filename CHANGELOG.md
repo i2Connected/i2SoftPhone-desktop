@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Screen Sharing
 
+## 5.2.5 - undefined
+
+### Fixed
+- Phone prefix option couldn't be changed.
+
 ## 5.2.4 - 2024-04-11
 
 ### Fixed
