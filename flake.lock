@@ -1,0 +1,299 @@
+{
+  "nodes": {
+    "bctoolbox-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1711528184,
+        "narHash": "sha256-L96Ag8YhsBeiR6XzYDRpvH4sk1n7QcXhfw+jon/rzh4=",
+        "ref": "6e5b2547ada63afcc6e0b6efc91f780de076605a",
+        "rev": "6e5b2547ada63afcc6e0b6efc91f780de076605a",
+        "revCount": 857,
+        "type": "git",
+        "url": "file:./linphone-sdk/bctoolbox"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:./bctoolbox"
+      }
+    },
+    "bcunit-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1700735100,
+        "narHash": "sha256-42mbo6icYveRDKZ8mRlzqNDWcBY78kk9Yi1uUQBiWAk=",
+        "ref": "bd57ee7f2e29b5418bfa4a428639d42ce608d15e",
+        "rev": "bd57ee7f2e29b5418bfa4a428639d42ce608d15e",
+        "revCount": 227,
+        "type": "git",
+        "url": "file:./linphone-sdk/bcunit"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:./bcunit"
+      }
+    },
+    "belcard-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1704707519,
+        "narHash": "sha256-Cp/bfrdBR4gVNqefRpJzQh6dG41PbII2EyT0+QcucAA=",
+        "ref": "afaf9f73ef97e082986d7a54aad9c4b1a6cad1a4",
+        "rev": "afaf9f73ef97e082986d7a54aad9c4b1a6cad1a4",
+        "revCount": 242,
+        "type": "git",
+        "url": "file:./linphone-sdk/belcard"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:./belcard"
+      }
+    },
+    "belle-sip-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1711523325,
+        "narHash": "sha256-vSC7N7gX2Dwk9bxhwQIya2V9zqDM6UsDQjZcjcDxXXU=",
+        "ref": "03662b800ac63e8a48744d371df79358aea10d0c",
+        "rev": "03662b800ac63e8a48744d371df79358aea10d0c",
+        "revCount": 2164,
+        "type": "git",
+        "url": "file:./linphone-sdk/belle-sip"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:./belle-sip"
+      }
+    },
+    "belr-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1711525048,
+        "narHash": "sha256-8n78wGwYEshrItCIwJwUUfKPH1e3vzidKZKHEkQubx4=",
+        "ref": "ae44414813a7dfc4f19d39899bd99f189a41e49d",
+        "rev": "ae44414813a7dfc4f19d39899bd99f189a41e49d",
+        "revCount": 211,
+        "type": "git",
+        "url": "file:./linphone-sdk/belr"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:./belr"
+      }
+    },
+    "bzrtp-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1713880943,
+        "narHash": "sha256-h/kZWjmQfvKqAQvhoPnS+JB6LShxH0z7e+TMzXNbrRA=",
+        "ref": "refs/heads/fix/nix-build",
+        "rev": "6f3290f8f0644fc6f654fd659ef6aecbcdaf70b1",
+        "revCount": 327,
+        "type": "git",
+        "url": "file:./linphone-sdk/bzrtp"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:./bzrtp"
+      }
+    },
+    "decaf-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1685541108,
+        "narHash": "sha256-WOHC35Am4BpMmWXXKfoGQ1+zTO3R1wspNJE/WL2bKMg=",
+        "ref": "4d7bafff3a69c9d02b8addbb78f301a6a74e59ea",
+        "rev": "4d7bafff3a69c9d02b8addbb78f301a6a74e59ea",
+        "revCount": 562,
+        "type": "git",
+        "url": "file:./linphone-sdk/external/decaf"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:./external/decaf"
+      }
+    },
+    "ispell-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1699354417,
+        "narHash": "sha256-YoRLiMjk2BxoI27xc2nzucxfHV9UbouFRSECb3RdHGo=",
+        "ref": "05574fe160222c3d0b6283c1433c9b087271fad1",
+        "rev": "05574fe160222c3d0b6283c1433c9b087271fad1",
+        "revCount": 4,
+        "type": "git",
+        "url": "file:./external/ispell"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:./external/ispell"
+      }
+    },
+    "liblinphone-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1712587436,
+        "narHash": "sha256-u3E4VL+q+Hcu6CfJEgHD9tN4O4XQZq6XIp8JjQmTqnc=",
+        "ref": "4bd295821551a6a87bb963ca226a4572f10163b7",
+        "rev": "4bd295821551a6a87bb963ca226a4572f10163b7",
+        "revCount": 16565,
+        "type": "git",
+        "url": "file:./linphone-sdk/liblinphone"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:./liblinphone"
+      }
+    },
+    "lime-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1704707676,
+        "narHash": "sha256-4SzvVy/i6wAnMHSOUBOCHJuHj7wcHk4aXEWKd+zm7g8=",
+        "ref": "a9d1f3eee62bfcd3eac54816840f0c03fab278fb",
+        "rev": "a9d1f3eee62bfcd3eac54816840f0c03fab278fb",
+        "revCount": 258,
+        "type": "git",
+        "url": "file:./linphone-sdk/lime"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:./lime"
+      }
+    },
+    "linphone-sdk": {
+      "inputs": {
+        "bctoolbox-src": "bctoolbox-src",
+        "bcunit-src": "bcunit-src",
+        "belcard-src": "belcard-src",
+        "belle-sip-src": "belle-sip-src",
+        "belr-src": "belr-src",
+        "bzrtp-src": "bzrtp-src",
+        "decaf-src": "decaf-src",
+        "liblinphone-src": "liblinphone-src",
+        "lime-src": "lime-src",
+        "mbedtls-src": "mbedtls-src",
+        "mediastreamer2-src": "mediastreamer2-src",
+        "msopenh264-src": "msopenh264-src",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "ortp-src": "ortp-src",
+        "soci-src": "soci-src"
+      },
+      "locked": {
+        "lastModified": 1713883095,
+        "narHash": "sha256-+UXgLThDf8lkHmEsxoSHMb5PGzxT5DLcYijGojkTHtk=",
+        "ref": "refs/heads/feat/auto-extract-nix-version-from-submodule-src",
+        "rev": "92db77c5d7a738fc324eeb5d55f1f430bfec25a8",
+        "revCount": 3047,
+        "type": "git",
+        "url": "file:./linphone-sdk"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:./linphone-sdk"
+      }
+    },
+    "mbedtls-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1685541286,
+        "narHash": "sha256-Bdq4syH+rRgSZP9wwBzQNkU9V5ZHSQCHPtaAPn7JSo0=",
+        "ref": "2acc0f26e6e97c82ff9981c1ec32b497d4ea9426",
+        "rev": "2acc0f26e6e97c82ff9981c1ec32b497d4ea9426",
+        "revCount": 24180,
+        "type": "git",
+        "url": "file:./external/mbedtls"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:./external/mbedtls"
+      }
+    },
+    "mediastreamer2-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1711832699,
+        "narHash": "sha256-A9A8xfDgJgtSkzDzBbwdtJxmqOSvYfe6jycBVP4lIaY=",
+        "ref": "d2eb8c1f5d2521d31669f480229d93755d623e58",
+        "rev": "d2eb8c1f5d2521d31669f480229d93755d623e58",
+        "revCount": 6537,
+        "type": "git",
+        "url": "file:./linphone-sdk/mediastreamer2"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:./mediastreamer2"
+      }
+    },
+    "msopenh264-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1709975904,
+        "narHash": "sha256-KQfXelgbjwDr1qMd8SuX2zf50V5Pra+OFAyfefissEo=",
+        "ref": "76b7e5e503087acd8d2d5dcc9d6eec88c8b82dde",
+        "rev": "76b7e5e503087acd8d2d5dcc9d6eec88c8b82dde",
+        "revCount": 162,
+        "type": "git",
+        "url": "file:./linphone-sdk/msopenh264"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:./msopenh264"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 0,
+        "narHash": "sha256-aSpiNepFOMk9932HOax0XwNxbA38GOUVOiXfUVPOrck=",
+        "path": "/nix/store/j10523yhkcc34478azkgcl70yzcx6j2j-source",
+        "type": "path"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "type": "indirect"
+      }
+    },
+    "ortp-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1711534760,
+        "narHash": "sha256-r7WkxL3hBxwy9Ze2HlzRAVQBU44ky8KS8M0uxg7Ttm4=",
+        "ref": "0ddef68a87b14a5bbe278a1c197c11f881e65875",
+        "rev": "0ddef68a87b14a5bbe278a1c197c11f881e65875",
+        "revCount": 2014,
+        "type": "git",
+        "url": "file:./linphone-sdk/ortp"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:./ortp"
+      }
+    },
+    "root": {
+      "inputs": {
+        "ispell-src": "ispell-src",
+        "linphone-sdk": "linphone-sdk",
+        "nixpkgs": "nixpkgs"
+      }
+    },
+    "soci-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1712325296,
+        "narHash": "sha256-4D+f+mMS6UBgEUBPrL1pHvcHvPQAUpzy9jSJgmiQqpo=",
+        "ref": "dc64bb457f658adb3fd998b8279ed28e005f7a98",
+        "rev": "dc64bb457f658adb3fd998b8279ed28e005f7a98",
+        "revCount": 2458,
+        "type": "git",
+        "url": "file:./linphone-sdk/external/soci"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:./external/soci"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
